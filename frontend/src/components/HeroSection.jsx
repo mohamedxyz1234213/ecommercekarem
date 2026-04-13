@@ -1,7 +1,46 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import API from '../api/axios';
 
 const HeroSection = () => {
+  const [content, setContent] = useState({
+    heroSubtitle: 'Luxury Fragrances',
+    heroTitle: 'Discover Your',
+    heroTitleHighlight: 'Signature Scent',
+    heroDescription:
+      "Curated collection of the world's finest perfumes, each telling a unique story of elegance and sophistication.",
+    heroImage: '',
+    heroPrimaryButtonText: 'Shop Now',
+    heroPrimaryButtonLink: '/shop',
+    heroSecondaryButtonText: 'View Collection',
+    heroSecondaryButtonLink: '/shop',
+  });
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await API.get('/settings');
+        setContent((prev) => ({
+          heroSubtitle: data.heroSubtitle || prev.heroSubtitle,
+          heroTitle: data.heroTitle || prev.heroTitle,
+          heroTitleHighlight: data.heroTitleHighlight || prev.heroTitleHighlight,
+          heroDescription: data.heroDescription || prev.heroDescription,
+          heroImage: data.heroImage || '',
+          heroPrimaryButtonText: data.heroPrimaryButtonText || prev.heroPrimaryButtonText,
+          heroPrimaryButtonLink: data.heroPrimaryButtonLink || prev.heroPrimaryButtonLink,
+          heroSecondaryButtonText: data.heroSecondaryButtonText || prev.heroSecondaryButtonText,
+          heroSecondaryButtonLink: data.heroSecondaryButtonLink || prev.heroSecondaryButtonLink,
+        }));
+      } catch {
+        // Use defaults on error
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const hasImage = !!content.heroImage;
+
   const styles = {
     hero: {
       position: 'relative',
@@ -11,14 +50,17 @@ const HeroSection = () => {
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
-      background: 'linear-gradient(135deg, var(--dark) 0%, #2D5016 50%, #3D6B1E 100%)',
+      background: hasImage
+        ? `url(${content.heroImage}) center/cover no-repeat`
+        : 'linear-gradient(135deg, var(--dark) 0%, #2D5016 50%, #3D6B1E 100%)',
     },
     overlay: {
       position: 'absolute',
       inset: 0,
-      background:
-        'radial-gradient(ellipse at 30% 50%, rgba(196, 162, 101, 0.08) 0%, transparent 50%), ' +
-        'radial-gradient(ellipse at 70% 30%, rgba(245, 240, 232, 0.05) 0%, transparent 50%)',
+      background: hasImage
+        ? 'rgba(0, 0, 0, 0.55)'
+        : 'radial-gradient(ellipse at 30% 50%, rgba(196, 162, 101, 0.08) 0%, transparent 50%), ' +
+          'radial-gradient(ellipse at 70% 30%, rgba(245, 240, 232, 0.05) 0%, transparent 50%)',
     },
     content: {
       position: 'relative',
@@ -90,7 +132,7 @@ const HeroSection = () => {
       display: 'inline-block',
       textDecoration: 'none',
     },
-    floatingCircle: (size, top, left, delay) => ({
+    floatingCircle: (size, top, left) => ({
       position: 'absolute',
       width: size,
       height: size,
@@ -126,7 +168,7 @@ const HeroSection = () => {
       ].map((c, i) => (
         <motion.div
           key={i}
-          style={styles.floatingCircle(c.size, c.top, c.left, c.delay)}
+          style={styles.floatingCircle(c.size, c.top, c.left)}
           animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
           transition={{ duration: 6, repeat: Infinity, delay: c.delay }}
         />
@@ -139,7 +181,7 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.8 }}
         >
-          Luxury Fragrances
+          {content.heroSubtitle}
         </motion.p>
 
         <motion.h1
@@ -148,8 +190,8 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.8 }}
         >
-          Discover Your <br />
-          <span style={styles.headingItalic}>Signature Scent</span>
+          {content.heroTitle} <br />
+          <span style={styles.headingItalic}>{content.heroTitleHighlight}</span>
         </motion.h1>
 
         <motion.p
@@ -158,8 +200,7 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6, duration: 0.8 }}
         >
-          Curated collection of the world&apos;s finest perfumes, each telling a unique story of
-          elegance and sophistication.
+          {content.heroDescription}
         </motion.p>
 
         <motion.div
@@ -168,11 +209,11 @@ const HeroSection = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.8, duration: 0.8 }}
         >
-          <Link to="/shop" style={styles.btnPrimary}>
-            Shop Now
+          <Link to={content.heroPrimaryButtonLink} style={styles.btnPrimary}>
+            {content.heroPrimaryButtonText}
           </Link>
-          <Link to="/shop" style={styles.btnSecondary}>
-            View Collection
+          <Link to={content.heroSecondaryButtonLink} style={styles.btnSecondary}>
+            {content.heroSecondaryButtonText}
           </Link>
         </motion.div>
       </div>

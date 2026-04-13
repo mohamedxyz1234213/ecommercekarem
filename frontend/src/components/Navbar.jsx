@@ -1,13 +1,44 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiShoppingBag, FiUser, FiMenu, FiX, FiLogOut } from 'react-icons/fi';
+import {
+  FiShoppingBag,
+  FiUser,
+  FiMenu,
+  FiX,
+  FiLogOut,
+  FiInstagram,
+  FiFacebook,
+  FiTwitter,
+  FiMail,
+  FiYoutube,
+  FiLinkedin,
+  FiPhone,
+  FiGlobe,
+  FiMusic,
+  FiMessageCircle,
+} from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import API from '../api/axios';
+
+const ICON_MAP = {
+  FiInstagram,
+  FiFacebook,
+  FiTwitter,
+  FiMail,
+  FiYoutube,
+  FiLinkedin,
+  FiPhone,
+  FiGlobe,
+  FiMusic,
+  FiMessageCircle,
+};
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [socialLinks, setSocialLinks] = useState([]);
   const { isAuthenticated, user, logout } = useAuth();
   const { cartCount, setIsDrawerOpen } = useCart();
   const location = useLocation();
@@ -23,6 +54,21 @@ const Navbar = () => {
   useEffect(() => {
     setMobileOpen(false);
   }, [location]);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await API.get('/settings');
+        const links = (data.socialLinks || []).filter(
+          (link) => link.enabled && (link.location === 'navbar' || link.location === 'both')
+        );
+        setSocialLinks(links);
+      } catch {
+        // Ignore — no social links in navbar
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const navBg = scrolled || !isHome ? 'rgba(250, 248, 245, 0.97)' : 'transparent';
   const textColor = scrolled || !isHome ? 'var(--text)' : 'var(--white)';
@@ -175,6 +221,26 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            {socialLinks.length > 0 && (
+              <div style={{ display: 'flex', gap: '0.5rem', marginLeft: '0.5rem' }}>
+                {socialLinks.map((sl, i) => {
+                  const IconComponent = ICON_MAP[sl.icon] || FiGlobe;
+                  return (
+                    <a
+                      key={sl._id || i}
+                      href={sl.url}
+                      target={sl.url.startsWith('mailto:') ? undefined : '_blank'}
+                      rel="noopener noreferrer"
+                      style={{ ...styles.iconBtn, fontSize: '1rem' }}
+                      aria-label={sl.platform}
+                      title={sl.platform}
+                    >
+                      <IconComponent />
+                    </a>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div style={styles.actions}>

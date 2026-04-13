@@ -1,4 +1,6 @@
 const User = require('../models/User');
+const { sanitize } = require('../utils/sanitize');
+const mongoose = require('mongoose');
 
 // @desc    Get all users (admin)
 // @route   GET /api/users
@@ -10,9 +12,10 @@ const getUsers = async (req, res) => {
 
     const query = {};
     if (search) {
+      const cleanSearch = sanitize(search);
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
+        { name: { $regex: cleanSearch, $options: 'i' } },
+        { email: { $regex: cleanSearch, $options: 'i' } },
       ];
     }
 
@@ -35,6 +38,9 @@ const getUsers = async (req, res) => {
 // @route   GET /api/users/:id
 const getUserById = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'User not found' });
+    }
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -52,6 +58,9 @@ const getUserById = async (req, res) => {
 // @route   PUT /api/users/:id
 const updateUser = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'User not found' });
+    }
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -59,10 +68,10 @@ const updateUser = async (req, res) => {
 
     const { name, email, role, phone, address } = req.body;
 
-    if (name !== undefined) user.name = name;
-    if (email !== undefined) user.email = email;
-    if (role !== undefined) user.role = role;
-    if (phone !== undefined) user.phone = phone;
+    if (name !== undefined) user.name = sanitize(name);
+    if (email !== undefined) user.email = email; // Email validated by mongoose
+    if (role !== undefined && ['user', 'admin'].includes(role)) user.role = role;
+    if (phone !== undefined) user.phone = sanitize(phone);
     if (address !== undefined) user.address = address;
 
     const updatedUser = await user.save();
@@ -88,6 +97,9 @@ const updateUser = async (req, res) => {
 // @route   DELETE /api/users/:id
 const deleteUser = async (req, res) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'User not found' });
+    }
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });

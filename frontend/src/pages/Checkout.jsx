@@ -28,6 +28,7 @@ const Checkout = () => {
     address: '',
     city: '',
     area: '',
+    zipCode: '',
     notes: '',
   });
   const [paymentMethod, setPaymentMethod] = useState('paymob');
@@ -54,41 +55,35 @@ const Checkout = () => {
         items: items.map((item) => ({
           product: item._id,
           quantity: item.quantity,
-          price: item.salePrice || item.price,
         })),
         shippingAddress: {
-          fullName: form.fullName,
-          phone: form.phone,
-          address: form.address,
+          street: form.address,
           city: form.city,
-          area: form.area,
+          state: form.area || '',
+          zipCode: form.zipCode || form.city,
+          country: 'Egypt',
+          phone: form.phone,
         },
         paymentMethod,
-        notes: form.notes,
-        total,
+        email: form.email || user?.email,
       };
 
       const { data } = await API.post('/orders', orderData);
 
       if (paymentMethod === 'instapay') {
-        navigate('/instapay-payment', { state: { orderId: data.order?._id || 'new', total } });
+        clearCart();
+        navigate('/instapay-payment', { state: { orderId: data._id || 'new', total } });
+      } else if (paymentMethod === 'paymob' && data.paymentUrl) {
+        clearCart();
+        window.location.href = data.paymentUrl;
       } else {
-        if (data.paymentUrl) {
-          window.location.href = data.paymentUrl;
-        } else {
-          toast.success('Order placed successfully!');
-          clearCart();
-          navigate('/profile');
-        }
-      }
-    } catch {
-      toast.success('Order placed! (Demo mode)');
-      clearCart();
-      if (paymentMethod === 'instapay') {
-        navigate('/instapay-payment', { state: { orderId: 'demo', total } });
-      } else {
+        toast.success('Order placed successfully!');
+        clearCart();
         navigate('/profile');
       }
+    } catch (err) {
+      const message = err?.response?.data?.message || 'Failed to place order. Please try again.';
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -183,6 +178,10 @@ const Checkout = () => {
                       <label style={styles.label}>Area</label>
                       <input style={styles.input} name="area" value={form.area} onChange={handleChange} />
                     </div>
+                  </div>
+                  <div style={styles.field}>
+                    <label style={styles.label}>Zip/Postal Code</label>
+                    <input style={styles.input} name="zipCode" value={form.zipCode} onChange={handleChange} placeholder="Optional" />
                   </div>
                   <div style={styles.field}>
                     <label style={styles.label}>Order Notes</label>

@@ -10,16 +10,34 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
 const {
   createOrder,
+  paymobCallback,
+  paymobRedirect,
   getMyOrders,
   getAllOrders,
   getOrderById,
   updateOrderStatus,
   approveInstapay,
+  rejectInstapay,
 } = require('../controllers/orderController');
 
+const webhookLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  message: { message: 'Too many webhook requests' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 const router = express.Router();
+
+// @route   POST /api/orders/paymob-callback (Paymob webhook — no auth, verified by HMAC)
+router.post('/paymob-callback', webhookLimiter, paymobCallback);
+
+// @route   GET /api/orders/paymob-redirect (Paymob redirect after payment)
+router.get('/paymob-redirect', webhookLimiter, paymobRedirect);
 
 // @route   POST /api/orders
 router.post(
@@ -53,5 +71,8 @@ router.put('/:id/status', apiLimiter, auth, isAdmin, updateOrderStatus);
 
 // @route   PUT /api/orders/:id/approve-instapay (admin)
 router.put('/:id/approve-instapay', apiLimiter, auth, isAdmin, approveInstapay);
+
+// @route   PUT /api/orders/:id/reject-instapay (admin)
+router.put('/:id/reject-instapay', apiLimiter, auth, isAdmin, rejectInstapay);
 
 module.exports = router;
