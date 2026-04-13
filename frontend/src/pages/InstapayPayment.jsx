@@ -93,7 +93,7 @@ const InstapayPayment = () => {
       padding: '0.75rem 1rem', backgroundColor: 'var(--secondary)', borderRadius: 'var(--radius-sm)',
     },
     username: { fontFamily: 'monospace', fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary)', flex: 1 },
-    copyBtn: { background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' },
+    copyBtn: { background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' },
     amountBox: {
       textAlign: 'center', padding: '1.25rem', backgroundColor: 'rgba(45, 80, 22, 0.05)',
       borderRadius: 'var(--radius-sm)', marginBottom: '2rem',
