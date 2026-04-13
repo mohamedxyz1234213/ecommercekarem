@@ -1,0 +1,113 @@
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import toast from 'react-hot-toast';
+import API from '../api/axios';
+
+const AuthContext = createContext(null);
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
+  return context;
+};
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    if (storedUser && token) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  const login = useCallback(async (email, password) => {
+    try {
+      const { data } = await API.post('/auth/login', { email, password });
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
+      toast.success('Welcome back!');
+      return data;
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Login failed';
+      toast.error(msg);
+      throw error;
+    }
+  }, []);
+
+  const register = useCallback(async (name, email, password) => {
+    try {
+      const { data } = await API.post('/auth/register', { name, email, password });
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
+      toast.success('Account created successfully!');
+      return data;
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Registration failed';
+      toast.error(msg);
+      throw error;
+    }
+  }, []);
+
+  const googleLogin = useCallback(async (credential) => {
+    try {
+      const { data } = await API.post('/auth/google', { credential });
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
+      toast.success('Welcome!');
+      return data;
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Google login failed';
+      toast.error(msg);
+      throw error;
+    }
+  }, []);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    toast.success('Logged out successfully');
+  }, []);
+
+  const updateProfile = useCallback(async (updates) => {
+    try {
+      const { data } = await API.put('/auth/profile', updates);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      setUser(data.user);
+      toast.success('Profile updated!');
+      return data;
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Update failed';
+      toast.error(msg);
+      throw error;
+    }
+  }, []);
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        isAuthenticated: !!user,
+        login,
+        register,
+        googleLogin,
+        logout,
+        updateProfile,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
