@@ -82,7 +82,7 @@ const OrderDetail = () => {
 
   const isInstaPay = (order.paymentMethod || '').toLowerCase() === 'instapay';
   const proofImage = order.instapayProof;
-  const baseUrl = 'http://localhost:5000';
+  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

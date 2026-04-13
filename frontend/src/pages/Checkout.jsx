@@ -28,6 +28,7 @@ const Checkout = () => {
     address: '',
     city: '',
     area: '',
+    zipCode: '',
     notes: '',
   });
   const [paymentMethod, setPaymentMethod] = useState('paymob');
@@ -59,7 +60,7 @@ const Checkout = () => {
           street: form.address,
           city: form.city,
           state: form.area || '',
-          zipCode: form.city, // Use city as zipCode fallback for Egyptian addresses
+          zipCode: form.zipCode || form.city,
           country: 'Egypt',
           phone: form.phone,
         },
@@ -177,6 +178,10 @@ const Checkout = () => {
                       <label style={styles.label}>Area</label>
                       <input style={styles.input} name="area" value={form.area} onChange={handleChange} />
                     </div>
+                  </div>
+                  <div style={styles.field}>
+                    <label style={styles.label}>Zip/Postal Code</label>
+                    <input style={styles.input} name="zipCode" value={form.zipCode} onChange={handleChange} placeholder="Optional" />
                   </div>
                   <div style={styles.field}>
                     <label style={styles.label}>Order Notes</label>

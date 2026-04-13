@@ -156,14 +156,17 @@ const paymobCallback = async (req, res) => {
     } else {
       order.paymentStatus = 'rejected';
       order.paymobTransactionId = transactionId;
-      await order.save();
 
-      // Restore stock on failed payment
-      for (const item of order.items) {
-        await Product.findByIdAndUpdate(item.product, {
-          $inc: { stock: item.quantity },
-        });
+      // Restore stock on failed payment (only once)
+      if (!order.stockRestored) {
+        for (const item of order.items) {
+          await Product.findByIdAndUpdate(item.product, {
+            $inc: { stock: item.quantity },
+          });
+        }
+        order.stockRestored = true;
       }
+      await order.save();
     }
 
     res.status(200).json({ message: 'Callback processed' });
@@ -229,9 +232,13 @@ const getAllOrders = async (req, res) => {
       query.$or = [
         { email: { $regex: cleanSearch, $options: 'i' } },
       ];
-      // Try to match ObjectId if it looks like a hex string
-      if (/^[a-fA-F0-9]+$/.test(cleanSearch)) {
-        query.$or.push({ _id: { $regex: cleanSearch, $options: 'i' } });
+      // Try exact ObjectId match if it's a valid 24-char hex string
+      if (/^[a-fA-F0-9]{24}$/.test(cleanSearch)) {
+        try {
+          query.$or.push({ _id: new mongoose.Types.ObjectId(cleanSearch) });
+        } catch {
+          // Not a valid ObjectId, skip
+        }
       }
     }
 
@@ -307,13 +314,15 @@ const updateOrderStatus = async (req, res) => {
     order.status = status;
     await order.save();
 
-    // Restore stock if cancelled (and wasn't already cancelled)
-    if (status === 'cancelled' && previousStatus !== 'cancelled') {
+    // Restore stock if cancelled (only once, tracked by stockRestored flag)
+    if (status === 'cancelled' && !order.stockRestored) {
       for (const item of order.items) {
         await Product.findByIdAndUpdate(item.product, {
           $inc: { stock: item.quantity },
         });
       }
+      order.stockRestored = true;
+      await order.save();
     }
 
     const user = await User.findById(order.user);
@@ -396,14 +405,17 @@ const rejectInstapay = async (req, res) => {
     order.paymentStatus = 'rejected';
     order.rejectionReason = req.body.reason || '';
     order.status = 'cancelled';
-    await order.save();
 
-    // Restore stock
-    for (const item of order.items) {
-      await Product.findByIdAndUpdate(item.product, {
-        $inc: { stock: item.quantity },
-      });
+    // Restore stock (only once)
+    if (!order.stockRestored) {
+      for (const item of order.items) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: item.quantity },
+        });
+      }
+      order.stockRestored = true;
     }
+    await order.save();
 
     const user = await User.findById(order.user);
     if (user) {

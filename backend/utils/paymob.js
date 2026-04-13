@@ -144,7 +144,9 @@ const verifyPaymobHMAC = (requestBody, receivedHmac) => {
     return false;
   }
 
-  // Paymob HMAC fields in the required order
+  // Paymob HMAC fields concatenated in the exact order specified by Paymob's API docs.
+  // Each field is converted to a string; undefined/null become empty strings to match
+  // Paymob's server-side calculation. The order of fields MUST NOT change.
   const obj = requestBody.obj || requestBody;
   const hmacFields = [
     obj.amount_cents,
