@@ -17,6 +17,7 @@ const OrderDetail = () => {
   const [updating, setUpdating] = useState(false);
   const [proofModal, setProofModal] = useState(false);
   const [rejectModal, setRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   useEffect(() => {
     fetchOrder();
@@ -25,9 +26,8 @@ const OrderDetail = () => {
   const fetchOrder = async () => {
     try {
       const { data } = await API.get(`/orders/${id}`);
-      const o = data.order || data;
-      setOrder(o);
-      setStatusUpdate(o.orderStatus || o.status || 'pending');
+      setOrder(data);
+      setStatusUpdate(data.status || 'pending');
     } catch {
       toast.error('Failed to fetch order');
       navigate('/orders');
@@ -52,7 +52,7 @@ const OrderDetail = () => {
   const handleApprovePayment = async () => {
     setUpdating(true);
     try {
-      await API.put(`/orders/${id}/approve-payment`);
+      await API.put(`/orders/${id}/approve-instapay`);
       toast.success('Payment approved! Customer will be notified.');
       fetchOrder();
     } catch (err) {
@@ -65,9 +65,10 @@ const OrderDetail = () => {
   const handleRejectPayment = async () => {
     setUpdating(true);
     try {
-      await API.put(`/orders/${id}/reject-payment`);
+      await API.put(`/orders/${id}/reject-instapay`, { reason: rejectReason });
       toast.success('Payment rejected. Customer will be notified.');
       setRejectModal(false);
+      setRejectReason('');
       fetchOrder();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to reject payment');
@@ -80,7 +81,8 @@ const OrderDetail = () => {
   if (!order) return null;
 
   const isInstaPay = (order.paymentMethod || '').toLowerCase() === 'instapay';
-  const proofImage = order.paymentProof || order.instaPayProof || order.proofImage;
+  const proofImage = order.instapayProof;
+  const baseUrl = 'http://localhost:5000';
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -91,7 +93,7 @@ const OrderDetail = () => {
         <h1 className="page-title" style={{ marginBottom: 0 }}>
           Order #{(order._id || '').slice(-6).toUpperCase()}
         </h1>
-        <StatusBadge status={order.orderStatus || order.status || 'pending'} />
+        <StatusBadge status={order.status || 'pending'} />
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
@@ -99,7 +101,7 @@ const OrderDetail = () => {
           {/* Order Items */}
           <div className="card" style={{ marginBottom: 24 }}>
             <h3 style={{ marginBottom: 16, fontSize: '1rem' }}>Order Items</h3>
-            {(order.items || order.orderItems || []).map((item, idx) => (
+            {(order.items || []).map((item, idx) => (
               <div
                 key={idx}
                 style={{
@@ -107,20 +109,20 @@ const OrderDetail = () => {
                   alignItems: 'center',
                   gap: 16,
                   padding: '12px 0',
-                  borderBottom: idx < (order.items || order.orderItems || []).length - 1 ? '1px solid #f0ebe3' : 'none',
+                  borderBottom: idx < (order.items || []).length - 1 ? '1px solid #f0ebe3' : 'none',
                 }}
               >
                 <img
-                  src={item.image || item.product?.images?.[0] || 'https://via.placeholder.com/60'}
-                  alt={item.name || item.product?.name}
+                  src={item.image ? (item.image.startsWith('http') ? item.image : `${baseUrl}${item.image}`) : 'https://via.placeholder.com/60'}
+                  alt={item.name}
                   style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover' }}
                 />
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontWeight: 600 }}>{item.name || item.product?.name || 'Product'}</p>
-                  <p style={{ color: '#888', fontSize: '0.85rem' }}>Qty: {item.quantity || item.qty}</p>
+                  <p style={{ fontWeight: 600 }}>{item.name || 'Product'}</p>
+                  <p style={{ color: '#888', fontSize: '0.85rem' }}>Qty: {item.quantity}</p>
                 </div>
                 <span style={{ fontWeight: 700, color: '#2D5016' }}>
-                  ${((item.price || 0) * (item.quantity || item.qty || 1)).toFixed(2)}
+                  EGP {((item.price || 0) * (item.quantity || 1)).toFixed(2)}
                 </span>
               </div>
             ))}
@@ -133,16 +135,9 @@ const OrderDetail = () => {
                 borderTop: '2px solid #e0d8cc',
               }}
             >
-              <div style={{ textAlign: 'right' }}>
-                {order.shippingPrice > 0 && (
-                  <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: 4 }}>
-                    Shipping: ${order.shippingPrice?.toFixed(2)}
-                  </p>
-                )}
-                <p style={{ fontSize: '1.2rem', fontWeight: 700, color: '#1A2E0A' }}>
-                  Total: ${(order.totalPrice || 0).toFixed(2)}
-                </p>
-              </div>
+              <p style={{ fontSize: '1.2rem', fontWeight: 700, color: '#1A2E0A' }}>
+                Total: EGP {(order.totalPrice || 0).toFixed(2)}
+              </p>
             </div>
           </div>
 
@@ -152,7 +147,7 @@ const OrderDetail = () => {
             <div className="grid-2">
               <div>
                 <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 2 }}>Full Name</p>
-                <p style={{ fontWeight: 600 }}>{order.shippingAddress?.fullName || order.user?.name || '—'}</p>
+                <p style={{ fontWeight: 600 }}>{order.user?.name || '—'}</p>
               </div>
               <div>
                 <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 2 }}>Phone</p>
@@ -162,7 +157,7 @@ const OrderDetail = () => {
                 <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 2 }}>Address</p>
                 <p style={{ fontWeight: 600 }}>
                   {[
-                    order.shippingAddress?.address,
+                    order.shippingAddress?.street,
                     order.shippingAddress?.city,
                     order.shippingAddress?.state,
                     order.shippingAddress?.zipCode,
@@ -179,6 +174,11 @@ const OrderDetail = () => {
           {isInstaPay && proofImage && (
             <div className="card">
               <h3 style={{ marginBottom: 16, fontSize: '1rem' }}>InstaPay Payment Proof</h3>
+              {order.instapayUsername && (
+                <p style={{ marginBottom: 12, fontSize: '0.9rem' }}>
+                  <strong>InstaPay Username:</strong> {order.instapayUsername}
+                </p>
+              )}
               <div
                 style={{
                   background: '#FAF8F5',
@@ -190,7 +190,7 @@ const OrderDetail = () => {
                 onClick={() => setProofModal(true)}
               >
                 <img
-                  src={proofImage}
+                  src={proofImage.startsWith('http') ? proofImage : `${baseUrl}${proofImage}`}
                   alt="Payment proof"
                   style={{ maxHeight: 300, borderRadius: 8, border: '1px solid #e0d8cc' }}
                 />
@@ -199,7 +199,7 @@ const OrderDetail = () => {
                 </p>
               </div>
 
-              {(order.paymentStatus || '').toLowerCase() !== 'approved' && (
+              {(order.paymentStatus || '').toLowerCase() === 'pending' && (
                 <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
                   <button
                     className="btn btn-success"
@@ -219,6 +219,50 @@ const OrderDetail = () => {
                   </button>
                 </div>
               )}
+
+              {order.paymentStatus === 'approved' && (
+                <div style={{ marginTop: 16, padding: '12px 16px', background: '#e8f5e9', borderRadius: 8, color: '#2e7d32', fontWeight: 600, textAlign: 'center' }}>
+                  ✓ Payment Approved {order.paidAt ? `on ${new Date(order.paidAt).toLocaleString()}` : ''}
+                </div>
+              )}
+
+              {order.paymentStatus === 'rejected' && (
+                <div style={{ marginTop: 16, padding: '12px 16px', background: '#fbe9e7', borderRadius: 8, color: '#c62828', fontWeight: 600, textAlign: 'center' }}>
+                  ✗ Payment Rejected {order.rejectionReason ? `— ${order.rejectionReason}` : ''}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Paymob payment info */}
+          {order.paymentMethod === 'paymob' && (
+            <div className="card">
+              <h3 style={{ marginBottom: 16, fontSize: '1rem' }}>Paymob Payment Details</h3>
+              {order.paymobOrderId && (
+                <p style={{ fontSize: '0.85rem', marginBottom: 8 }}>
+                  <strong>Paymob Order ID:</strong> {order.paymobOrderId}
+                </p>
+              )}
+              {order.paymobTransactionId && (
+                <p style={{ fontSize: '0.85rem', marginBottom: 8 }}>
+                  <strong>Transaction ID:</strong> {order.paymobTransactionId}
+                </p>
+              )}
+              {order.paymentStatus === 'approved' && (
+                <div style={{ padding: '12px 16px', background: '#e8f5e9', borderRadius: 8, color: '#2e7d32', fontWeight: 600, textAlign: 'center' }}>
+                  ✓ Payment Confirmed {order.paidAt ? `on ${new Date(order.paidAt).toLocaleString()}` : ''}
+                </div>
+              )}
+              {order.paymentStatus === 'rejected' && (
+                <div style={{ padding: '12px 16px', background: '#fbe9e7', borderRadius: 8, color: '#c62828', fontWeight: 600, textAlign: 'center' }}>
+                  ✗ Payment Failed
+                </div>
+              )}
+              {order.paymentStatus === 'pending' && (
+                <div style={{ padding: '12px 16px', background: '#fff3e0', borderRadius: 8, color: '#e65100', fontWeight: 600, textAlign: 'center' }}>
+                  ⏳ Awaiting Payment Confirmation
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -234,7 +278,7 @@ const OrderDetail = () => {
               </div>
               <div>
                 <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 2 }}>Status</p>
-                <StatusBadge status={order.paymentStatus || (order.isPaid ? 'paid' : 'unpaid')} />
+                <StatusBadge status={order.paymentStatus || 'pending'} />
               </div>
               {order.paidAt && (
                 <div>
@@ -280,7 +324,7 @@ const OrderDetail = () => {
               </div>
               <div>
                 <p style={{ fontSize: '0.8rem', color: '#888' }}>Email</p>
-                <p style={{ fontWeight: 600 }}>{order.user?.email || '—'}</p>
+                <p style={{ fontWeight: 600 }}>{order.user?.email || order.email || '—'}</p>
               </div>
               <div>
                 <p style={{ fontSize: '0.8rem', color: '#888' }}>Ordered</p>
@@ -293,18 +337,31 @@ const OrderDetail = () => {
 
       {/* Proof Image Modal */}
       <Modal isOpen={proofModal} onClose={() => setProofModal(false)} title="Payment Proof" maxWidth={800}>
-        <img
-          src={proofImage}
-          alt="Payment proof"
-          style={{ width: '100%', borderRadius: 8 }}
-        />
+        {proofImage && (
+          <img
+            src={proofImage.startsWith('http') ? proofImage : `${baseUrl}${proofImage}`}
+            alt="Payment proof"
+            style={{ width: '100%', borderRadius: 8 }}
+          />
+        )}
       </Modal>
 
       {/* Reject Confirmation Modal */}
       <Modal isOpen={rejectModal} onClose={() => setRejectModal(false)} title="Reject Payment">
-        <p style={{ marginBottom: 20 }}>
+        <p style={{ marginBottom: 12 }}>
           Are you sure you want to reject this payment? The customer will be notified via email.
         </p>
+        <div className="form-group" style={{ marginBottom: 20 }}>
+          <label style={{ fontSize: '0.85rem', fontWeight: 600 }}>Rejection Reason (optional)</label>
+          <textarea
+            className="form-control"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="e.g. Payment proof is unclear or amount doesn't match"
+            rows={3}
+            style={{ marginTop: 6 }}
+          />
+        </div>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
           <button className="btn btn-secondary" onClick={() => setRejectModal(false)}>Cancel</button>
           <button className="btn btn-danger" onClick={handleRejectPayment} disabled={updating}>

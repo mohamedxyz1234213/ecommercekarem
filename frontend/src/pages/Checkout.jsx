@@ -54,41 +54,35 @@ const Checkout = () => {
         items: items.map((item) => ({
           product: item._id,
           quantity: item.quantity,
-          price: item.salePrice || item.price,
         })),
         shippingAddress: {
-          fullName: form.fullName,
-          phone: form.phone,
-          address: form.address,
+          street: form.address,
           city: form.city,
-          area: form.area,
+          state: form.area || '',
+          zipCode: form.city, // Use city as zipCode fallback for Egyptian addresses
+          country: 'Egypt',
+          phone: form.phone,
         },
         paymentMethod,
-        notes: form.notes,
-        total,
+        email: form.email || user?.email,
       };
 
       const { data } = await API.post('/orders', orderData);
 
       if (paymentMethod === 'instapay') {
-        navigate('/instapay-payment', { state: { orderId: data.order?._id || 'new', total } });
+        clearCart();
+        navigate('/instapay-payment', { state: { orderId: data._id || 'new', total } });
+      } else if (paymentMethod === 'paymob' && data.paymentUrl) {
+        clearCart();
+        window.location.href = data.paymentUrl;
       } else {
-        if (data.paymentUrl) {
-          window.location.href = data.paymentUrl;
-        } else {
-          toast.success('Order placed successfully!');
-          clearCart();
-          navigate('/profile');
-        }
-      }
-    } catch {
-      toast.success('Order placed! (Demo mode)');
-      clearCart();
-      if (paymentMethod === 'instapay') {
-        navigate('/instapay-payment', { state: { orderId: 'demo', total } });
-      } else {
+        toast.success('Order placed successfully!');
+        clearCart();
         navigate('/profile');
       }
+    } catch (err) {
+      const message = err?.response?.data?.message || 'Failed to place order. Please try again.';
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }

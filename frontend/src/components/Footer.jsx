@@ -1,11 +1,59 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiInstagram, FiFacebook, FiTwitter, FiMail, FiArrowRight } from 'react-icons/fi';
+import {
+  FiInstagram,
+  FiFacebook,
+  FiTwitter,
+  FiMail,
+  FiArrowRight,
+  FiYoutube,
+  FiLinkedin,
+  FiPhone,
+  FiGlobe,
+  FiMusic,
+  FiMessageCircle,
+} from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import AnimatedSection from './AnimatedSection';
+import API from '../api/axios';
+
+const ICON_MAP = {
+  FiInstagram,
+  FiFacebook,
+  FiTwitter,
+  FiMail,
+  FiYoutube,
+  FiLinkedin,
+  FiPhone,
+  FiGlobe,
+  FiMusic,
+  FiMessageCircle,
+};
 
 const Footer = () => {
   const [email, setEmail] = useState('');
+  const [socialLinks, setSocialLinks] = useState([]);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await API.get('/settings');
+        const links = (data.socialLinks || []).filter(
+          (link) => link.enabled && (link.location === 'footer' || link.location === 'both')
+        );
+        setSocialLinks(links);
+      } catch {
+        // Use defaults on error
+        setSocialLinks([
+          { platform: 'Instagram', url: '#', icon: 'FiInstagram' },
+          { platform: 'Facebook', url: '#', icon: 'FiFacebook' },
+          { platform: 'Twitter', url: '#', icon: 'FiTwitter' },
+          { platform: 'Email', url: 'mailto:info@example.com', icon: 'FiMail' },
+        ]);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleNewsletter = (e) => {
     e.preventDefault();
@@ -107,6 +155,7 @@ const Footer = () => {
       transition: 'all 0.3s',
       cursor: 'pointer',
       backgroundColor: 'transparent',
+      textDecoration: 'none',
     },
     divider: {
       borderTop: '1px solid rgba(255,255,255,0.1)',
@@ -129,11 +178,22 @@ const Footer = () => {
                 finest ingredients from around the world.
               </p>
               <div style={styles.socials}>
-                {[FiInstagram, FiFacebook, FiTwitter, FiMail].map((Icon, i) => (
-                  <button key={i} style={styles.socialIcon} aria-label="Social link">
-                    <Icon />
-                  </button>
-                ))}
+                {socialLinks.map((link, i) => {
+                  const IconComponent = ICON_MAP[link.icon] || FiGlobe;
+                  return (
+                    <a
+                      key={link._id || i}
+                      href={link.url}
+                      target={link.url.startsWith('mailto:') ? undefined : '_blank'}
+                      rel="noopener noreferrer"
+                      style={styles.socialIcon}
+                      aria-label={link.platform}
+                      title={link.platform}
+                    >
+                      <IconComponent />
+                    </a>
+                  );
+                })}
               </div>
             </div>
 
