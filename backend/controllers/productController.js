@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const Product = require('../models/Product');
 const Review = require('../models/Review');
+const { sanitize } = require('../utils/sanitize');
 
 // @desc    Get all products with search/filter/pagination
 // @route   GET /api/products
@@ -22,15 +23,16 @@ const getProducts = async (req, res) => {
     const query = {};
 
     if (search) {
+      const cleanSearch = sanitize(search);
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { brand: { $regex: search, $options: 'i' } },
+        { name: { $regex: cleanSearch, $options: 'i' } },
+        { description: { $regex: cleanSearch, $options: 'i' } },
+        { brand: { $regex: cleanSearch, $options: 'i' } },
       ];
     }
 
-    if (category) query.category = category;
-    if (brand) query.brand = brand;
+    if (category) query.category = sanitize(category);
+    if (brand) query.brand = sanitize(brand);
     if (onSale === 'true') query.onSale = true;
     if (featured === 'true') query.featured = true;
 
@@ -201,11 +203,14 @@ const addProductReview = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
+    const numericRating = Number(rating);
+    const cleanComment = sanitize(comment);
+
     // Upsert review
     const review = await Review.findOneAndUpdate(
       { user: req.user._id, product: product._id },
-      { rating, comment, user: req.user._id, product: product._id },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
+      { rating: numericRating, comment: cleanComment, user: req.user._id, product: product._id },
+      { upsert: true, new: true, setDefaultsOnInsert: true, runValidators: true }
     );
 
     // Recalculate product rating

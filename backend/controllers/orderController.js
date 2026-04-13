@@ -8,6 +8,7 @@ const {
   sendStatusUpdate,
   sendAdminNotification,
 } = require('../utils/email');
+const { sanitize } = require('../utils/sanitize');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -36,7 +37,7 @@ const createOrder = async (req, res) => {
     const orderItems = [];
 
     for (const item of items) {
-      const product = await Product.findById(item.product);
+      const product = await Product.findById(sanitize(String(item.product)));
       if (!product) {
         return res.status(404).json({ message: `Product not found: ${item.product}` });
       }
@@ -118,8 +119,8 @@ const getAllOrders = async (req, res) => {
     const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
 
     const query = {};
-    if (status) query.status = status;
-    if (paymentStatus) query.paymentStatus = paymentStatus;
+    if (status) query.status = sanitize(status);
+    if (paymentStatus) query.paymentStatus = sanitize(paymentStatus);
 
     const [orders, total] = await Promise.all([
       Order.find(query)

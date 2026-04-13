@@ -1,6 +1,15 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const { body } = require('express-validator');
 const { auth, isAdmin } = require('../middleware/auth');
+
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { message: 'Too many requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 const {
   createOrder,
   getMyOrders,
@@ -16,6 +25,7 @@ const router = express.Router();
 router.post(
   '/',
   auth,
+  apiLimiter,
   [
     body('items').isArray({ min: 1 }).withMessage('At least one item is required'),
     body('items.*.product').notEmpty().withMessage('Product ID is required'),

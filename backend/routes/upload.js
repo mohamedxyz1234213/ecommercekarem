@@ -1,12 +1,21 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const { auth } = require('../middleware/auth');
 const { uploadSingle, uploadProductImages } = require('../middleware/upload');
 
 const router = express.Router();
 
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 50,
+  message: { message: 'Too many upload requests, please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // @route   POST /api/upload
 // @desc    Upload single image
-router.post('/', auth, (req, res) => {
+router.post('/', auth, uploadLimiter, (req, res) => {
   uploadSingle(req, res, (err) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
@@ -28,7 +37,7 @@ router.post('/', auth, (req, res) => {
 
 // @route   POST /api/upload/multiple
 // @desc    Upload multiple images
-router.post('/multiple', auth, (req, res) => {
+router.post('/multiple', auth, uploadLimiter, (req, res) => {
   uploadProductImages(req, res, (err) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
