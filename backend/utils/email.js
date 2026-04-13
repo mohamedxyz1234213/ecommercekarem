@@ -110,6 +110,51 @@ const sendStatusUpdate = async (order, user) => {
   return sendEmail(order.email || user.email, subject, html);
 };
 
+const sendInstapayRejection = async (order, user) => {
+  const subject = `Payment Rejected — Order #${order._id.toString().slice(-8).toUpperCase()}`;
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+      <h2 style="color:#e74c3c;">Payment Rejected</h2>
+      <p>Hi ${user.name},</p>
+      <p>Unfortunately, your InstaPay payment for order <strong>#${order._id.toString().slice(-8).toUpperCase()}</strong> has been rejected.</p>
+      ${order.rejectionReason ? `<p><strong>Reason:</strong> ${order.rejectionReason}</p>` : ''}
+      <p>Please contact our support team for assistance or try placing a new order.</p>
+      <p style="font-size:18px;font-weight:bold;">Total: EGP ${order.totalPrice.toFixed(2)}</p>
+      <hr style="margin:24px 0;" />
+      <p style="color:#999;font-size:12px;">Perfume Store — Thank you for shopping with us!</p>
+    </div>
+  `;
+  return sendEmail(order.email || user.email, subject, html);
+};
+
+const sendPaymobPaymentConfirmation = async (order, user) => {
+  const subject = `Payment Confirmed — Order #${order._id.toString().slice(-8).toUpperCase()}`;
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+      <h2 style="color:#27ae60;">Payment Successful!</h2>
+      <p>Hi ${user.name},</p>
+      <p>Your payment for order <strong>#${order._id.toString().slice(-8).toUpperCase()}</strong> has been successfully processed via Paymob.</p>
+      <p>Your order is now being processed and will be shipped soon.</p>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f5f5f5;">
+            <th style="padding:8px;text-align:left;">Product</th>
+            <th style="padding:8px;text-align:center;">Qty</th>
+            <th style="padding:8px;text-align:right;">Price</th>
+          </tr>
+        </thead>
+        <tbody>${formatOrderItems(order.items)}</tbody>
+      </table>
+      <p style="font-size:18px;font-weight:bold;text-align:right;margin-top:16px;">
+        Total: EGP ${order.totalPrice.toFixed(2)}
+      </p>
+      <hr style="margin:24px 0;" />
+      <p style="color:#999;font-size:12px;">Perfume Store — Thank you for shopping with us!</p>
+    </div>
+  `;
+  return sendEmail(order.email || user.email, subject, html);
+};
+
 const sendAdminNotification = async (order) => {
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) return;
@@ -136,6 +181,8 @@ module.exports = {
   sendEmail,
   sendOrderConfirmation,
   sendInstapayApproval,
+  sendInstapayRejection,
+  sendPaymobPaymentConfirmation,
   sendStatusUpdate,
   sendAdminNotification,
 };

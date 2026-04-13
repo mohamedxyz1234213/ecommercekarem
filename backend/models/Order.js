@@ -68,6 +68,14 @@ const orderSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  paymobOrderId: {
+    type: String,
+    default: '',
+  },
+  paymobTransactionId: {
+    type: String,
+    default: '',
+  },
   totalPrice: {
     type: Number,
     required: true,
@@ -81,6 +89,14 @@ const orderSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
+  },
+  paidAt: {
+    type: Date,
+    default: null,
+  },
+  rejectionReason: {
+    type: String,
+    default: '',
   },
   createdAt: {
     type: Date,

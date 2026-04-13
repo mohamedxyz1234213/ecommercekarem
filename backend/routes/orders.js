@@ -10,16 +10,26 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
 const {
   createOrder,
+  paymobCallback,
+  paymobRedirect,
   getMyOrders,
   getAllOrders,
   getOrderById,
   updateOrderStatus,
   approveInstapay,
+  rejectInstapay,
 } = require('../controllers/orderController');
 
 const router = express.Router();
+
+// @route   POST /api/orders/paymob-callback (Paymob webhook — no auth, verified by HMAC)
+router.post('/paymob-callback', paymobCallback);
+
+// @route   GET /api/orders/paymob-redirect (Paymob redirect after payment)
+router.get('/paymob-redirect', paymobRedirect);
 
 // @route   POST /api/orders
 router.post(
@@ -53,5 +63,8 @@ router.put('/:id/status', apiLimiter, auth, isAdmin, updateOrderStatus);
 
 // @route   PUT /api/orders/:id/approve-instapay (admin)
 router.put('/:id/approve-instapay', apiLimiter, auth, isAdmin, approveInstapay);
+
+// @route   PUT /api/orders/:id/reject-instapay (admin)
+router.put('/:id/reject-instapay', apiLimiter, auth, isAdmin, rejectInstapay);
 
 module.exports = router;
