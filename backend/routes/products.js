@@ -26,11 +26,12 @@ const router = express.Router();
 router.get('/', apiLimiter, getProducts);
 
 // @route   GET /api/products/:id
-router.get('/:id', getProductById);
+router.get('/:id', apiLimiter, getProductById);
 
 // @route   POST /api/products (admin)
 router.post(
   '/',
+  apiLimiter,
   auth,
   isAdmin,
   [
@@ -44,14 +45,15 @@ router.post(
 );
 
 // @route   PUT /api/products/:id (admin)
-router.put('/:id', auth, isAdmin, updateProduct);
+router.put('/:id', apiLimiter, auth, isAdmin, updateProduct);
 
 // @route   DELETE /api/products/:id (admin)
-router.delete('/:id', auth, isAdmin, deleteProduct);
+router.delete('/:id', apiLimiter, auth, isAdmin, deleteProduct);
 
 // @route   PUT /api/products/:id/review (authenticated)
 router.put(
   '/:id/review',
+  apiLimiter,
   auth,
   [
     body('rating')
@@ -63,6 +65,6 @@ router.put(
 );
 
 // @route   GET /api/products/:id/reviews
-router.get('/:id/reviews', getProductReviews);
+router.get('/:id/reviews', apiLimiter, getProductReviews);
 
 module.exports = router;

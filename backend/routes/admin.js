@@ -13,10 +13,7 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// All routes require auth + admin
-router.use(auth, isAdmin, apiLimiter);
-
 // @route   GET /api/admin/dashboard
-router.get('/dashboard', getDashboardStats);
+router.get('/dashboard', apiLimiter, auth, isAdmin, getDashboardStats);
 
 module.exports = router;

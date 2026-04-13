@@ -40,18 +40,18 @@ router.post(
 );
 
 // @route   GET /api/orders/my
-router.get('/my', auth, getMyOrders);
+router.get('/my', apiLimiter, auth, getMyOrders);
 
 // @route   GET /api/orders (admin)
-router.get('/', auth, isAdmin, getAllOrders);
+router.get('/', apiLimiter, auth, isAdmin, getAllOrders);
 
 // @route   GET /api/orders/:id
-router.get('/:id', auth, getOrderById);
+router.get('/:id', apiLimiter, auth, getOrderById);
 
 // @route   PUT /api/orders/:id/status (admin)
-router.put('/:id/status', auth, isAdmin, updateOrderStatus);
+router.put('/:id/status', apiLimiter, auth, isAdmin, updateOrderStatus);
 
 // @route   PUT /api/orders/:id/approve-instapay (admin)
-router.put('/:id/approve-instapay', auth, isAdmin, approveInstapay);
+router.put('/:id/approve-instapay', apiLimiter, auth, isAdmin, approveInstapay);
 
 module.exports = router;

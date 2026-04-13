@@ -47,7 +47,7 @@ router.post(
 );
 
 // @route   GET /api/auth/me
-router.get('/me', auth, getMe);
+router.get('/me', authLimiter, auth, getMe);
 
 // @route   GET /api/auth/google
 router.get(

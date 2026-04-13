@@ -19,19 +19,16 @@ const {
 
 const router = express.Router();
 
-// All routes require auth + admin
-router.use(auth, isAdmin, apiLimiter);
-
 // @route   GET /api/users
-router.get('/', getUsers);
+router.get('/', apiLimiter, auth, isAdmin, getUsers);
 
 // @route   GET /api/users/:id
-router.get('/:id', getUserById);
+router.get('/:id', apiLimiter, auth, isAdmin, getUserById);
 
 // @route   PUT /api/users/:id
-router.put('/:id', updateUser);
+router.put('/:id', apiLimiter, auth, isAdmin, updateUser);
 
 // @route   DELETE /api/users/:id
-router.delete('/:id', deleteUser);
+router.delete('/:id', apiLimiter, auth, isAdmin, deleteUser);
 
 module.exports = router;
