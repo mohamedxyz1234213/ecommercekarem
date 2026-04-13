@@ -24,8 +24,8 @@ const router = express.Router();
 // @route   POST /api/orders
 router.post(
   '/',
-  auth,
   apiLimiter,
+  auth,
   [
     body('items').isArray({ min: 1 }).withMessage('At least one item is required'),
     body('items.*.product').notEmpty().withMessage('Product ID is required'),

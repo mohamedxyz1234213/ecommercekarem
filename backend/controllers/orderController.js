@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
@@ -8,7 +9,6 @@ const {
   sendStatusUpdate,
   sendAdminNotification,
 } = require('../utils/email');
-const { sanitize } = require('../utils/sanitize');
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -37,7 +37,10 @@ const createOrder = async (req, res) => {
     const orderItems = [];
 
     for (const item of items) {
-      const product = await Product.findById(sanitize(String(item.product)));
+      if (!mongoose.Types.ObjectId.isValid(item.product)) {
+        return res.status(400).json({ message: `Invalid product ID: ${item.product}` });
+      }
+      const product = await Product.findById(item.product);
       if (!product) {
         return res.status(404).json({ message: `Product not found: ${item.product}` });
       }

@@ -15,7 +15,7 @@ const uploadLimiter = rateLimit({
 
 // @route   POST /api/upload
 // @desc    Upload single image
-router.post('/', auth, uploadLimiter, (req, res) => {
+router.post('/', uploadLimiter, auth, (req, res) => {
   uploadSingle(req, res, (err) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
@@ -37,7 +37,7 @@ router.post('/', auth, uploadLimiter, (req, res) => {
 
 // @route   POST /api/upload/multiple
 // @desc    Upload multiple images
-router.post('/multiple', auth, uploadLimiter, (req, res) => {
+router.post('/multiple', uploadLimiter, auth, (req, res) => {
   uploadProductImages(req, res, (err) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
