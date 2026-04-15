@@ -33,12 +33,24 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // CORS
+const allowedOrigins = new Set([
+  process.env.CLIENT_URL || 'http://localhost:3000',
+  process.env.ADMIN_URL || 'http://localhost:3001',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+]);
+
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_URL || 'http://localhost:3000',
-      process.env.ADMIN_URL || 'http://localhost:3001',
-    ],
+    origin(origin, callback) {
+      // Allow non-browser clients (no Origin header), local dev ports, and configured domains.
+      if (!origin || allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

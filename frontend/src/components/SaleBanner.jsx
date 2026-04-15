@@ -10,8 +10,21 @@ const SaleBanner = () => {
   useEffect(() => {
     const fetchSale = async () => {
       try {
-        const { data } = await API.get('/sales/active');
-        if (data.sale) setSale(data.sale);
+        const { data } = await API.get('/settings');
+        if (data?.bannerText) {
+          setSale({
+            title: 'Special Offer',
+            description: data.bannerText,
+            discount: 0,
+          });
+          return;
+        }
+
+        setSale({
+          title: 'Summer Sale',
+          description: 'Up to 40% off on selected luxury fragrances',
+          discount: 40,
+        });
       } catch {
         setSale({
           title: 'Summer Sale',

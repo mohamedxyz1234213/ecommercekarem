@@ -15,14 +15,18 @@ const PLACEHOLDER_PRODUCTS = [
 ];
 
 const FeaturedProducts = () => {
+  const SliderComponent = Slider?.default || Slider;
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchFeatured = async () => {
       try {
-        const { data } = await API.get('/products/featured');
-        setProducts(data.products?.length ? data.products : PLACEHOLDER_PRODUCTS);
+        const { data } = await API.get('/products', {
+          params: { featured: true, limit: 8 },
+        });
+        const safeProducts = Array.isArray(data?.products) ? data.products : [];
+        setProducts(safeProducts.length ? safeProducts : PLACEHOLDER_PRODUCTS);
       } catch {
         setProducts(PLACEHOLDER_PRODUCTS);
       } finally {
@@ -94,7 +98,7 @@ const FeaturedProducts = () => {
         </AnimatedSection>
 
         <AnimatedSection delay={0.2}>
-          <Slider {...settings}>
+          <SliderComponent {...settings}>
             {products.map((product) => (
               <div key={product._id} style={styles.slideItem}>
                 <div style={{ padding: '0 8px' }}>
@@ -102,7 +106,7 @@ const FeaturedProducts = () => {
                 </div>
               </div>
             ))}
-          </Slider>
+          </SliderComponent>
         </AnimatedSection>
       </div>
     </section>
