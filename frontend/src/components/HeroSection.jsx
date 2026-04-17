@@ -46,6 +46,7 @@ const HeroSection = () => {
   }, []);
 
   const hasImage = !!content.heroImage;
+  const heroVideoSrc = '/HeroVideo.mp4';
 
   const styles = {
     hero: {
@@ -58,15 +59,24 @@ const HeroSection = () => {
       overflow: 'hidden',
       background: hasImage
         ? `url(${content.heroImage}) center/cover no-repeat`
-        : 'linear-gradient(135deg, #240909 0%, #3a1010 55%, #5a2323 100%)',
+        : 'linear-gradient(135deg, #013220 0%, #014421 55%, #355E3B 100%)',
+    },
+    video: {
+      position: 'absolute',
+      inset: 0,
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover',
+      zIndex: 0,
     },
     overlay: {
       position: 'absolute',
       inset: 0,
-      background: hasImage
-        ? 'rgba(0, 0, 0, 0.35)'
-        : 'radial-gradient(ellipse at 30% 50%, rgba(242, 235, 227, 0.08) 0%, transparent 50%), ' +
-          'radial-gradient(ellipse at 70% 30%, rgba(58, 16, 16, 0.2) 0%, transparent 50%)',
+      background:
+        'linear-gradient(rgba(1, 50, 32, 0.55), rgba(1, 50, 32, 0.65)), ' +
+        'radial-gradient(ellipse at 30% 50%, rgba(188, 184, 138, 0.1) 0%, transparent 50%), ' +
+        'radial-gradient(ellipse at 70% 30%, rgba(1, 68, 33, 0.25) 0%, transparent 50%)',
+      zIndex: 1,
     },
     content: {
       position: 'relative',
@@ -164,6 +174,17 @@ const HeroSection = () => {
 
   return (
     <section style={styles.hero}>
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="metadata"
+        style={styles.video}
+        poster={content.heroImage || undefined}
+      >
+        <source src={heroVideoSrc} type="video/mp4" />
+      </video>
       <div style={styles.overlay} />
 
       {/* Decorative circles */}

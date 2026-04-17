@@ -1,17 +1,19 @@
 /* ===== CSS Variables ===== */
 :root {
-  --primary: #ffffff;
-  --secondary: #121212;
-  --accent: #d0d0d0;
-  --text: #ffffff;
-  --light: #000000;
-  --dark: #ffffff;
-  --gold: #e6e6e6;
+  --primary: #014421;   /* Pakistan green */
+  --secondary: #355e3b; /* Hunter green */
+  --accent: #8a9a5b;    /* Moss green */
+  --text: #edf6ee;      /* High-contrast readable text */
+  --light: #013220;     /* Dark green */
+  --dark: #013220;
+  --gold: #bcb88a;      /* Sage/sand */
   --danger: #ff6b6b;
   --warning: #ffd166;
   --success: #6ee7b7;
   --info: #93c5fd;
-  --border: #3a3a3a;
+  --border: #2b5b39;
+  --gray-300: #507f57;
+  --gray-500: #d1d7b3;
   --shadow: rgba(0, 0, 0, 0.35);
   --sidebar-width: 260px;
   --sidebar-collapsed: 72px;
@@ -93,14 +95,14 @@ ul, ol { list-style: none; }
   transition: all 0.2s ease;
   border: none;
 }
-.btn-primary { background: var(--primary); color: var(--text); }
-.btn-primary:hover { background: #d9d9d9; color: #111111; }
+.btn-primary { background: var(--gold); color: var(--light); }
+.btn-primary:hover { background: #d1cda3; color: var(--light); }
 .btn-secondary { background: var(--secondary); color: var(--text); border: 1px solid var(--border); }
-.btn-secondary:hover { background: #1c1c1c; }
+.btn-secondary:hover { background: var(--primary); }
 .btn-danger { background: var(--danger); color: #ffffff; }
 .btn-danger:hover { background: #c0392b; }
-.btn-gold { background: var(--gold); color: #111111; }
-.btn-gold:hover { background: #cccccc; }
+.btn-gold { background: var(--accent); color: var(--light); }
+.btn-gold:hover { background: #9cad6d; }
 .btn-success { background: #18a957; color: #ffffff; }
 .btn-success:hover { background: #219a52; }
 .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
@@ -120,15 +122,15 @@ ul, ol { list-style: none; }
   border: 1px solid var(--border);
   border-radius: 8px;
   font-size: 0.9rem;
-  background: #1a1a1a;
+  background: rgba(188, 184, 138, 0.08);
   color: var(--text);
   transition: border-color 0.2s;
 }
 .form-control:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.15);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(188, 184, 138, 0.18);
 }
-.form-control::placeholder { color: #b8b8b8; }
+.form-control::placeholder { color: rgba(209, 215, 179, 0.9); }
 textarea.form-control { resize: vertical; min-height: 100px; }
 
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
@@ -165,24 +167,24 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
 .toggle-slider {
   position: absolute; cursor: pointer; inset: 0;
-  background: #ccc; border-radius: 24px; transition: 0.3s;
+  background: var(--gray-300, #507f57); border-radius: 24px; transition: 0.3s;
 }
 .toggle-slider::before {
   content: ''; position: absolute; height: 18px; width: 18px;
-  left: 3px; bottom: 3px; background: #f4fff5; border-radius: 50%; transition: 0.3s;
+  left: 3px; bottom: 3px; background: var(--gold); border-radius: 50%; transition: 0.3s;
 }
 .toggle-switch input:checked + .toggle-slider { background: var(--primary); }
 .toggle-switch input:checked + .toggle-slider::before { transform: translateX(24px); }
 
 .search-bar {
   display: flex; align-items: center; gap: 8px;
-  background: #1a1a1a; border: 1px solid var(--border);
+  background: rgba(188, 184, 138, 0.08); border: 1px solid var(--border);
   border-radius: 8px; padding: 8px 14px; width: 300px;
 }
 .search-bar input { border: none; flex: 1; font-size: 0.9rem; background: transparent; color: var(--text); }
-.search-bar input::placeholder { color: #b8b8b8; }
-.search-bar svg { color: #d0d0d0; }
+.search-bar input::placeholder { color: rgba(209, 215, 179, 0.9); }
+.search-bar svg { color: var(--gold); }
 
-.empty-state { text-align: center; padding: 60px 20px; color: #d0d0d0; }
-.empty-state svg { font-size: 3rem; margin-bottom: 16px; color: #8a8a8a; }
+.empty-state { text-align: center; padding: 60px 20px; color: var(--gray-500, #d1d7b3); }
+.empty-state svg { font-size: 3rem; margin-bottom: 16px; color: var(--accent); }
 .empty-state h3 { color: var(--text); margin-bottom: 8px; }

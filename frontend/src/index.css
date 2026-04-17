@@ -1,17 +1,17 @@
 :root {
-  --primary: #3a1010;
-  --secondary: #f2ebe3;
-  --accent: #6b2a2a;
-  --text: #f2ebe3;
-  --light: #3a1010;
-  --dark: #240909;
-  --gold: #d9c8b7;
-  --white: #562020;
-  --gray-100: #5a2323;
-  --gray-200: #743131;
-  --gray-300: #8e4b4b;
-  --gray-400: #dbc7c7;
-  --gray-500: #f3e7dc;
+  --primary: #014421;   /* Pakistan green */
+  --secondary: #355e3b; /* Hunter green */
+  --accent: #8a9a5b;    /* Moss green */
+  --text: #edf6ee;      /* High-contrast readable text */
+  --light: #013220;     /* Dark green page background */
+  --dark: #013220;
+  --gold: #bcb88a;      /* Sage/sand */
+  --white: #355e3b;     /* Surfaces/cards */
+  --gray-100: #0e3a25;
+  --gray-200: #2b5b39;
+  --gray-300: #507f57;
+  --gray-400: #9fb08d;
+  --gray-500: #d1d7b3;
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 10px 26px rgba(0, 0, 0, 0.28);
   --shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.34);
@@ -76,27 +76,27 @@ input, textarea, select {
   font-family: var(--font-body);
   font-size: 1rem;
   outline: none;
-  border: 1.5px solid rgba(242, 235, 227, 0.42);
+  border: 1.5px solid var(--gray-300);
   border-radius: var(--radius-sm);
   padding: 0.75rem 1rem;
   transition: var(--transition);
-  background: rgba(242, 235, 227, 0.16);
+  background: rgba(188, 184, 138, 0.08);
   color: var(--text);
 }
 
 input:focus, textarea:focus, select:focus {
-  border-color: var(--secondary);
-  box-shadow: 0 0 0 3px rgba(242, 235, 227, 0.15);
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(188, 184, 138, 0.2);
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: rgba(242, 235, 227, 0.72);
+  color: rgba(209, 215, 179, 0.9);
 }
 
 ::selection {
-  background: var(--secondary);
-  color: var(--primary);
+  background: var(--gold);
+  color: var(--light);
 }
 
 ::-webkit-scrollbar {
@@ -104,16 +104,16 @@ textarea::placeholder {
 }
 
 ::-webkit-scrollbar-track {
-  background: #2b0d0d;
+  background: var(--light);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #6b2a2a;
+  background: var(--secondary);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8e4b4b;
+  background: var(--accent);
 }
 
 #root {
@@ -126,7 +126,7 @@ section {
 }
 
 section + section {
-  border-top: 1px solid rgba(242, 235, 227, 0.12);
+  border-top: 1px solid var(--gray-200);
 }
 
 .container {
@@ -148,17 +148,17 @@ section + section {
 /* Slick carousel overrides */
 .slick-prev:before,
 .slick-next:before {
-  color: var(--secondary) !important;
+  color: var(--gold) !important;
   font-size: 24px !important;
 }
 
 .slick-dots li button:before {
-  color: rgba(242, 235, 227, 0.6) !important;
+  color: var(--accent) !important;
   font-size: 10px !important;
 }
 
 .slick-dots li.slick-active button:before {
-  color: var(--secondary) !important;
+  color: var(--gold) !important;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
