@@ -20,6 +20,11 @@ const orderItemSchema = new mongoose.Schema(
       required: true,
       min: [1, 'Quantity must be at least 1'],
     },
+    size: {
+      type: String,
+      enum: ['50ml', '75ml', '100ml', ''],
+      default: '',
+    },
     image: {
       type: String,
       default: '',

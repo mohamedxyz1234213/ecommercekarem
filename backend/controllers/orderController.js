@@ -48,7 +48,27 @@ const createOrder = async (req, res) => {
       if (!product) {
         return res.status(404).json({ message: `Product not found: ${item.product}` });
       }
-      if (product.stock < item.quantity) {
+      const requestedSize = typeof item.size === 'string' ? item.size.trim() : '';
+      const hasSizeStocks = Array.isArray(product.sizeStocks) && product.sizeStocks.length > 0;
+
+      if (hasSizeStocks) {
+        if (!requestedSize) {
+          return res.status(400).json({
+            message: `Please select a size for ${product.name}`,
+          });
+        }
+        const sizeEntry = product.sizeStocks.find((entry) => entry.size === requestedSize);
+        if (!sizeEntry) {
+          return res.status(400).json({
+            message: `Size ${requestedSize} is not available for ${product.name}`,
+          });
+        }
+        if (sizeEntry.quantity < item.quantity) {
+          return res.status(400).json({
+            message: `Insufficient stock for ${product.name} (${requestedSize}). Available: ${sizeEntry.quantity}`,
+          });
+        }
+      } else if (product.stock < item.quantity) {
         return res.status(400).json({
           message: `Insufficient stock for ${product.name}. Available: ${product.stock}`,
         });
@@ -62,11 +82,19 @@ const createOrder = async (req, res) => {
         name: product.name,
         price: itemPrice,
         quantity: item.quantity,
+        size: requestedSize || '',
         image: product.images[0] || '',
       });
 
       // Decrement stock
-      product.stock -= item.quantity;
+      if (hasSizeStocks) {
+        product.sizeStocks = product.sizeStocks.map((entry) =>
+          entry.size === requestedSize
+            ? { ...entry, quantity: entry.quantity - item.quantity }
+            : entry
+        );
+      }
+      product.stock = Math.max(0, (product.stock || 0) - item.quantity);
       await product.save();
     }
 
@@ -160,9 +188,18 @@ const paymobCallback = async (req, res) => {
       // Restore stock on failed payment (only once)
       if (!order.stockRestored) {
         for (const item of order.items) {
-          await Product.findByIdAndUpdate(item.product, {
-            $inc: { stock: item.quantity },
-          });
+          const product = await Product.findById(item.product);
+          if (!product) continue;
+
+          product.stock = (product.stock || 0) + item.quantity;
+          if (item.size && Array.isArray(product.sizeStocks) && product.sizeStocks.length > 0) {
+            product.sizeStocks = product.sizeStocks.map((entry) =>
+              entry.size === item.size
+                ? { ...entry, quantity: entry.quantity + item.quantity }
+                : entry
+            );
+          }
+          await product.save();
         }
         order.stockRestored = true;
       }
@@ -317,9 +354,18 @@ const updateOrderStatus = async (req, res) => {
     // Restore stock if cancelled (only once, tracked by stockRestored flag)
     if (status === 'cancelled' && !order.stockRestored) {
       for (const item of order.items) {
-        await Product.findByIdAndUpdate(item.product, {
-          $inc: { stock: item.quantity },
-        });
+        const product = await Product.findById(item.product);
+        if (!product) continue;
+
+        product.stock = (product.stock || 0) + item.quantity;
+        if (item.size && Array.isArray(product.sizeStocks) && product.sizeStocks.length > 0) {
+          product.sizeStocks = product.sizeStocks.map((entry) =>
+            entry.size === item.size
+              ? { ...entry, quantity: entry.quantity + item.quantity }
+              : entry
+          );
+        }
+        await product.save();
       }
       order.stockRestored = true;
       await order.save();
@@ -409,9 +455,18 @@ const rejectInstapay = async (req, res) => {
     // Restore stock (only once)
     if (!order.stockRestored) {
       for (const item of order.items) {
-        await Product.findByIdAndUpdate(item.product, {
-          $inc: { stock: item.quantity },
-        });
+        const product = await Product.findById(item.product);
+        if (!product) continue;
+
+        product.stock = (product.stock || 0) + item.quantity;
+        if (item.size && Array.isArray(product.sizeStocks) && product.sizeStocks.length > 0) {
+          product.sizeStocks = product.sizeStocks.map((entry) =>
+            entry.size === item.size
+              ? { ...entry, quantity: entry.quantity + item.quantity }
+              : entry
+          );
+        }
+        await product.save();
       }
       order.stockRestored = true;
     }

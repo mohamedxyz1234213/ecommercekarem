@@ -70,8 +70,8 @@ const Navbar = () => {
     fetchSettings();
   }, []);
 
-  const navBg = scrolled || !isHome ? 'rgba(250, 248, 245, 0.97)' : 'transparent';
-  const textColor = scrolled || !isHome ? 'var(--text)' : 'var(--white)';
+  const navBg = scrolled || !isHome ? 'rgba(11, 27, 19, 0.94)' : 'transparent';
+  const textColor = scrolled || !isHome ? '#EAF7EE' : '#F2FFF5';
 
   const links = [
     { label: 'Home', path: '/' },
@@ -100,11 +100,12 @@ const Navbar = () => {
       justifyContent: 'space-between',
     },
     logo: {
-      fontFamily: 'var(--font-heading)',
-      fontSize: '1.75rem',
+      fontFamily: 'Inter, var(--font-body)',
+      fontSize: '1.05rem',
       fontWeight: 700,
-      color: textColor,
+      color: '#F2FFF5',
       letterSpacing: '3px',
+      textTransform: 'uppercase',
       cursor: 'pointer',
     },
     linksDesktop: {
@@ -212,7 +213,7 @@ const Navbar = () => {
       <nav style={styles.nav}>
         <div style={styles.container}>
           <Link to="/" style={styles.logo}>
-            KARÉME
+            VYBE SCENT
           </Link>
 
           <div style={styles.linksDesktop} className="nav-links-desktop">

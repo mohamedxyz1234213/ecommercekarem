@@ -39,8 +39,9 @@ const Register = () => {
       toast.error('Passwords do not match');
       return;
     }
-    if (form.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+    const passwordPolicy = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$/;
+    if (!passwordPolicy.test(form.password)) {
+      toast.error('Password must be 8+ chars and include uppercase, lowercase, number, and special character');
       return;
     }
     setLoading(true);
@@ -75,7 +76,15 @@ const Register = () => {
     container: { width: '100%', maxWidth: '440px', padding: '2rem 1.5rem 4rem' },
     card: { backgroundColor: 'var(--white)', borderRadius: 'var(--radius-md)', padding: '2.5rem', boxShadow: 'var(--shadow-md)' },
     header: { textAlign: 'center', marginBottom: '2rem' },
-    logo: { fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 700, letterSpacing: '3px', color: 'var(--primary)', marginBottom: '0.5rem' },
+    logo: {
+      fontFamily: 'Inter, var(--font-body)',
+      fontSize: '1rem',
+      fontWeight: 700,
+      letterSpacing: '3px',
+      textTransform: 'uppercase',
+      color: '#F2FFF5',
+      marginBottom: '0.75rem',
+    },
     title: { fontFamily: 'var(--font-heading)', fontSize: '1.75rem', fontWeight: 500, marginBottom: '0.5rem' },
     subtitle: { fontSize: '0.9rem', color: 'var(--gray-500)' },
     form: { display: 'flex', flexDirection: 'column', gap: '1.25rem' },
@@ -112,7 +121,7 @@ const Register = () => {
         <AnimatedSection>
           <div style={styles.card}>
             <div style={styles.header}>
-              <p style={styles.logo}>KARÉME</p>
+              <p style={styles.logo}>VYBE SCENT</p>
               <h1 style={styles.title}>Create Account</h1>
               <p style={styles.subtitle}>Join our fragrance community</p>
             </div>

@@ -8,6 +8,7 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 
 const CATEGORIES = ['Perfume', 'Cologne', 'Body Spray', 'Gift Set', 'Accessory', 'Unisex', 'Men', 'Women'];
+const SIZE_OPTIONS = ['50ml', '75ml', '100ml'];
 
 const initialForm = {
   name: '',
@@ -20,6 +21,7 @@ const initialForm = {
   brand: '',
   stock: '',
   featured: false,
+  sizeStocks: [],
 };
 
 const ProductForm = () => {
@@ -50,6 +52,9 @@ const ProductForm = () => {
         brand: p.brand || '',
         stock: p.stock || '',
         featured: p.featured || false,
+        sizeStocks: Array.isArray(p.sizeStocks)
+          ? p.sizeStocks.filter((entry) => SIZE_OPTIONS.includes(entry.size))
+          : [],
       });
       if (p.images) setImages(p.images);
     } catch {
@@ -65,43 +70,117 @@ const ProductForm = () => {
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
+  const toggleSize = (size) => {
+    setForm((prev) => {
+      const exists = prev.sizeStocks.some((entry) => entry.size === size);
+      const nextSizeStocks = exists
+        ? prev.sizeStocks.filter((entry) => entry.size !== size)
+        : [...prev.sizeStocks, { size, quantity: 0 }];
+
+      const computedStock = nextSizeStocks.reduce(
+        (sum, entry) => sum + (Number(entry.quantity) || 0),
+        0
+      );
+
+      return {
+        ...prev,
+        sizeStocks: nextSizeStocks,
+        stock: computedStock,
+      };
+    });
+  };
+
+  const updateSizeQuantity = (size, quantity) => {
+    setForm((prev) => {
+      const nextSizeStocks = prev.sizeStocks.map((entry) =>
+        entry.size === size ? { ...entry, quantity: Math.max(0, Number(quantity) || 0) } : entry
+      );
+      const computedStock = nextSizeStocks.reduce(
+        (sum, entry) => sum + (Number(entry.quantity) || 0),
+        0
+      );
+      return {
+        ...prev,
+        sizeStocks: nextSizeStocks,
+        stock: computedStock,
+      };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.price) {
-      toast.error('Name and price are required');
+    const nativeFormData = new FormData(e.currentTarget);
+    const submitted = {
+      name: String(nativeFormData.get('name') ?? form.name ?? '').trim(),
+      description: String(nativeFormData.get('description') ?? form.description ?? '').trim(),
+      brand: String(nativeFormData.get('brand') ?? form.brand ?? '').trim(),
+      category: String(nativeFormData.get('category') ?? form.category ?? '').trim(),
+      price: String(nativeFormData.get('price') ?? form.price ?? '').trim(),
+      salePrice: String(nativeFormData.get('salePrice') ?? form.salePrice ?? '').trim(),
+    };
+
+    if (!submitted.name || !submitted.price || !submitted.description || !submitted.brand || !submitted.category) {
+      toast.error('Name, description, brand, category, and price are required');
+      return;
+    }
+    if (!CATEGORIES.includes(submitted.category)) {
+      toast.error('Category must be Men, Women, or Unisex');
+      return;
+    }
+    if (form.sizeStocks.length === 0) {
+      toast.error('Please select at least one size');
       return;
     }
 
     setLoading(true);
     try {
-      const formData = new FormData();
-      Object.keys(form).forEach((key) => {
-        formData.append(key, form[key]);
-      });
+      const existingImageUrls = images.filter((img) => typeof img === 'string');
+      const newImageFiles = images.filter((img) => img instanceof File);
 
-      // Separate new files from existing URLs
-      images.forEach((img) => {
-        if (img instanceof File) {
-          formData.append('images', img);
-        } else if (typeof img === 'string') {
-          formData.append('existingImages', img);
-        }
-      });
+      let uploadedImageUrls = [];
+      if (newImageFiles.length > 0) {
+        const uploadData = new FormData();
+        newImageFiles.forEach((file) => uploadData.append('images', file));
+        const { data } = await API.post('/upload/multiple', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        uploadedImageUrls = Array.isArray(data) ? data.map((item) => item.url).filter(Boolean) : [];
+      }
+
+      const payload = {
+        ...form,
+        name: submitted.name,
+        description: submitted.description,
+        brand: submitted.brand,
+        category: submitted.category,
+        price: Number(submitted.price) || 0,
+        salePrice: submitted.salePrice === '' ? null : Number(submitted.salePrice),
+        stock: Number(form.stock) || 0,
+        onSale: Boolean(form.onSale),
+        featured: Boolean(form.featured),
+        sizeStocks: form.sizeStocks.map((entry) => ({
+          size: entry.size,
+          quantity: Number(entry.quantity) || 0,
+        })),
+        images: [...existingImageUrls, ...uploadedImageUrls],
+      };
 
       if (isEdit) {
-        await API.put(`/products/${id}`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await API.put(`/products/${id}`, payload);
         toast.success('Product updated!');
       } else {
-        await API.post('/products', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
+        await API.post('/products', payload);
         toast.success('Product created!');
       }
       navigate('/products');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to save product');
+      const errorPayload = err.response?.data;
+      const validationErrors = errorPayload?.errors;
+      const validationMessage = Array.isArray(validationErrors)
+        ? validationErrors.map((item) => item.msg).filter(Boolean).join(' | ')
+        : null;
+      toast.error(validationMessage || errorPayload?.message || 'Failed to save product');
+      console.error('Product save failed:', errorPayload || err.message);
     } finally {
       setLoading(false);
     }
@@ -213,11 +292,48 @@ const ProductForm = () => {
                     className="form-control"
                     name="stock"
                     value={form.stock}
-                    onChange={handleChange}
+                    onChange={() => {}}
                     placeholder="0"
                     min="0"
+                    readOnly
                   />
                 </div>
+              </div>
+
+              <div style={{ marginTop: 12 }}>
+                <label style={{ display: 'block', marginBottom: 8, fontWeight: 600 }}>Sizes & Quantity</label>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                  {SIZE_OPTIONS.map((size) => {
+                    const active = form.sizeStocks.some((entry) => entry.size === size);
+                    return (
+                      <button
+                        key={size}
+                        type="button"
+                        className={active ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm'}
+                        onClick={() => toggleSize(size)}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {form.sizeStocks.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 12 }}>
+                    {form.sizeStocks.map((entry) => (
+                      <div key={entry.size} className="form-group" style={{ marginBottom: 0 }}>
+                        <label>{entry.size} quantity</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          min="0"
+                          value={entry.quantity}
+                          onChange={(e) => updateSizeQuantity(entry.size, e.target.value)}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

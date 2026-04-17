@@ -26,10 +26,7 @@ const Profile = () => {
         const { data } = await API.get('/orders/my-orders');
         setOrders(data.orders || []);
       } catch {
-        setOrders([
-          { _id: 'demo1', createdAt: '2024-02-15', status: 'delivered', total: 2500, items: [{ name: 'Rose Élégante', quantity: 2 }] },
-          { _id: 'demo2', createdAt: '2024-02-10', status: 'processing', total: 1800, items: [{ name: 'Oud Mystique', quantity: 1 }] },
-        ]);
+        setOrders([]);
       } finally {
         setLoadingOrders(false);
       }
@@ -176,7 +173,12 @@ const Profile = () => {
                         <span style={styles.orderId}>Order #{order._id?.slice(-6) || order._id}</span>
                         <span style={styles.orderDate}>{new Date(order.createdAt).toLocaleDateString()}</span>
                         <span style={styles.orderItems}>
-                          {order.items?.map((item) => `${item.name || 'Item'} × ${item.quantity}`).join(', ')}
+                          {order.items
+                            ?.map(
+                              (item) =>
+                                `${item.name || 'Item'}${item.size ? ` (${item.size})` : ''} × ${item.quantity}`
+                            )
+                            .join(', ')}
                         </span>
                       </div>
                       <div style={styles.orderRight}>

@@ -6,9 +6,9 @@ import SaleBanner from '../components/SaleBanner';
 import AnimatedSection from '../components/AnimatedSection';
 
 const categories = [
-  { name: 'For Her', image: 'https://placehold.co/400x500/F5F0E8/8B7355?text=For+Her', slug: 'women' },
-  { name: 'For Him', image: 'https://placehold.co/400x500/F5F0E8/2D5016?text=For+Him', slug: 'men' },
-  { name: 'Unisex', image: 'https://placehold.co/400x500/F5F0E8/C4A265?text=Unisex', slug: 'unisex' },
+  { name: 'Women', slug: 'women' },
+  { name: 'Men', slug: 'men' },
+  { name: 'Unisex', slug: 'unisex' },
 ];
 
 const pageVariants = {
@@ -133,7 +133,17 @@ const Home = () => {
                     style={styles.catCard}
                     whileHover={{ scale: 1.02 }}
                   >
-                    <img src={cat.image} alt={cat.name} style={styles.catImg} />
+                    <div
+                      style={{
+                        ...styles.catImg,
+                        background:
+                          cat.slug === 'women'
+                            ? 'linear-gradient(135deg, #A85D7D 0%, #6A2C4E 100%)'
+                            : cat.slug === 'men'
+                              ? 'linear-gradient(135deg, #355C7D 0%, #2A3A50 100%)'
+                              : 'linear-gradient(135deg, #8E7C5A 0%, #4C3F2A 100%)',
+                      }}
+                    />
                     <div style={styles.catOverlay}>
                       <h3 style={styles.catName}>{cat.name}</h3>
                     </div>

@@ -23,18 +23,18 @@ createRoot(document.getElementById('root')).render(
               toastOptions={{
                 duration: 3000,
                 style: {
-                  background: '#FAF8F5',
-                  color: '#1A1A1A',
+                  background: '#163022',
+                  color: '#E6F1E9',
                   fontFamily: "'Lato', sans-serif",
                   borderRadius: '12px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-                  border: '1px solid #E5E5E5',
+                  boxShadow: '0 8px 30px rgba(0,0,0,0.35)',
+                  border: '1px solid #2A4A38',
                 },
                 success: {
-                  iconTheme: { primary: '#2D5016', secondary: '#FAF8F5' },
+                  iconTheme: { primary: '#2f7a3f', secondary: '#163022' },
                 },
                 error: {
-                  iconTheme: { primary: '#DC2626', secondary: '#FAF8F5' },
+                  iconTheme: { primary: '#DC2626', secondary: '#163022' },
                 },
               }}
             />

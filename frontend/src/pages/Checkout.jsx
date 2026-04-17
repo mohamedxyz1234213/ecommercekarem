@@ -55,6 +55,7 @@ const Checkout = () => {
         items: items.map((item) => ({
           product: item._id,
           quantity: item.quantity,
+          size: item.selectedSize || '',
         })),
         shippingAddress: {
           street: form.address,
@@ -217,8 +218,11 @@ const Checkout = () => {
               <div style={styles.summary}>
                 <h3 style={styles.summaryTitle}>Order Summary</h3>
                 {items.map((item) => (
-                  <div key={item._id} style={styles.summaryItem}>
-                    <span style={styles.summaryItemName}>{item.name} × {item.quantity}</span>
+                  <div key={`${item._id}-${item.selectedSize || 'default'}`} style={styles.summaryItem}>
+                    <span style={styles.summaryItemName}>
+                      {item.name}
+                      {item.selectedSize ? ` (${item.selectedSize})` : ''} × {item.quantity}
+                    </span>
                     <span>EGP {((item.salePrice || item.price) * item.quantity).toFixed(2)}</span>
                   </div>
                 ))}

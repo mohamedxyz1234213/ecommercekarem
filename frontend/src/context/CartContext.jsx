@@ -26,33 +26,41 @@ export const CartProvider = ({ children }) => {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addToCart = useCallback((product, quantity = 1) => {
+  const addToCart = useCallback((product, quantity = 1, selectedSize = '') => {
     setItems((prev) => {
-      const existing = prev.find((item) => item._id === product._id);
+      const existing = prev.find(
+        (item) => item._id === product._id && (item.selectedSize || '') === (selectedSize || '')
+      );
       if (existing) {
         toast.success('Cart updated!');
         return prev.map((item) =>
-          item._id === product._id
+          item._id === product._id && (item.selectedSize || '') === (selectedSize || '')
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
       toast.success('Added to cart!');
-      return [...prev, { ...product, quantity }];
+      return [...prev, { ...product, quantity, selectedSize: selectedSize || '' }];
     });
     setIsDrawerOpen(true);
   }, []);
 
-  const removeFromCart = useCallback((productId) => {
-    setItems((prev) => prev.filter((item) => item._id !== productId));
+  const removeFromCart = useCallback((productId, selectedSize = '') => {
+    setItems((prev) =>
+      prev.filter(
+        (item) => !(item._id === productId && (item.selectedSize || '') === (selectedSize || ''))
+      )
+    );
     toast.success('Removed from cart');
   }, []);
 
-  const updateQuantity = useCallback((productId, quantity) => {
+  const updateQuantity = useCallback((productId, selectedSize = '', quantity) => {
     if (quantity < 1) return;
     setItems((prev) =>
       prev.map((item) =>
-        item._id === productId ? { ...item, quantity } : item
+        item._id === productId && (item.selectedSize || '') === (selectedSize || '')
+          ? { ...item, quantity }
+          : item
       )
     );
   }, []);

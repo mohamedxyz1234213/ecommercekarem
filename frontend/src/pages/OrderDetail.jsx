@@ -6,22 +6,13 @@ import API from '../api/axios';
 import AnimatedSection from '../components/AnimatedSection';
 import LoadingSpinner from '../components/LoadingSpinner';
 
+const FALLBACK_ORDER_ITEM_IMAGE =
+  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2270%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f5f0e8%22/%3E%3C/svg%3E';
+
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
   exit: { opacity: 0, transition: { duration: 0.3 } },
-};
-
-const DEMO_ORDER = {
-  _id: 'demo1',
-  createdAt: '2024-02-15',
-  status: 'delivered',
-  total: 2500,
-  paymentMethod: 'paymob',
-  shippingAddress: { fullName: 'John Doe', address: '123 Main St', city: 'Cairo', phone: '01012345678' },
-  items: [
-    { product: { _id: '1', name: 'Rose Élégante', images: ['https://placehold.co/80x100/F5F0E8/8B7355?text=RE'] }, quantity: 2, price: 1250 },
-  ],
 };
 
 const OrderDetail = () => {
@@ -33,9 +24,9 @@ const OrderDetail = () => {
     const fetchOrder = async () => {
       try {
         const { data } = await API.get(`/orders/${id}`);
-        setOrder(data.order || DEMO_ORDER);
+        setOrder(data.order || null);
       } catch {
-        setOrder({ ...DEMO_ORDER, _id: id });
+        setOrder(null);
       } finally {
         setLoading(false);
       }
@@ -44,7 +35,13 @@ const OrderDetail = () => {
   }, [id]);
 
   if (loading) return <div style={{ paddingTop: '120px' }}><LoadingSpinner /></div>;
-  if (!order) return null;
+  if (!order) {
+    return (
+      <div style={{ paddingTop: '120px', textAlign: 'center', color: 'var(--gray-500)' }}>
+        Order not found.
+      </div>
+    );
+  }
 
   const steps = [
     { key: 'pending', label: 'Confirmed', icon: FiClock },
@@ -154,12 +151,15 @@ const OrderDetail = () => {
             {order.items?.map((item, i) => (
               <div key={i} style={styles.itemRow}>
                 <img
-                  src={item.product?.images?.[0] || 'https://placehold.co/60x70/F5F0E8/8B7355?text=P'}
+                  src={item.product?.images?.[0] || FALLBACK_ORDER_ITEM_IMAGE}
                   alt={item.product?.name || item.name}
                   style={styles.itemImg}
                 />
                 <div>
                   <p style={styles.itemName}>{item.product?.name || item.name || 'Product'}</p>
+                  {item.size && (
+                    <p style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>Size: {item.size}</p>
+                  )}
                   <p style={styles.itemQty}>Qty: {item.quantity}</p>
                 </div>
                 <span style={styles.itemPrice}>EGP {(item.price * item.quantity).toFixed(2)}</span>

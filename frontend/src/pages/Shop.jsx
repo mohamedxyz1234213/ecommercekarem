@@ -7,17 +7,6 @@ import ProductCard from '../components/ProductCard';
 import AnimatedSection from '../components/AnimatedSection';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-const PLACEHOLDER_PRODUCTS = [
-  { _id: '1', name: 'Rose Élégante', brand: 'KARÉME', price: 1250, category: 'women', images: ['https://placehold.co/400x500/F5F0E8/8B7355?text=Rose+Elegante'], rating: 4.8, numReviews: 124 },
-  { _id: '2', name: 'Oud Mystique', brand: 'KARÉME', price: 1800, salePrice: 1440, onSale: true, category: 'men', images: ['https://placehold.co/400x500/F5F0E8/2D5016?text=Oud+Mystique'], rating: 4.9, numReviews: 89 },
-  { _id: '3', name: 'Amber Noir', brand: 'Maison', price: 950, category: 'unisex', images: ['https://placehold.co/400x500/F5F0E8/1A1A1A?text=Amber+Noir'], rating: 4.5, numReviews: 67 },
-  { _id: '4', name: 'Jasmine Dreams', brand: 'KARÉME', price: 1100, category: 'women', images: ['https://placehold.co/400x500/F5F0E8/C4A265?text=Jasmine+Dreams'], rating: 4.7, numReviews: 203 },
-  { _id: '5', name: 'Velvet Santal', brand: 'Prestige', price: 2200, salePrice: 1760, onSale: true, category: 'unisex', images: ['https://placehold.co/400x500/F5F0E8/8B7355?text=Velvet+Santal'], rating: 5.0, numReviews: 56 },
-  { _id: '6', name: 'Musk Impérial', brand: 'Maison', price: 1450, category: 'men', images: ['https://placehold.co/400x500/F5F0E8/2D5016?text=Musk+Imperial'], rating: 4.6, numReviews: 145 },
-  { _id: '7', name: 'Fleur de Nuit', brand: 'KARÉME', price: 1600, category: 'women', images: ['https://placehold.co/400x500/F5F0E8/8B7355?text=Fleur+de+Nuit'], rating: 4.4, numReviews: 78 },
-  { _id: '8', name: 'Cedar & Sage', brand: 'Prestige', price: 1350, salePrice: 1080, onSale: true, category: 'men', images: ['https://placehold.co/400x500/F5F0E8/2D5016?text=Cedar+Sage'], rating: 4.3, numReviews: 92 },
-];
-
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
@@ -49,9 +38,9 @@ const Shop = () => {
         if (filters.sort) params.append('sort', filters.sort);
 
         const { data } = await API.get(`/products?${params.toString()}`);
-        setProducts(data.products?.length ? data.products : PLACEHOLDER_PRODUCTS);
+        setProducts(data.products || []);
       } catch {
-        setProducts(PLACEHOLDER_PRODUCTS);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
@@ -186,8 +175,8 @@ const Shop = () => {
                   onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
                 >
                   <option value="">All Categories</option>
-                  <option value="women">For Her</option>
-                  <option value="men">For Him</option>
+                  <option value="women">Women</option>
+                  <option value="men">Men</option>
                   <option value="unisex">Unisex</option>
                 </select>
               </div>

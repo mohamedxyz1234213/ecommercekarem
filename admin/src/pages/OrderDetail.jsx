@@ -82,7 +82,12 @@ const OrderDetail = () => {
 
   const isInstaPay = (order.paymentMethod || '').toLowerCase() === 'instapay';
   const proofImage = order.instapayProof;
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  const normalizeAssetUrl = (src) => {
+    if (!src) return '';
+    if (/^https?:\/\//i.test(src) || src.startsWith('data:image')) return src;
+    return src.startsWith('/') ? `${apiBase}${src}` : `${apiBase}/${src}`;
+  };
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -113,7 +118,7 @@ const OrderDetail = () => {
                 }}
               >
                 <img
-                  src={item.image ? (item.image.startsWith('http') ? item.image : `${baseUrl}${item.image}`) : 'https://via.placeholder.com/60'}
+                  src={normalizeAssetUrl(item.image) || 'https://via.placeholder.com/60'}
                   alt={item.name}
                   style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover' }}
                 />
@@ -190,7 +195,7 @@ const OrderDetail = () => {
                 onClick={() => setProofModal(true)}
               >
                 <img
-                  src={proofImage.startsWith('http') ? proofImage : `${baseUrl}${proofImage}`}
+                  src={normalizeAssetUrl(proofImage)}
                   alt="Payment proof"
                   style={{ maxHeight: 300, borderRadius: 8, border: '1px solid #e0d8cc' }}
                 />
@@ -339,7 +344,7 @@ const OrderDetail = () => {
       <Modal isOpen={proofModal} onClose={() => setProofModal(false)} title="Payment Proof" maxWidth={800}>
         {proofImage && (
           <img
-            src={proofImage.startsWith('http') ? proofImage : `${baseUrl}${proofImage}`}
+            src={normalizeAssetUrl(proofImage)}
             alt="Payment proof"
             style={{ width: '100%', borderRadius: 8 }}
           />

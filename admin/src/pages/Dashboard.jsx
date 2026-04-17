@@ -23,10 +23,10 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const [statsRes, ordersRes, productsRes, usersRes] = await Promise.allSettled([
-        API.get('/admin/stats'),
-        API.get('/orders/admin/all?limit=5&sort=-createdAt'),
+        API.get('/admin/dashboard'),
+        API.get('/orders?limit=5'),
         API.get('/products?limit=5&sort=-sold'),
-        API.get('/admin/users'),
+        API.get('/users?limit=1'),
       ]);
 
       if (statsRes.status === 'fulfilled') {

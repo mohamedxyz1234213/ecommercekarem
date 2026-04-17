@@ -28,16 +28,45 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  const extractErrorMessage = (error, fallbackMessage) => {
+    const backendErrors = error.response?.data?.errors;
+    if (Array.isArray(backendErrors) && backendErrors.length > 0) {
+      return backendErrors.map((item) => item.msg).join(', ');
+    }
+    return error.response?.data?.message || fallbackMessage;
+  };
+
+  const normalizeAuthResponse = (data) => {
+    // Support both `{ token, user }` and flattened user payloads from backend.
+    const normalizedUser =
+      data.user ||
+      (data._id
+        ? {
+            _id: data._id,
+            name: data.name,
+            email: data.email,
+            role: data.role,
+            avatar: data.avatar,
+          }
+        : null);
+
+    return {
+      token: data.token,
+      user: normalizedUser,
+    };
+  };
+
   const login = useCallback(async (email, password) => {
     try {
       const { data } = await API.post('/auth/login', { email, password });
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setUser(data.user);
+      const authData = normalizeAuthResponse(data);
+      localStorage.setItem('token', authData.token);
+      localStorage.setItem('user', JSON.stringify(authData.user));
+      setUser(authData.user);
       toast.success('Welcome back!');
-      return data;
+      return authData;
     } catch (error) {
-      const msg = error.response?.data?.message || 'Login failed';
+      const msg = extractErrorMessage(error, 'Login failed');
       toast.error(msg);
       throw error;
     }
@@ -46,13 +75,14 @@ export const AuthProvider = ({ children }) => {
   const register = useCallback(async (name, email, password) => {
     try {
       const { data } = await API.post('/auth/register', { name, email, password });
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setUser(data.user);
+      const authData = normalizeAuthResponse(data);
+      localStorage.setItem('token', authData.token);
+      localStorage.setItem('user', JSON.stringify(authData.user));
+      setUser(authData.user);
       toast.success('Account created successfully!');
-      return data;
+      return authData;
     } catch (error) {
-      const msg = error.response?.data?.message || 'Registration failed';
+      const msg = extractErrorMessage(error, 'Registration failed');
       toast.error(msg);
       throw error;
     }

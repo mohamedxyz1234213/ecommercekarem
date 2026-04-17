@@ -58,8 +58,8 @@ const Sidebar = ({ collapsed, onToggle }) => {
               exit={{ opacity: 0 }}
               style={{ overflow: 'hidden', whiteSpace: 'nowrap' }}
             >
-              <h2 style={{ color: '#C4A265', fontSize: '1.25rem', fontFamily: "'Playfair Display', serif" }}>
-                Perfume Admin
+              <h2 style={{ color: '#C4A265', fontSize: '1.25rem', fontFamily: 'var(--font-heading)', fontWeight: 400 }}>
+                vybe admin
               </h2>
             </motion.div>
           )}
@@ -144,7 +144,7 @@ const Sidebar = ({ collapsed, onToggle }) => {
               textAlign: 'center',
             }}
           >
-            © 2024 Perfume Store
+            © 2024 vybe
           </motion.div>
         )}
       </AnimatePresence>

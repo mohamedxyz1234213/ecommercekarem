@@ -9,33 +9,15 @@ import ProductCard from '../components/ProductCard';
 import AnimatedSection from '../components/AnimatedSection';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-const PLACEHOLDER = {
-  _id: '1',
-  name: 'Rose Élégante Eau de Parfum',
-  brand: 'KARÉME',
-  price: 1250,
-  description: 'A captivating blend of Bulgarian rose, peony petals, and warm amber. This luxurious eau de parfum embodies timeless elegance with its delicate floral heart and a sophisticated base of sandalwood and white musk. Perfect for evening occasions and special moments.',
-  images: [
-    'https://placehold.co/600x700/F5F0E8/8B7355?text=Rose+Elegante',
-    'https://placehold.co/600x700/F5F0E8/2D5016?text=Side+View',
-    'https://placehold.co/600x700/F5F0E8/C4A265?text=Box',
-  ],
-  category: 'women',
-  rating: 4.8,
-  numReviews: 124,
-  sizes: ['50ml', '100ml'],
-  notes: { top: 'Bergamot, Pink Pepper', middle: 'Bulgarian Rose, Peony', base: 'Sandalwood, White Musk, Amber' },
-  reviews: [
-    { _id: 'r1', user: { name: 'Sarah M.' }, rating: 5, comment: 'Absolutely stunning fragrance! Lasts all day.', createdAt: '2024-01-15' },
-    { _id: 'r2', user: { name: 'Nour A.' }, rating: 4, comment: 'Beautiful scent, very elegant. Perfect for special occasions.', createdAt: '2024-01-10' },
-  ],
-};
+const FALLBACK_DETAIL_IMAGE =
+  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22700%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f5f0e8%22/%3E%3C/svg%3E';
 
-const RELATED = [
-  { _id: '4', name: 'Jasmine Dreams', brand: 'KARÉME', price: 1100, images: ['https://placehold.co/400x500/F5F0E8/C4A265?text=Jasmine+Dreams'], rating: 4.7, numReviews: 203 },
-  { _id: '3', name: 'Amber Noir', brand: 'KARÉME', price: 950, images: ['https://placehold.co/400x500/F5F0E8/1A1A1A?text=Amber+Noir'], rating: 4.5, numReviews: 67 },
-  { _id: '7', name: 'Fleur de Nuit', brand: 'KARÉME', price: 1600, images: ['https://placehold.co/400x500/F5F0E8/8B7355?text=Fleur+de+Nuit'], rating: 4.4, numReviews: 78 },
-];
+const normalizeImageUrl = (src) => {
+  if (!src) return FALLBACK_DETAIL_IMAGE;
+  if (/^https?:\/\//i.test(src) || src.startsWith('data:image')) return src;
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  return src.startsWith('/') ? `${apiBase}${src}` : `${apiBase}/${src}`;
+};
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -51,20 +33,33 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState('');
 
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
       setSelectedImage(0);
       setQuantity(1);
+      setSelectedSize('');
       try {
         const { data } = await API.get(`/products/${id}`);
-        setProduct(data.product || PLACEHOLDER);
-        const relRes = await API.get(`/products/${id}/related`);
-        setRelated(relRes.data.products?.length ? relRes.data.products : RELATED);
+        const fetchedProduct = data?.product || data || null;
+        setProduct(fetchedProduct);
+
+        if (fetchedProduct?.category) {
+          const relRes = await API.get('/products', {
+            params: { category: fetchedProduct.category, limit: 8 },
+          });
+          const relatedProducts = (relRes.data?.products || [])
+            .filter((p) => p._id !== fetchedProduct._id)
+            .slice(0, 4);
+          setRelated(relatedProducts);
+        } else {
+          setRelated([]);
+        }
       } catch {
-        setProduct({ ...PLACEHOLDER, _id: id });
-        setRelated(RELATED);
+        setProduct(null);
+        setRelated([]);
       } finally {
         setLoading(false);
       }
@@ -73,10 +68,24 @@ const ProductDetail = () => {
   }, [id]);
 
   if (loading) return <div style={{ paddingTop: '120px' }}><LoadingSpinner /></div>;
-  if (!product) return null;
+  if (!product) {
+    return (
+      <div style={{ paddingTop: '120px', textAlign: 'center', color: 'var(--gray-500)' }}>
+        Product not found.
+      </div>
+    );
+  }
 
   const { name, brand, price, salePrice, onSale, description, images, rating, numReviews, notes, reviews, sizes } = product;
   const discount = onSale && salePrice ? Math.round((1 - salePrice / price) * 100) : 0;
+  const availableSizes =
+    Array.isArray(product.sizeStocks) && product.sizeStocks.length > 0
+      ? product.sizeStocks.filter((entry) => (entry.quantity || 0) > 0)
+      : Array.isArray(sizes)
+        ? sizes.map((size) => ({ size, quantity: null }))
+        : [];
+
+  const selectedSizeStock = availableSizes.find((entry) => entry.size === selectedSize)?.quantity ?? null;
 
   const styles = {
     page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'var(--light)' },
@@ -106,6 +115,18 @@ const ProductDetail = () => {
     noteLabel: { fontWeight: 600, color: 'var(--accent)', minWidth: '60px' },
     divider: { borderTop: '1px solid var(--gray-200)', margin: '0.5rem 0' },
     qtyRow: { display: 'flex', alignItems: 'center', gap: '1rem' },
+    sizeRow: { display: 'flex', flexDirection: 'column', gap: '0.5rem' },
+    sizeButtons: { display: 'flex', gap: '0.5rem', flexWrap: 'wrap' },
+    sizeBtn: (active) => ({
+      padding: '0.45rem 0.9rem',
+      borderRadius: 'var(--radius-sm)',
+      border: `1px solid ${active ? 'var(--primary)' : 'var(--gray-200)'}`,
+      backgroundColor: active ? 'rgba(45, 80, 22, 0.08)' : 'var(--white)',
+      color: active ? 'var(--primary)' : 'var(--text)',
+      cursor: 'pointer',
+      fontWeight: 600,
+      fontSize: '0.85rem',
+    }),
     qtyControl: { display: 'flex', alignItems: 'center', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' },
     qtyBtn: { width: '40px', height: '40px', backgroundColor: 'var(--white)', border: 'none', fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
     qtyVal: { width: '50px', textAlign: 'center', fontWeight: 600, fontSize: '1rem', border: 'none', borderLeft: '1px solid var(--gray-200)', borderRight: '1px solid var(--gray-200)' },
@@ -144,7 +165,7 @@ const ProductDetail = () => {
             <div style={styles.gallery}>
               <motion.img
                 key={selectedImage}
-                src={images?.[selectedImage] || 'https://placehold.co/600x700/F5F0E8/8B7355?text=Perfume'}
+                src={normalizeImageUrl(images?.[selectedImage])}
                 alt={name}
                 style={styles.mainImage}
                 initial={{ opacity: 0 }}
@@ -156,7 +177,7 @@ const ProductDetail = () => {
                   {images.map((img, i) => (
                     <img
                       key={i}
-                      src={img}
+                      src={normalizeImageUrl(img)}
                       alt={`${name} view ${i + 1}`}
                       style={styles.thumb(i === selectedImage)}
                       onClick={() => setSelectedImage(i)}
@@ -201,6 +222,29 @@ const ProductDetail = () => {
 
               <div style={styles.divider} />
 
+              {availableSizes.length > 0 && (
+                <div style={styles.sizeRow}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Size:</span>
+                  <div style={styles.sizeButtons}>
+                    {availableSizes.map((entry) => (
+                      <button
+                        key={entry.size}
+                        type="button"
+                        style={styles.sizeBtn(selectedSize === entry.size)}
+                        onClick={() => setSelectedSize(entry.size)}
+                      >
+                        {entry.size}
+                      </button>
+                    ))}
+                  </div>
+                  {selectedSize && selectedSizeStock !== null && (
+                    <span style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>
+                      Available: {selectedSizeStock}
+                    </span>
+                  )}
+                </div>
+              )}
+
               <div style={styles.qtyRow}>
                 <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Quantity:</span>
                 <div style={styles.qtyControl}>
@@ -215,9 +259,15 @@ const ProductDetail = () => {
                   style={styles.addBtn}
                   whileHover={{ opacity: 0.9, scale: 1.01 }}
                   whileTap={{ scale: 0.98 }}
-                  onClick={() => addToCart(product, quantity)}
+                  onClick={() => {
+                    if (availableSizes.length > 0 && !selectedSize) {
+                      return;
+                    }
+                    addToCart(product, quantity, selectedSize);
+                  }}
+                  disabled={availableSizes.length > 0 && !selectedSize}
                 >
-                  <FiShoppingBag /> Add to Bag
+                  <FiShoppingBag /> {availableSizes.length > 0 && !selectedSize ? 'Select Size' : 'Add to Bag'}
                 </motion.button>
                 <motion.button
                   style={styles.wishBtn}

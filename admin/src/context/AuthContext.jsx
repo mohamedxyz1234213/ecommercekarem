@@ -25,9 +25,10 @@ export const AuthProvider = ({ children }) => {
       return;
     }
     try {
-      const { data } = await API.get('/auth/profile');
-      if (data.user && data.user.role === 'admin') {
-        setUser(data.user);
+      const { data } = await API.get('/auth/me');
+      const currentUser = data.user || data;
+      if (currentUser && currentUser.role === 'admin') {
+        setUser(currentUser);
       } else {
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminUser');
@@ -44,13 +45,14 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const { data } = await API.post('/auth/login', { email, password });
-      if (data.user.role !== 'admin') {
+      const currentUser = data.user || data;
+      if (!currentUser || currentUser.role !== 'admin') {
         toast.error('Access denied. Admin privileges required.');
         return false;
       }
       localStorage.setItem('adminToken', data.token);
-      localStorage.setItem('adminUser', JSON.stringify(data.user));
-      setUser(data.user);
+      localStorage.setItem('adminUser', JSON.stringify(currentUser));
+      setUser(currentUser);
       toast.success('Welcome back, Admin!');
       return true;
     } catch (err) {

@@ -1,5 +1,22 @@
 const mongoose = require('mongoose');
 
+const sizeStockSchema = new mongoose.Schema(
+  {
+    size: {
+      type: String,
+      enum: ['50ml', '75ml', '100ml'],
+      required: true,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: [0, 'Size quantity cannot be negative'],
+      default: 0,
+    },
+  },
+  { _id: false }
+);
+
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -50,6 +67,10 @@ const productSchema = new mongoose.Schema({
     required: [true, 'Stock quantity is required'],
     min: [0, 'Stock cannot be negative'],
     default: 0,
+  },
+  sizeStocks: {
+    type: [sizeStockSchema],
+    default: [],
   },
   rating: {
     type: Number,

@@ -47,16 +47,17 @@ const Login = () => {
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <h1
             style={{
-              fontFamily: "'Playfair Display', serif",
+              fontFamily: 'var(--font-heading)',
               fontSize: '2rem',
               color: '#1A2E0A',
               marginBottom: 8,
+              fontWeight: 400,
             }}
           >
-            Admin Panel
+            vybe admin
           </h1>
           <p style={{ color: '#8B7355', fontSize: '0.9rem' }}>
-            Perfume Store Management
+            Management Dashboard
           </p>
         </div>
 

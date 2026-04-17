@@ -81,11 +81,12 @@ const Footer = () => {
       marginBottom: '3rem',
     },
     logo: {
-      fontFamily: 'var(--font-heading)',
-      fontSize: '1.75rem',
+      fontFamily: 'Inter, var(--font-body)',
+      fontSize: '1.05rem',
       fontWeight: 700,
-      color: '#fff',
+      color: '#F2FFF5',
       letterSpacing: '3px',
+      textTransform: 'uppercase',
       marginBottom: '1rem',
     },
     desc: {
@@ -172,7 +173,7 @@ const Footer = () => {
         <AnimatedSection>
           <div style={styles.grid}>
             <div>
-              <div style={styles.logo}>KARÉME</div>
+              <div style={styles.logo}>VYBE SCENT</div>
               <p style={styles.desc}>
                 Discover the art of luxury fragrance. Each scent tells a story, crafted with the
                 finest ingredients from around the world.
@@ -245,7 +246,7 @@ const Footer = () => {
         </AnimatedSection>
 
         <div style={styles.divider}>
-          <p>&copy; {new Date().getFullYear()} KARÉME. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} VYBE SCENT. All rights reserved.</p>
         </div>
       </div>
     </footer>

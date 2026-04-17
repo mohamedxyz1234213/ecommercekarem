@@ -24,7 +24,7 @@ const Users = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data } = await API.get('/admin/users');
+      const { data } = await API.get('/users');
       setUsers(data.users || data || []);
     } catch {
       toast.error('Failed to fetch users');
@@ -36,7 +36,7 @@ const Users = () => {
   const handleDelete = async () => {
     if (!deleteModal) return;
     try {
-      await API.delete(`/admin/users/${deleteModal._id}`);
+      await API.delete(`/users/${deleteModal._id}`);
       toast.success('User deleted');
       setUsers(users.filter((u) => u._id !== deleteModal._id));
     } catch {
@@ -49,7 +49,7 @@ const Users = () => {
   const handleRoleUpdate = async () => {
     if (!editModal) return;
     try {
-      await API.put(`/admin/users/${editModal._id}/role`, { role: newRole });
+      await API.put(`/users/${editModal._id}`, { role: newRole });
       toast.success(`Role updated to ${newRole}`);
       setUsers(users.map((u) => (u._id === editModal._id ? { ...u, role: newRole } : u)));
     } catch {

@@ -4,6 +4,9 @@ import { FiPlus, FiMinus, FiTrash2, FiArrowLeft, FiArrowRight } from 'react-icon
 import { useCart } from '../context/CartContext';
 import AnimatedSection from '../components/AnimatedSection';
 
+const FALLBACK_CART_IMAGE =
+  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22120%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f5f0e8%22/%3E%3C/svg%3E';
+
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0, transition: { duration: 0.5 } },
@@ -90,10 +93,10 @@ const Cart = () => {
           <div style={styles.grid} className="cart-grid">
             <div style={styles.itemsSection}>
               {items.map((item) => (
-                <AnimatedSection key={item._id}>
+                <AnimatedSection key={`${item._id}-${item.selectedSize || 'default'}`}>
                   <motion.div style={styles.itemCard} whileHover={{ y: -2 }}>
                     <img
-                      src={item.images?.[0] || 'https://placehold.co/100x120/F5F0E8/8B7355?text=P'}
+                      src={item.images?.[0] || FALLBACK_CART_IMAGE}
                       alt={item.name}
                       style={styles.itemImg}
                     />
@@ -101,19 +104,31 @@ const Cart = () => {
                       <div>
                         {item.brand && <p style={styles.itemBrand}>{item.brand}</p>}
                         <h3 style={styles.itemName}>{item.name}</h3>
+                        {item.selectedSize && (
+                          <p style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>Size: {item.selectedSize}</p>
+                        )}
                       </div>
                       <div style={styles.itemBottom}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                           <div style={styles.qtyControl}>
-                            <button style={styles.qtyBtn} onClick={() => updateQuantity(item._id, item.quantity - 1)}>
+                            <button
+                              style={styles.qtyBtn}
+                              onClick={() => updateQuantity(item._id, item.selectedSize, item.quantity - 1)}
+                            >
                               <FiMinus />
                             </button>
                             <span style={styles.qtyVal}>{item.quantity}</span>
-                            <button style={styles.qtyBtn} onClick={() => updateQuantity(item._id, item.quantity + 1)}>
+                            <button
+                              style={styles.qtyBtn}
+                              onClick={() => updateQuantity(item._id, item.selectedSize, item.quantity + 1)}
+                            >
                               <FiPlus />
                             </button>
                           </div>
-                          <button style={styles.removeBtn} onClick={() => removeFromCart(item._id)}>
+                          <button
+                            style={styles.removeBtn}
+                            onClick={() => removeFromCart(item._id, item.selectedSize)}
+                          >
                             <FiTrash2 />
                           </button>
                         </div>

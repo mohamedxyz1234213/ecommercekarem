@@ -3,6 +3,31 @@ const Product = require('../models/Product');
 const Review = require('../models/Review');
 const { sanitize } = require('../utils/sanitize');
 
+const normalizeSizeStocks = (rawSizeStocks) => {
+  if (rawSizeStocks === undefined || rawSizeStocks === null || rawSizeStocks === '') return undefined;
+
+  let parsed = rawSizeStocks;
+  if (typeof rawSizeStocks === 'string') {
+    try {
+      parsed = JSON.parse(rawSizeStocks);
+    } catch {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(parsed)) return [];
+
+  return parsed
+    .map((entry) => ({
+      size: typeof entry?.size === 'string' ? entry.size.trim() : '',
+      quantity: Number(entry?.quantity) || 0,
+    }))
+    .filter((entry) => ['50ml', '75ml', '100ml'].includes(entry.size));
+};
+
+const getTotalSizeStock = (sizeStocks) =>
+  sizeStocks.reduce((sum, entry) => sum + Math.max(0, Number(entry.quantity) || 0), 0);
+
 // @desc    Get all products with search/filter/pagination
 // @route   GET /api/products
 const getProducts = async (req, res) => {
@@ -88,7 +113,12 @@ const createProduct = async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      const details = errors.array();
+      console.error('createProduct validation error:', details);
+      return res.status(400).json({
+        message: details[0]?.msg || 'Invalid product data',
+        errors: details,
+      });
     }
 
     const {
@@ -103,19 +133,26 @@ const createProduct = async (req, res) => {
       images,
       stock,
       featured,
+      sizeStocks,
     } = req.body;
+
+    const normalizedSizeStocks = normalizeSizeStocks(sizeStocks);
+    const computedStockFromSizes =
+      normalizedSizeStocks !== undefined ? getTotalSizeStock(normalizedSizeStocks) : null;
 
     const product = await Product.create({
       name,
       description,
-      price,
+      price: Number(price),
       salePrice: salePrice || null,
       onSale: onSale || false,
       saleTape: saleTape || '',
       category,
       brand,
       images: images || [],
-      stock: stock || 0,
+      stock:
+        computedStockFromSizes !== null ? computedStockFromSizes : Number(stock) || 0,
+      ...(normalizedSizeStocks !== undefined ? { sizeStocks: normalizedSizeStocks } : {}),
       featured: featured || false,
     });
 
@@ -147,6 +184,7 @@ const updateProduct = async (req, res) => {
       'images',
       'stock',
       'featured',
+      'sizeStocks',
     ];
 
     allowedFields.forEach((field) => {
@@ -154,6 +192,14 @@ const updateProduct = async (req, res) => {
         product[field] = req.body[field];
       }
     });
+
+    if (req.body.sizeStocks !== undefined) {
+      const normalizedSizeStocks = normalizeSizeStocks(req.body.sizeStocks);
+      product.sizeStocks = normalizedSizeStocks;
+      product.stock = getTotalSizeStock(normalizedSizeStocks);
+    } else if (req.body.stock !== undefined) {
+      product.stock = Number(req.body.stock) || 0;
+    }
 
     const updated = await product.save();
     res.json(updated);

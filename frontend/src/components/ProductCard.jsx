@@ -4,10 +4,20 @@ import { FiShoppingBag } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import ReviewStars from './ReviewStars';
 
+const FALLBACK_PRODUCT_IMAGE =
+  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22500%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f5f0e8%22/%3E%3C/svg%3E';
+
+const normalizeImageUrl = (src) => {
+  if (!src) return FALLBACK_PRODUCT_IMAGE;
+  if (/^https?:\/\//i.test(src) || src.startsWith('data:image')) return src;
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  return src.startsWith('/') ? `${apiBase}${src}` : `${apiBase}/${src}`;
+};
+
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
   const { _id, name, price, salePrice, images, rating, numReviews, brand, onSale } = product;
-  const displayImage = images?.[0] || 'https://placehold.co/400x500/F5F0E8/8B7355?text=Perfume';
+  const displayImage = normalizeImageUrl(images?.[0]);
   const discount = onSale && salePrice ? Math.round((1 - salePrice / price) * 100) : 0;
 
   const styles = {

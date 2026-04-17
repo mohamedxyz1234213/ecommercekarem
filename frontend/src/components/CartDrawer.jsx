@@ -3,6 +3,9 @@ import { FiX, FiPlus, FiMinus, FiTrash2, FiArrowRight } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 
+const FALLBACK_DRAWER_IMAGE =
+  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2270%22 height=%2285%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f5f0e8%22/%3E%3C/svg%3E';
+
 const CartDrawer = () => {
   const { items, cartTotal, isDrawerOpen, setIsDrawerOpen, updateQuantity, removeFromCart } =
     useCart();
@@ -205,15 +208,18 @@ const CartDrawer = () => {
                 <p style={styles.emptyMsg}>Your bag is empty</p>
               ) : (
                 items.map((item) => (
-                  <div key={item._id} style={styles.item}>
+                  <div key={`${item._id}-${item.selectedSize || 'default'}`} style={styles.item}>
                     <img
-                      src={item.images?.[0] || 'https://placehold.co/70x85/F5F0E8/8B7355?text=P'}
+                      src={item.images?.[0] || FALLBACK_DRAWER_IMAGE}
                       alt={item.name}
                       style={styles.itemImg}
                     />
                     <div style={styles.itemInfo}>
                       <div>
                         <p style={styles.itemName}>{item.name}</p>
+                        {item.selectedSize && (
+                          <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)' }}>{item.selectedSize}</p>
+                        )}
                         <p style={styles.itemPrice}>
                           EGP {((item.salePrice || item.price) * item.quantity).toFixed(2)}
                         </p>
@@ -222,21 +228,21 @@ const CartDrawer = () => {
                         <div style={styles.qtyRow}>
                           <button
                             style={styles.qtyBtn}
-                            onClick={() => updateQuantity(item._id, item.quantity - 1)}
+                            onClick={() => updateQuantity(item._id, item.selectedSize, item.quantity - 1)}
                           >
                             <FiMinus />
                           </button>
                           <span style={styles.qty}>{item.quantity}</span>
                           <button
                             style={styles.qtyBtn}
-                            onClick={() => updateQuantity(item._id, item.quantity + 1)}
+                            onClick={() => updateQuantity(item._id, item.selectedSize, item.quantity + 1)}
                           >
                             <FiPlus />
                           </button>
                         </div>
                         <button
                           style={styles.removeBtn}
-                          onClick={() => removeFromCart(item._id)}
+                          onClick={() => removeFromCart(item._id, item.selectedSize)}
                           aria-label="Remove item"
                         >
                           <FiTrash2 />

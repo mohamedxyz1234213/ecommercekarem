@@ -341,7 +341,7 @@ const Settings = () => {
               <p style={{ fontSize: '0.7rem', letterSpacing: '4px', color: '#C4A265', marginBottom: 8, textTransform: 'uppercase' }}>
                 {settings.heroSubtitle || 'Subtitle'}
               </p>
-              <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.5rem', marginBottom: 8 }}>
+              <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 400, marginBottom: 8 }}>
                 {settings.heroTitle || 'Title'} <br />
                 <span style={{ fontStyle: 'italic', color: '#C4A265' }}>{settings.heroTitleHighlight || 'Highlight'}</span>
               </h2>

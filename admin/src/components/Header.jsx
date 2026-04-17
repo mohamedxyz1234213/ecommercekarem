@@ -23,8 +23,8 @@ const Header = ({ collapsed }) => {
       }}
     >
       <div>
-        <h3 style={{ fontSize: '1rem', color: '#1A2E0A', fontFamily: "'Playfair Display', serif" }}>
-          Admin Dashboard
+        <h3 style={{ fontSize: '1rem', color: '#1A2E0A', fontFamily: 'var(--font-heading)', fontWeight: 400 }}>
+          vybe dashboard
         </h3>
       </div>
 
