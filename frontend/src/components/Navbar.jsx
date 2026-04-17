@@ -39,6 +39,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [socialLinks, setSocialLinks] = useState([]);
+  const [siteName, setSiteName] = useState('vybe');
   const { isAuthenticated, user, logout } = useAuth();
   const { cartCount, setIsDrawerOpen } = useCart();
   const location = useLocation();
@@ -59,6 +60,7 @@ const Navbar = () => {
     const fetchSettings = async () => {
       try {
         const { data } = await API.get('/settings');
+        setSiteName(data.siteName || 'vybe');
         const links = (data.socialLinks || []).filter(
           (link) => link.enabled && (link.location === 'navbar' || link.location === 'both')
         );
@@ -70,8 +72,8 @@ const Navbar = () => {
     fetchSettings();
   }, []);
 
-  const navBg = scrolled || !isHome ? 'rgba(11, 27, 19, 0.94)' : 'transparent';
-  const textColor = scrolled || !isHome ? '#EAF7EE' : '#F2FFF5';
+  const navBg = scrolled || !isHome ? 'rgba(58, 16, 16, 0.95)' : 'transparent';
+  const textColor = '#F2EBE3';
 
   const links = [
     { label: 'Home', path: '/' },
@@ -100,12 +102,12 @@ const Navbar = () => {
       justifyContent: 'space-between',
     },
     logo: {
-      fontFamily: 'Inter, var(--font-body)',
-      fontSize: '1.05rem',
-      fontWeight: 700,
-      color: '#F2FFF5',
-      letterSpacing: '3px',
-      textTransform: 'uppercase',
+      fontFamily: 'var(--font-heading)',
+      fontSize: '1.5rem',
+      fontWeight: 600,
+      color: '#F2EBE3',
+      letterSpacing: '1.5px',
+      textTransform: 'lowercase',
       cursor: 'pointer',
     },
     linksDesktop: {
@@ -115,8 +117,8 @@ const Navbar = () => {
     },
     link: {
       fontSize: '0.9rem',
-      fontWeight: 400,
-      letterSpacing: '1.5px',
+      fontWeight: 500,
+      letterSpacing: '1px',
       textTransform: 'uppercase',
       color: textColor,
       position: 'relative',
@@ -153,9 +155,9 @@ const Navbar = () => {
       justifyContent: 'center',
     },
     authBtn: {
-      backgroundColor: scrolled || !isHome ? 'var(--primary)' : 'rgba(255,255,255,0.15)',
-      color: '#fff',
-      border: scrolled || !isHome ? 'none' : '1px solid rgba(255,255,255,0.3)',
+      backgroundColor: 'var(--secondary)',
+      color: 'var(--primary)',
+      border: '1px solid rgba(242,235,227,0.45)',
       padding: '0.5rem 1.5rem',
       borderRadius: 'var(--radius-xl)',
       fontSize: '0.85rem',
@@ -183,7 +185,7 @@ const Navbar = () => {
       right: 0,
       width: '280px',
       height: '100vh',
-      backgroundColor: 'var(--light)',
+      backgroundColor: '#3a1010',
       zIndex: 1001,
       padding: '2rem 1.5rem',
       display: 'flex',
@@ -195,15 +197,15 @@ const Navbar = () => {
       background: 'none',
       border: 'none',
       fontSize: '1.5rem',
-      color: 'var(--text)',
+      color: '#f2ebe3',
       cursor: 'pointer',
     },
     mobileLink: {
       fontSize: '1.1rem',
       fontWeight: 500,
-      color: 'var(--text)',
+      color: '#f2ebe3',
       padding: '0.75rem 0',
-      borderBottom: '1px solid var(--gray-200)',
+      borderBottom: '1px solid rgba(242,235,227,0.2)',
       display: 'block',
     },
   };
@@ -213,7 +215,7 @@ const Navbar = () => {
       <nav style={styles.nav}>
         <div style={styles.container}>
           <Link to="/" style={styles.logo}>
-            VYBE SCENT
+            {siteName}
           </Link>
 
           <div style={styles.linksDesktop} className="nav-links-desktop">

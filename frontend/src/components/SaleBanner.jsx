@@ -6,31 +6,23 @@ import AnimatedSection from './AnimatedSection';
 
 const SaleBanner = () => {
   const [sale, setSale] = useState(null);
+  const [siteName, setSiteName] = useState('vybe');
 
   useEffect(() => {
     const fetchSale = async () => {
       try {
         const { data } = await API.get('/settings');
+        setSiteName(data.siteName || 'vybe');
         if (data?.bannerText) {
           setSale({
-            title: 'Special Offer',
+            title: data.siteName || 'Announcement',
             description: data.bannerText,
             discount: 0,
           });
           return;
         }
-
-        setSale({
-          title: 'Summer Sale',
-          description: 'Up to 40% off on selected luxury fragrances',
-          discount: 40,
-        });
       } catch {
-        setSale({
-          title: 'Summer Sale',
-          description: 'Up to 40% off on selected luxury fragrances',
-          discount: 40,
-        });
+        setSale(null);
       }
     };
     fetchSale();
@@ -126,7 +118,7 @@ const SaleBanner = () => {
           >
             Limited Time
           </motion.span>
-          <h2 style={styles.heading}>{sale.title}</h2>
+          <h2 style={styles.heading}>{sale.title || siteName}</h2>
           <p style={styles.desc}>{sale.description}</p>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link to="/shop" style={styles.btn}>

@@ -44,6 +44,11 @@ const Checkout = () => {
       toast.error('Please fill in all required fields');
       return;
     }
+    const normalizedEmail = String(form.email || user?.email || '').trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+      toast.error('Please enter a valid email for payment verification');
+      return;
+    }
     if (items.length === 0) {
       toast.error('Your cart is empty');
       return;
@@ -66,7 +71,7 @@ const Checkout = () => {
           phone: form.phone,
         },
         paymentMethod,
-        email: form.email || user?.email,
+        email: normalizedEmail,
       };
 
       const { data } = await API.post('/orders', orderData);

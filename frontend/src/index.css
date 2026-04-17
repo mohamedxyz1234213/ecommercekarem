@@ -1,26 +1,26 @@
 :root {
-  --primary: #2f7a3f;
-  --secondary: #0d2419;
-  --accent: #4b9b5d;
-  --text: #e6f1e9;
-  --light: #0d2419;
-  --dark: #06120d;
-  --gold: #a8c48f;
-  --white: #0d2419;
-  --gray-100: #1a2f22;
-  --gray-200: #274533;
-  --gray-300: #3b5d49;
-  --gray-400: #7ea28a;
-  --gray-500: #a8c2ad;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.28);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.4);
-  --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.45);
+  --primary: #3a1010;
+  --secondary: #f2ebe3;
+  --accent: #6b2a2a;
+  --text: #f2ebe3;
+  --light: #3a1010;
+  --dark: #240909;
+  --gold: #d9c8b7;
+  --white: #562020;
+  --gray-100: #5a2323;
+  --gray-200: #743131;
+  --gray-300: #8e4b4b;
+  --gray-400: #dbc7c7;
+  --gray-500: #f3e7dc;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 10px 26px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.34);
+  --shadow-xl: 0 26px 70px rgba(0, 0, 0, 0.42);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
   --radius-xl: 30px;
-  --font-heading: 'Lato', 'Helvetica Neue', Arial, sans-serif;
+  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
   --font-body: 'Lato', 'Helvetica Neue', Arial, sans-serif;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -76,22 +76,27 @@ input, textarea, select {
   font-family: var(--font-body);
   font-size: 1rem;
   outline: none;
-  border: 1.5px solid var(--gray-200);
+  border: 1.5px solid rgba(242, 235, 227, 0.42);
   border-radius: var(--radius-sm);
   padding: 0.75rem 1rem;
   transition: var(--transition);
-  background: var(--secondary);
+  background: rgba(242, 235, 227, 0.16);
   color: var(--text);
 }
 
 input:focus, textarea:focus, select:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(45, 80, 22, 0.1);
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(242, 235, 227, 0.15);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(242, 235, 227, 0.72);
 }
 
 ::selection {
-  background: var(--primary);
-  color: var(--white);
+  background: var(--secondary);
+  color: var(--primary);
 }
 
 ::-webkit-scrollbar {
@@ -99,29 +104,29 @@ input:focus, textarea:focus, select:focus {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--dark);
+  background: #2b0d0d;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--gray-300);
+  background: #6b2a2a;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
+  background: #8e4b4b;
 }
 
 #root {
   background: var(--light);
 }
 
-/* Use one dark-green section background with clear separators */
+/* Keep section rhythm with subtle separators */
 section {
   background-color: var(--light) !important;
 }
 
 section + section {
-  border-top: 1px solid var(--gray-200);
+  border-top: 1px solid rgba(242, 235, 227, 0.12);
 }
 
 .container {
@@ -143,15 +148,19 @@ section + section {
 /* Slick carousel overrides */
 .slick-prev:before,
 .slick-next:before {
-  color: var(--primary) !important;
+  color: var(--secondary) !important;
   font-size: 24px !important;
 }
 
 .slick-dots li button:before {
-  color: var(--accent) !important;
+  color: rgba(242, 235, 227, 0.6) !important;
   font-size: 10px !important;
 }
 
 .slick-dots li.slick-active button:before {
-  color: var(--primary) !important;
+  color: var(--secondary) !important;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

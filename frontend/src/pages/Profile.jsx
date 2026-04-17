@@ -23,8 +23,15 @@ const Profile = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const { data } = await API.get('/orders/my-orders');
-        setOrders(data.orders || []);
+        const { data } = await API.get('/orders/my');
+        const rawOrders = Array.isArray(data?.orders) ? data.orders : [];
+        const normalizedOrders = rawOrders
+          .map((order) => ({
+            ...order,
+            _id: order._id || order.id || order.orderId || '',
+          }))
+          .filter((order) => order._id);
+        setOrders(normalizedOrders);
       } catch {
         setOrders([]);
       } finally {
@@ -182,7 +189,7 @@ const Profile = () => {
                         </span>
                       </div>
                       <div style={styles.orderRight}>
-                        <span style={styles.orderTotal}>EGP {order.total?.toFixed(2)}</span>
+                        <span style={styles.orderTotal}>EGP {(order.totalPrice || 0).toFixed(2)}</span>
                         <span style={styles.statusBadge(order.status)}>{order.status}</span>
                         <FiChevronRight style={{ color: 'var(--gray-400)' }} />
                       </div>

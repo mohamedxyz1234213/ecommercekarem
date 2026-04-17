@@ -14,6 +14,8 @@ const {
 const { initiatePaymobPayment, verifyPaymobHMAC } = require('../utils/paymob');
 const { sanitize } = require('../utils/sanitize');
 
+const isValidEmail = (value) => /^\S+@\S+\.\S+$/.test(String(value || '').trim());
+
 // @desc    Create new order
 // @route   POST /api/orders
 const createOrder = async (req, res) => {
@@ -31,6 +33,14 @@ const createOrder = async (req, res) => {
       instapayUsername,
       email,
     } = req.body;
+
+    const normalizedEmail = String(email || req.user.email || '').trim().toLowerCase();
+    if (!isValidEmail(normalizedEmail)) {
+      return res.status(400).json({ message: 'A valid email is required for payment verification' });
+    }
+    if (normalizedEmail !== String(req.user.email || '').trim().toLowerCase()) {
+      return res.status(400).json({ message: 'Email verification failed. Please use your account email.' });
+    }
 
     if (!items || items.length === 0) {
       return res.status(400).json({ message: 'No order items' });
@@ -106,7 +116,7 @@ const createOrder = async (req, res) => {
       instapayProof: instapayProof || '',
       instapayUsername: instapayUsername || '',
       totalPrice,
-      email: email || req.user.email,
+      email: normalizedEmail,
     });
 
     const populatedOrder = await Order.findById(order._id).populate('user', 'name email');
@@ -146,6 +156,66 @@ const createOrder = async (req, res) => {
   }
 };
 
+// @desc    Submit instapay payment proof for an order
+// @route   POST /api/orders/:id/instapay-proof
+const submitInstapayProof = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    // Ensure only owner (or admin) can submit payment proof
+    if (order.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Not authorized to update this order' });
+    }
+
+    if (order.paymentMethod !== 'instapay') {
+      return res.status(400).json({ message: 'This order does not use InstaPay payment' });
+    }
+
+    const submittedEmail = String(req.body.email || '').trim().toLowerCase();
+    if (!isValidEmail(submittedEmail)) {
+      return res.status(400).json({ message: 'A valid email is required' });
+    }
+
+    // Verify submitted email matches order/user email for payment proof verification
+    const owner = await User.findById(order.user).select('email name');
+    const ownerEmail = String(owner?.email || '').trim().toLowerCase();
+    const orderEmail = String(order.email || '').trim().toLowerCase();
+    if (submittedEmail !== ownerEmail && submittedEmail !== orderEmail) {
+      return res.status(400).json({ message: 'Email verification failed for this order' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: 'Payment proof image is required' });
+    }
+
+    const instapayUsername = String(req.body.instapayUsername || '').trim();
+    if (!instapayUsername) {
+      return res.status(400).json({ message: 'InstaPay username is required' });
+    }
+
+    order.instapayProof = `/uploads/${req.file.filename}`;
+    order.instapayUsername = instapayUsername;
+    order.email = submittedEmail;
+    order.paymentStatus = 'pending';
+    await order.save();
+
+    // Notify admin that payment proof is submitted and pending verification
+    sendAdminNotification(order).catch(() => {});
+
+    return res.json({ message: 'Payment proof submitted successfully', order });
+  } catch (error) {
+    console.error('submitInstapayProof error:', error.message);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // @desc    Paymob webhook callback
 // @route   POST /api/orders/paymob-callback
 const paymobCallback = async (req, res) => {
@@ -180,9 +250,11 @@ const paymobCallback = async (req, res) => {
       const user = await User.findById(order.user);
       if (user) {
         sendPaymobPaymentConfirmation(order, user).catch(() => {});
+        sendStatusUpdate(order, user).catch(() => {});
       }
     } else {
       order.paymentStatus = 'rejected';
+      order.status = 'cancelled';
       order.paymobTransactionId = transactionId;
 
       // Restore stock on failed payment (only once)
@@ -204,6 +276,11 @@ const paymobCallback = async (req, res) => {
         order.stockRestored = true;
       }
       await order.save();
+
+      const user = await User.findById(order.user);
+      if (user) {
+        sendStatusUpdate(order, user).catch(() => {});
+      }
     }
 
     res.status(200).json({ message: 'Callback processed' });
@@ -489,6 +566,7 @@ const rejectInstapay = async (req, res) => {
 
 module.exports = {
   createOrder,
+  submitInstapayProof,
   paymobCallback,
   paymobRedirect,
   getMyOrders,

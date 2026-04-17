@@ -177,6 +177,22 @@ const sendAdminNotification = async (order) => {
   return sendEmail(adminEmail, subject, html);
 };
 
+const sendLoginWelcome = async (user) => {
+  if (!user?.email) return;
+  const subject = `Welcome back, ${user.name || 'there'}!`;
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+      <h2 style="color:#333;">Welcome back!</h2>
+      <p>Hi ${user.name || 'there'},</p>
+      <p>You have successfully logged in to your account.</p>
+      <p>If this was not you, please reset your password immediately and contact support.</p>
+      <hr style="margin:24px 0;" />
+      <p style="color:#999;font-size:12px;">vybe — account security notification</p>
+    </div>
+  `;
+  return sendEmail(user.email, subject, html);
+};
+
 module.exports = {
   sendEmail,
   sendOrderConfirmation,
@@ -185,4 +201,5 @@ module.exports = {
   sendPaymobPaymentConfirmation,
   sendStatusUpdate,
   sendAdminNotification,
+  sendLoginWelcome,
 };

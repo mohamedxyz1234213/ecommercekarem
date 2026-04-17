@@ -22,7 +22,7 @@ const orderItemSchema = new mongoose.Schema(
     },
     size: {
       type: String,
-      enum: ['50ml', '75ml', '100ml', ''],
+      enum: ['50ml', '75ml', '100ml', '25ml'],
       default: '',
     },
     image: {

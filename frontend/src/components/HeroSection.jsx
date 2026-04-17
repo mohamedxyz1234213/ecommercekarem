@@ -5,35 +5,41 @@ import API from '../api/axios';
 
 const HeroSection = () => {
   const [content, setContent] = useState({
-    heroSubtitle: 'Luxury Fragrances',
-    heroTitle: 'Discover Your',
-    heroTitleHighlight: 'Signature Scent',
-    heroDescription:
-      "Curated collection of the world's finest perfumes, each telling a unique story of elegance and sophistication.",
+    heroSubtitle: '',
+    heroTitle: '',
+    heroTitleHighlight: '',
+    heroDescription: '',
     heroImage: '',
-    heroPrimaryButtonText: 'Shop Now',
+    heroPrimaryButtonText: '',
     heroPrimaryButtonLink: '/shop',
-    heroSecondaryButtonText: 'View Collection',
+    heroSecondaryButtonText: '',
     heroSecondaryButtonLink: '/shop',
   });
+
+  const normalizeAssetUrl = (src) => {
+    if (!src) return '';
+    if (/^https?:\/\//i.test(src) || src.startsWith('data:image')) return src;
+    const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+    return src.startsWith('/') ? `${apiBase}${src}` : `${apiBase}/${src}`;
+  };
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const { data } = await API.get('/settings');
-        setContent((prev) => ({
-          heroSubtitle: data.heroSubtitle || prev.heroSubtitle,
-          heroTitle: data.heroTitle || prev.heroTitle,
-          heroTitleHighlight: data.heroTitleHighlight || prev.heroTitleHighlight,
-          heroDescription: data.heroDescription || prev.heroDescription,
-          heroImage: data.heroImage || '',
-          heroPrimaryButtonText: data.heroPrimaryButtonText || prev.heroPrimaryButtonText,
-          heroPrimaryButtonLink: data.heroPrimaryButtonLink || prev.heroPrimaryButtonLink,
-          heroSecondaryButtonText: data.heroSecondaryButtonText || prev.heroSecondaryButtonText,
-          heroSecondaryButtonLink: data.heroSecondaryButtonLink || prev.heroSecondaryButtonLink,
-        }));
+        setContent({
+          heroSubtitle: data.heroSubtitle || '',
+          heroTitle: data.heroTitle || '',
+          heroTitleHighlight: data.heroTitleHighlight || '',
+          heroDescription: data.heroDescription || '',
+          heroImage: normalizeAssetUrl(data.heroImage),
+          heroPrimaryButtonText: data.heroPrimaryButtonText || '',
+          heroPrimaryButtonLink: data.heroPrimaryButtonLink || '/shop',
+          heroSecondaryButtonText: data.heroSecondaryButtonText || '',
+          heroSecondaryButtonLink: data.heroSecondaryButtonLink || '/shop',
+        });
       } catch {
-        // Use defaults on error
+        // keep empty if settings request fails
       }
     };
     fetchSettings();
@@ -52,15 +58,15 @@ const HeroSection = () => {
       overflow: 'hidden',
       background: hasImage
         ? `url(${content.heroImage}) center/cover no-repeat`
-        : 'linear-gradient(135deg, var(--dark) 0%, #2D5016 50%, #3D6B1E 100%)',
+        : 'linear-gradient(135deg, #240909 0%, #3a1010 55%, #5a2323 100%)',
     },
     overlay: {
       position: 'absolute',
       inset: 0,
       background: hasImage
-        ? 'rgba(0, 0, 0, 0.55)'
-        : 'radial-gradient(ellipse at 30% 50%, rgba(196, 162, 101, 0.08) 0%, transparent 50%), ' +
-          'radial-gradient(ellipse at 70% 30%, rgba(245, 240, 232, 0.05) 0%, transparent 50%)',
+        ? 'rgba(0, 0, 0, 0.35)'
+        : 'radial-gradient(ellipse at 30% 50%, rgba(242, 235, 227, 0.08) 0%, transparent 50%), ' +
+          'radial-gradient(ellipse at 70% 30%, rgba(58, 16, 16, 0.2) 0%, transparent 50%)',
     },
     content: {
       position: 'relative',
@@ -75,7 +81,7 @@ const HeroSection = () => {
       fontWeight: 300,
       letterSpacing: '6px',
       textTransform: 'uppercase',
-      color: 'var(--gold)',
+      color: 'rgba(242,235,227,0.86)',
       marginBottom: '1.5rem',
     },
     heading: {
@@ -88,7 +94,7 @@ const HeroSection = () => {
     },
     headingItalic: {
       fontStyle: 'italic',
-      color: 'var(--gold)',
+      color: '#f2ebe3',
     },
     desc: {
       fontSize: '1.1rem',
@@ -107,7 +113,7 @@ const HeroSection = () => {
     btnPrimary: {
       padding: '1rem 2.5rem',
       backgroundColor: 'var(--gold)',
-      color: 'var(--dark)',
+      color: 'var(--primary)',
       borderRadius: 'var(--radius-xl)',
       fontSize: '0.9rem',
       fontWeight: 700,
@@ -121,13 +127,13 @@ const HeroSection = () => {
     btnSecondary: {
       padding: '1rem 2.5rem',
       backgroundColor: 'transparent',
-      color: '#fff',
+      color: '#f2ebe3',
       borderRadius: 'var(--radius-xl)',
       fontSize: '0.9rem',
       fontWeight: 400,
       letterSpacing: '2px',
       textTransform: 'uppercase',
-      border: '1px solid rgba(255,255,255,0.3)',
+      border: '1px solid rgba(242,235,227,0.45)',
       cursor: 'pointer',
       display: 'inline-block',
       textDecoration: 'none',

@@ -2,6 +2,7 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const { body } = require('express-validator');
 const { auth, isAdmin } = require('../middleware/auth');
+const { uploadInstapayProof } = require('../middleware/upload');
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -13,6 +14,7 @@ const apiLimiter = rateLimit({
 
 const {
   createOrder,
+  submitInstapayProof,
   paymobCallback,
   paymobRedirect,
   getMyOrders,
@@ -53,9 +55,23 @@ router.post(
     body('shippingAddress.zipCode').trim().notEmpty().withMessage('Zip code is required'),
     body('shippingAddress.country').trim().notEmpty().withMessage('Country is required'),
     body('paymentMethod').isIn(['paymob', 'instapay']).withMessage('Valid payment method is required'),
+    body('email').trim().isEmail().withMessage('Valid email is required'),
   ],
   createOrder
 );
+
+// @route   POST /api/orders/:id/instapay-proof
+router.post('/:id/instapay-proof', apiLimiter, auth, (req, res) => {
+  uploadInstapayProof(req, res, (err) => {
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ message: 'File too large. Maximum size is 5MB.' });
+      }
+      return res.status(400).json({ message: err.message });
+    }
+    return submitInstapayProof(req, res);
+  });
+});
 
 // @route   GET /api/orders/my
 router.get('/my', apiLimiter, auth, getMyOrders);

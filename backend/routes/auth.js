@@ -7,6 +7,7 @@ const {
   register,
   login,
   getMe,
+  updateMe,
   googleCallback,
   logout,
 } = require('../controllers/authController');
@@ -56,6 +57,7 @@ router.post(
 
 // @route   GET /api/auth/me
 router.get('/me', authLimiter, auth, getMe);
+router.put('/me', authLimiter, auth, updateMe);
 
 // @route   GET /api/auth/google
 router.get(

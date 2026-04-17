@@ -46,7 +46,7 @@ const FeaturedProducts = () => {
   const styles = {
     section: {
       padding: '6rem 0',
-      backgroundColor: 'var(--light)',
+      backgroundColor: '#3a1010',
     },
     container: {
       maxWidth: '1280px',
@@ -62,14 +62,14 @@ const FeaturedProducts = () => {
       fontWeight: 600,
       letterSpacing: '4px',
       textTransform: 'uppercase',
-      color: 'var(--gold)',
+      color: 'rgba(242,235,227,0.75)',
       marginBottom: '0.75rem',
     },
     title: {
       fontFamily: 'var(--font-heading)',
       fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
       fontWeight: 500,
-      color: 'var(--text)',
+      color: '#f2ebe3',
     },
     slideItem: {
       padding: '0 10px',

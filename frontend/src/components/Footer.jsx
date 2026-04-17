@@ -33,23 +33,21 @@ const ICON_MAP = {
 const Footer = () => {
   const [email, setEmail] = useState('');
   const [socialLinks, setSocialLinks] = useState([]);
+  const [siteName, setSiteName] = useState('vybe');
+  const [tagline, setTagline] = useState('');
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const { data } = await API.get('/settings');
+        setSiteName(data.siteName || 'vybe');
+        setTagline(data.tagline || '');
         const links = (data.socialLinks || []).filter(
           (link) => link.enabled && (link.location === 'footer' || link.location === 'both')
         );
         setSocialLinks(links);
       } catch {
-        // Use defaults on error
-        setSocialLinks([
-          { platform: 'Instagram', url: '#', icon: 'FiInstagram' },
-          { platform: 'Facebook', url: '#', icon: 'FiFacebook' },
-          { platform: 'Twitter', url: '#', icon: 'FiTwitter' },
-          { platform: 'Email', url: 'mailto:info@example.com', icon: 'FiMail' },
-        ]);
+        setSocialLinks([]);
       }
     };
     fetchSettings();
@@ -64,10 +62,11 @@ const Footer = () => {
 
   const styles = {
     footer: {
-      backgroundColor: 'var(--dark)',
-      color: 'rgba(255,255,255,0.8)',
+      backgroundColor: '#2a0c0c',
+      color: 'rgba(242,235,227,0.86)',
       padding: '5rem 0 2rem',
       marginTop: '4rem',
+      borderTop: '1px solid rgba(242,235,227,0.15)',
     },
     container: {
       maxWidth: '1280px',
@@ -81,12 +80,12 @@ const Footer = () => {
       marginBottom: '3rem',
     },
     logo: {
-      fontFamily: 'Inter, var(--font-body)',
-      fontSize: '1.05rem',
-      fontWeight: 700,
-      color: '#F2FFF5',
-      letterSpacing: '3px',
-      textTransform: 'uppercase',
+      fontFamily: 'var(--font-heading)',
+      fontSize: '1.7rem',
+      fontWeight: 600,
+      color: '#F2EBE3',
+      letterSpacing: '1px',
+      textTransform: 'lowercase',
       marginBottom: '1rem',
     },
     desc: {
@@ -98,7 +97,7 @@ const Footer = () => {
     heading: {
       fontFamily: 'var(--font-heading)',
       fontSize: '1.1rem',
-      color: '#fff',
+      color: '#f2ebe3',
       marginBottom: '1.25rem',
       fontWeight: 500,
     },
@@ -122,15 +121,15 @@ const Footer = () => {
       padding: '0.75rem 1rem',
       border: '1px solid rgba(255,255,255,0.2)',
       borderRadius: 'var(--radius-sm) 0 0 var(--radius-sm)',
-      backgroundColor: 'rgba(255,255,255,0.05)',
-      color: '#fff',
+      backgroundColor: 'rgba(242,235,227,0.06)',
+      color: '#f2ebe3',
       fontSize: '0.9rem',
       outline: 'none',
     },
     submitBtn: {
       padding: '0.75rem 1rem',
-      backgroundColor: 'var(--gold)',
-      color: 'var(--dark)',
+      backgroundColor: '#f2ebe3',
+      color: '#3a1010',
       border: 'none',
       borderRadius: '0 var(--radius-sm) var(--radius-sm) 0',
       cursor: 'pointer',
@@ -151,7 +150,7 @@ const Footer = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: '#fff',
+      color: '#f2ebe3',
       fontSize: '1rem',
       transition: 'all 0.3s',
       cursor: 'pointer',
@@ -173,10 +172,9 @@ const Footer = () => {
         <AnimatedSection>
           <div style={styles.grid}>
             <div>
-              <div style={styles.logo}>VYBE SCENT</div>
+              <div style={styles.logo}>{siteName}</div>
               <p style={styles.desc}>
-                Discover the art of luxury fragrance. Each scent tells a story, crafted with the
-                finest ingredients from around the world.
+                {tagline || 'Luxury fragrances.'}
               </p>
               <div style={styles.socials}>
                 {socialLinks.map((link, i) => {
@@ -246,7 +244,7 @@ const Footer = () => {
         </AnimatedSection>
 
         <div style={styles.divider}>
-          <p>&copy; {new Date().getFullYear()} VYBE SCENT. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {siteName}. All rights reserved.</p>
         </div>
       </div>
     </footer>

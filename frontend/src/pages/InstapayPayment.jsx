@@ -5,6 +5,7 @@ import { FiUpload, FiCheck, FiCopy } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import API from '../api/axios';
 import AnimatedSection from '../components/AnimatedSection';
+import { useAuth } from '../context/AuthContext';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -15,7 +16,9 @@ const pageVariants = {
 const InstapayPayment = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { orderId, total } = location.state || { orderId: 'N/A', total: 0 };
+  const [email, setEmail] = useState(user?.email || '');
   const [instapayUsername, setInstapayUsername] = useState('');
   const [proofImage, setProofImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -47,6 +50,10 @@ const InstapayPayment = () => {
       toast.error('Please enter your InstaPay username');
       return;
     }
+    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email.trim())) {
+      toast.error('Please enter a valid email for verification');
+      return;
+    }
     if (!proofImage) {
       toast.error('Please upload payment proof');
       return;
@@ -54,19 +61,24 @@ const InstapayPayment = () => {
 
     setSubmitting(true);
     try {
-      const formData = new FormData();
-      formData.append('orderId', orderId);
-      formData.append('instapayUsername', instapayUsername);
-      formData.append('proofImage', proofImage);
+      if (!orderId || orderId === 'N/A') {
+        toast.error('Missing order reference. Please place the order again.');
+        setSubmitting(false);
+        return;
+      }
 
-      await API.post('/orders/instapay-proof', formData, {
+      const formData = new FormData();
+      formData.append('instapayUsername', instapayUsername.trim());
+      formData.append('email', email.trim().toLowerCase());
+      formData.append('instapayProof', proofImage);
+
+      await API.post(`/orders/${orderId}/instapay-proof`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setSubmitted(true);
       toast.success('Payment proof submitted!');
-    } catch {
-      setSubmitted(true);
-      toast.success('Payment proof submitted! (Demo mode)');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to submit payment proof');
     } finally {
       setSubmitting(false);
     }
@@ -212,6 +224,18 @@ const InstapayPayment = () => {
             <div style={styles.divider} />
 
             <form onSubmit={handleSubmit}>
+              <div style={styles.field}>
+                <label style={styles.label}>Verification Email *</label>
+                <input
+                  style={styles.input}
+                  type="email"
+                  placeholder="Enter your account email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
               <div style={styles.field}>
                 <label style={styles.label}>Your InstaPay Username *</label>
                 <input

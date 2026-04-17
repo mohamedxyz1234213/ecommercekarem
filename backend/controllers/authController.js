@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const User = require('../models/User');
+const { sendLoginWelcome } = require('../utils/email');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -69,6 +70,9 @@ const login = async (req, res) => {
 
     const token = generateToken(user._id);
 
+    // Send async login notification email (non-blocking)
+    sendLoginWelcome(user).catch(() => {});
+
     res.json({
       _id: user._id,
       name: user.name,
@@ -108,6 +112,39 @@ const getMe = async (req, res) => {
   }
 };
 
+// @desc    Update current user profile
+// @route   PUT /api/auth/me
+const updateMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const { name, email, phone } = req.body;
+
+    if (name !== undefined) user.name = String(name).trim();
+    if (email !== undefined) user.email = String(email).trim().toLowerCase();
+    if (phone !== undefined) user.phone = String(phone).trim();
+
+    const updated = await user.save();
+
+    res.json({
+      _id: updated._id,
+      name: updated.name,
+      email: updated.email,
+      role: updated.role,
+      avatar: updated.avatar,
+      phone: updated.phone,
+      address: updated.address,
+      createdAt: updated.createdAt,
+    });
+  } catch (error) {
+    console.error('updateMe error:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // @desc    Google OAuth callback handler
 // @route   GET /api/auth/google/callback
 const googleCallback = (req, res) => {
@@ -124,4 +161,4 @@ const logout = (req, res) => {
   res.json({ message: 'Logged out successfully' });
 };
 
-module.exports = { register, login, getMe, googleCallback, logout };
+module.exports = { register, login, getMe, updateMe, googleCallback, logout };

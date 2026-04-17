@@ -24,7 +24,7 @@ const OrderDetail = () => {
     const fetchOrder = async () => {
       try {
         const { data } = await API.get(`/orders/${id}`);
-        setOrder(data.order || null);
+        setOrder(data.order || data || null);
       } catch {
         setOrder(null);
       } finally {
@@ -168,7 +168,7 @@ const OrderDetail = () => {
             <div style={styles.divider} />
             <div style={styles.totalRow}>
               <span style={styles.totalLabel}>Total</span>
-              <span style={styles.totalVal}>EGP {order.total?.toFixed(2)}</span>
+              <span style={styles.totalVal}>EGP {(order.totalPrice || 0).toFixed(2)}</span>
             </div>
           </div>
         </AnimatedSection>

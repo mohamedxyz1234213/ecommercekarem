@@ -112,9 +112,10 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = useCallback(async (updates) => {
     try {
-      const { data } = await API.put('/auth/profile', updates);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setUser(data.user);
+      const { data } = await API.put('/auth/me', updates);
+      const updatedUser = data.user || data;
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      setUser(updatedUser);
       toast.success('Profile updated!');
       return data;
     } catch (error) {
