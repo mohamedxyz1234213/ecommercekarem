@@ -141,7 +141,7 @@ const UserDetail = () => {
                     <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3' }}>
                       <StatusBadge status={order.orderStatus || order.status || 'pending'} />
                     </td>
-                    <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3', color: '#888' }}>
+                    <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3', color: '#4d564a' }}>
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
                   </tr>
@@ -149,7 +149,7 @@ const UserDetail = () => {
               </tbody>
             </table>
           ) : (
-            <p style={{ color: '#888', textAlign: 'center', padding: 20 }}>No orders yet</p>
+            <p style={{ color: '#4d564a', textAlign: 'center', padding: 20 }}>No orders yet</p>
           )}
         </div>
       </div>

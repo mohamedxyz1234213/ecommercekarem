@@ -3,17 +3,19 @@ import { motion } from 'framer-motion';
 import { FiShoppingBag } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import ReviewStars from './ReviewStars';
+import { getApiOrigin } from '../utils/apiBase';
 
 const FALLBACK_PRODUCT_IMAGE =
-  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22500%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f5f0e8%22/%3E%3C/svg%3E';
+  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22500%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f0ede6%22/%3E%3C/svg%3E';
 
 const normalizeImageUrl = (src) => {
   if (!src) return FALLBACK_PRODUCT_IMAGE;
   if (/^https?:\/\//i.test(src) || src.startsWith('data:image')) return src;
-  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  const apiBase = getApiOrigin();
   return src.startsWith('/') ? `${apiBase}${src}` : `${apiBase}/${src}`;
 };
 
+/** Light-surface card with explicit contrast (avoids theme --white = green tint) */
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
   const { _id, name, price, salePrice, images, rating, numReviews, brand, onSale } = product;
@@ -23,10 +25,11 @@ const ProductCard = ({ product }) => {
   const styles = {
     card: {
       position: 'relative',
-      backgroundColor: 'var(--white)',
-      borderRadius: 'var(--radius-md)',
+      backgroundColor: '#ffffff',
+      borderRadius: '16px',
       overflow: 'hidden',
-      boxShadow: 'var(--shadow-sm)',
+      boxShadow: '0 4px 24px rgba(20, 32, 22, 0.07)',
+      border: '1px solid rgba(20, 32, 22, 0.06)',
       cursor: 'pointer',
       height: '100%',
       display: 'flex',
@@ -36,113 +39,128 @@ const ProductCard = ({ product }) => {
       position: 'relative',
       overflow: 'hidden',
       aspectRatio: '3/4',
-      backgroundColor: 'var(--secondary)',
+      backgroundColor: '#f4f1ea',
     },
     image: {
       width: '100%',
       height: '100%',
       objectFit: 'cover',
-      transition: 'transform 0.5s ease',
+      transition: 'transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
     },
     saleTape: {
       position: 'absolute',
-      top: '16px',
-      left: '-30px',
-      backgroundColor: '#DC2626',
+      top: '14px',
+      left: '-28px',
+      background: 'linear-gradient(90deg, #b91c1c, #dc2626)',
       color: '#fff',
-      fontSize: '0.7rem',
+      fontSize: '0.65rem',
       fontWeight: 700,
-      padding: '4px 40px',
+      padding: '5px 36px',
       transform: 'rotate(-45deg)',
-      letterSpacing: '1px',
+      letterSpacing: '0.12em',
       textTransform: 'uppercase',
       zIndex: 2,
+      boxShadow: '0 2px 8px rgba(185, 28, 28, 0.35)',
     },
     addBtn: {
       position: 'absolute',
-      bottom: '12px',
-      right: '12px',
-      width: '40px',
-      height: '40px',
+      bottom: '14px',
+      right: '14px',
+      width: '44px',
+      height: '44px',
       borderRadius: '50%',
-      backgroundColor: 'var(--primary)',
+      backgroundColor: '#014421',
       color: '#fff',
       border: 'none',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
       cursor: 'pointer',
-      fontSize: '1rem',
+      fontSize: '1.05rem',
       zIndex: 2,
+      boxShadow: '0 4px 14px rgba(1, 68, 33, 0.35)',
     },
     info: {
-      padding: '1rem 1.25rem 1.25rem',
+      padding: '1.125rem 1.25rem 1.35rem',
       display: 'flex',
       flexDirection: 'column',
-      gap: '0.35rem',
+      gap: '0.4rem',
       flex: 1,
     },
     brand: {
-      fontSize: '0.75rem',
-      fontWeight: 600,
-      letterSpacing: '1.5px',
+      fontSize: '0.6875rem',
+      fontWeight: 700,
+      letterSpacing: '0.14em',
       textTransform: 'uppercase',
-      color: 'var(--accent)',
+      color: 'var(--muted-on-light)',
     },
     name: {
       fontFamily: 'var(--font-heading)',
-      fontSize: '1.05rem',
+      fontSize: 'clamp(0.98rem, 2.4vw, 1.125rem)',
       fontWeight: 500,
-      color: 'var(--text)',
-      lineHeight: 1.3,
+      color: '#142016',
+      lineHeight: 1.35,
+      margin: 0,
+      display: '-webkit-box',
+      WebkitLineClamp: 2,
+      WebkitBoxOrient: 'vertical',
+      overflow: 'hidden',
     },
     priceRow: {
       display: 'flex',
-      alignItems: 'center',
-      gap: '0.5rem',
-      marginTop: '0.25rem',
+      alignItems: 'baseline',
+      flexWrap: 'wrap',
+      gap: '0.4rem 0.6rem',
+      marginTop: '0.35rem',
     },
     price: {
-      fontSize: '1.1rem',
+      fontSize: 'clamp(1rem, 2.5vw, 1.15rem)',
       fontWeight: 700,
-      color: 'var(--primary)',
+      color: '#014421',
+      letterSpacing: '-0.02em',
     },
     originalPrice: {
-      fontSize: '0.9rem',
-      color: 'var(--gray-400)',
+      fontSize: '0.875rem',
+      color: '#9ca3af',
       textDecoration: 'line-through',
+      fontWeight: 500,
     },
     discountBadge: {
-      fontSize: '0.7rem',
+      fontSize: '0.6875rem',
       fontWeight: 700,
-      color: '#DC2626',
-      backgroundColor: '#FEE2E2',
-      padding: '2px 6px',
-      borderRadius: '4px',
+      color: '#b91c1c',
+      backgroundColor: '#fef2f2',
+      padding: '3px 8px',
+      borderRadius: '6px',
+      letterSpacing: '0.02em',
     },
   };
 
   return (
     <motion.div
-      whileHover={{ y: -4, boxShadow: '0 12px 40px rgba(0,0,0,0.12)' }}
-      transition={{ duration: 0.3 }}
+      whileHover={{ y: -6, boxShadow: '0 16px 40px rgba(20, 32, 22, 0.12)' }}
+      transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
       style={styles.card}
     >
       <Link to={`/product/${_id}`} style={{ textDecoration: 'none', color: 'inherit', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={styles.imageWrapper}>
-          {onSale && discount > 0 && <div style={styles.saleTape}>SALE {discount}%</div>}
+          {onSale && discount > 0 && <div style={styles.saleTape}>Sale {discount}%</div>}
           <motion.img
             src={displayImage}
             alt={name}
             style={styles.image}
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.5 }}
+            whileHover={{ scale: 1.06 }}
+            transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
           />
         </div>
         <div style={styles.info}>
           {brand && <span style={styles.brand}>{brand}</span>}
           <h3 style={styles.name}>{name}</h3>
-          {rating > 0 && <ReviewStars rating={rating} count={numReviews} size={13} />}
+          {rating > 0 && (
+            <div style={{ marginTop: '0.15rem' }}>
+              <ReviewStars rating={rating} count={numReviews} size={14} countColor="var(--muted-on-light)" />
+            </div>
+          )}
           <div style={styles.priceRow}>
             <span style={styles.price}>
               EGP {(onSale && salePrice ? salePrice : price)?.toFixed(2)}
@@ -150,7 +168,7 @@ const ProductCard = ({ product }) => {
             {onSale && salePrice && (
               <>
                 <span style={styles.originalPrice}>EGP {price?.toFixed(2)}</span>
-                <span style={styles.discountBadge}>-{discount}%</span>
+                <span style={styles.discountBadge}>−{discount}%</span>
               </>
             )}
           </div>
@@ -158,8 +176,8 @@ const ProductCard = ({ product }) => {
       </Link>
       <motion.button
         style={styles.addBtn}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.94 }}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();

@@ -71,11 +71,16 @@ const Shop = () => {
   const brands = [...new Set(products.map((p) => p.brand).filter(Boolean))];
 
   const styles = {
-    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'var(--light)' },
+    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'transparent' },
     container: { maxWidth: '1280px', margin: '0 auto', padding: '0 1.5rem' },
     header: { textAlign: 'center', marginBottom: '2.5rem', paddingTop: '2rem' },
     label: { fontSize: '0.8rem', fontWeight: 600, letterSpacing: '4px', textTransform: 'uppercase', color: 'var(--gold)', marginBottom: '0.5rem' },
-    title: { fontFamily: 'var(--font-heading)', fontSize: 'clamp(1.75rem, 3vw, 2.5rem)', fontWeight: 500 },
+    title: {
+      fontFamily: 'var(--font-heading)',
+      fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
+      fontWeight: 500,
+      color: 'var(--text)',
+    },
     topBar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' },
     count: { fontSize: '0.9rem', color: 'var(--gray-500)' },
     controls: { display: 'flex', gap: '1rem', alignItems: 'center' },
@@ -175,9 +180,9 @@ const Shop = () => {
                   onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value }))}
                 >
                   <option value="">All Categories</option>
-                  <option value="women">Women</option>
-                  <option value="men">Men</option>
-                  <option value="unisex">Unisex</option>
+                  <option value="Women">Women</option>
+                  <option value="Men">Men</option>
+                  <option value="Unisex">Unisex</option>
                 </select>
               </div>
 

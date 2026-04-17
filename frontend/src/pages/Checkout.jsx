@@ -96,9 +96,9 @@ const Checkout = () => {
   };
 
   const styles = {
-    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'var(--light)' },
+    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'transparent' },
     container: { maxWidth: '960px', margin: '0 auto', padding: '2rem 1.5rem 4rem' },
-    title: { fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 500, marginBottom: '2rem' },
+    title: { fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 500, marginBottom: '2rem', color: 'var(--text)' },
     grid: { display: 'grid', gridTemplateColumns: '1fr 380px', gap: '3rem', alignItems: 'start' },
     formSection: { display: 'flex', flexDirection: 'column', gap: '1.5rem' },
     sectionTitle: { fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 500, marginBottom: '0.25rem' },

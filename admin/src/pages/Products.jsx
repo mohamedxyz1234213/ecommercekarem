@@ -8,6 +8,7 @@ import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/Modal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { resolveMediaUrl } from '../utils/resolveMediaUrl';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -60,7 +61,7 @@ const Products = () => {
       sortable: false,
       render: (row) => (
         <img
-          src={row.images?.[0] || 'https://via.placeholder.com/50'}
+          src={resolveMediaUrl(row.images?.[0]) || 'https://via.placeholder.com/50'}
           alt={row.name}
           style={{ width: 50, height: 50, borderRadius: 8, objectFit: 'cover' }}
         />
@@ -74,11 +75,11 @@ const Products = () => {
         <div>
           {row.onSale && row.salePrice ? (
             <>
-              <span style={{ textDecoration: 'line-through', color: '#999', fontSize: '0.8rem' }}>${row.price}</span>
-              <span style={{ color: '#e74c3c', fontWeight: 700, marginLeft: 6 }}>${row.salePrice}</span>
+              <span style={{ textDecoration: 'line-through', color: '#6b7280', fontSize: '0.8rem' }}>EGP {row.price}</span>
+              <span style={{ color: '#e74c3c', fontWeight: 700, marginLeft: 6 }}>EGP {row.salePrice}</span>
             </>
           ) : (
-            <span style={{ fontWeight: 600 }}>${row.price}</span>
+            <span style={{ fontWeight: 600 }}>EGP {row.price}</span>
           )}
         </div>
       ),
@@ -92,7 +93,7 @@ const Products = () => {
           {row.saleTape && <span style={{ fontSize: '0.7rem', color: '#f57f17' }}>{row.saleTape}</span>}
         </div>
       ) : (
-        <span style={{ color: '#999', fontSize: '0.8rem' }}>—</span>
+        <span style={{ color: '#6b7280', fontSize: '0.8rem' }}>—</span>
       ),
     },
     { key: 'category', label: 'Category' },

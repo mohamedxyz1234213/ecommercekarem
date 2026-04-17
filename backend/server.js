@@ -32,21 +32,28 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 }
 
-// CORS
-const allowedOrigins = new Set([
-  process.env.CLIENT_URL || 'http://localhost:3000',
-  process.env.ADMIN_URL || 'http://localhost:3001',
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://127.0.0.1:5173',
-  'http://127.0.0.1:5174',
-]);
+// CORS — in development, allow any origin so phone (LAN IP + Vite port) can reach the API.
+const allowedOrigins = new Set(
+  [
+    process.env.CLIENT_URL || 'http://localhost:3000',
+    process.env.ADMIN_URL || 'http://localhost:3001',
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',
+  ].filter(Boolean)
+);
+
+const corsAllowAny =
+  process.env.NODE_ENV !== 'production' || process.env.CORS_ALLOW_ALL === 'true';
 
 app.use(
   cors({
     origin(origin, callback) {
-      // Allow non-browser clients (no Origin header), local dev ports, and configured domains.
-      if (!origin || allowedOrigins.has(origin)) {
+      if (!origin) {
+        return callback(null, true);
+      }
+      if (corsAllowAny || allowedOrigins.has(origin)) {
         return callback(null, true);
       }
       return callback(new Error(`CORS blocked for origin: ${origin}`));
@@ -113,12 +120,17 @@ app.use((err, req, res, _next) => {
 
 // Start server
 const PORT = process.env.PORT || 5000;
+const HOST = process.env.HOST || '0.0.0.0';
 
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
+    app.listen(PORT, HOST, () => {
+      const mode = process.env.NODE_ENV || 'development';
+      console.log(`Server listening on http://${HOST}:${PORT} (${mode})`);
+      if (HOST === '0.0.0.0') {
+        console.log('Reachable on your LAN — use this PC IP from phone (e.g. http://192.168.x.x:' + PORT + '/api)');
+      }
     });
   } catch (error) {
     console.error('Failed to start server:', error.message);

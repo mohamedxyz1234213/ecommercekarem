@@ -5,6 +5,7 @@ import API from '../api/axios';
 import StatusBadge from '../components/StatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { resolveMediaUrl } from '../utils/resolveMediaUrl';
 
 const SalesManager = () => {
   const [products, setProducts] = useState([]);
@@ -122,7 +123,7 @@ const SalesManager = () => {
 
       {/* Bulk Actions */}
       <div className="card" style={{ marginBottom: 24 }}>
-        <h3 style={{ marginBottom: 16, fontSize: '1rem' }}>
+        <h3 style={{ marginBottom: 16, fontSize: '1rem', color: '#142016' }}>
           <MdLocalOffer size={18} style={{ verticalAlign: 'middle', marginRight: 8 }} />
           Bulk Sale Actions
           {selected.length > 0 && (
@@ -146,7 +147,7 @@ const SalesManager = () => {
             />
           </div>
           <div className="form-group" style={{ marginBottom: 0, flex: 1, minWidth: 150 }}>
-            <label>Or Fixed Sale Price ($)</label>
+            <label>Or Fixed Sale Price (EGP)</label>
             <input
               type="number"
               className="form-control"
@@ -170,7 +171,7 @@ const SalesManager = () => {
 
         {bulkSaleTape && (
           <div style={{ marginBottom: 16 }}>
-            <span style={{ fontSize: '0.8rem', color: '#888', marginRight: 8 }}>Preview:</span>
+            <span style={{ fontSize: '0.8rem', color: '#4d564a', marginRight: 8 }}>Preview:</span>
             <span
               style={{
                 display: 'inline-block',
@@ -236,7 +237,7 @@ const SalesManager = () => {
           >
             <div style={{ display: 'flex', gap: 12 }}>
               <img
-                src={product.images?.[0] || 'https://via.placeholder.com/60'}
+                src={resolveMediaUrl(product.images?.[0]) || 'https://via.placeholder.com/60'}
                 alt={product.name}
                 style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }}
               />
@@ -248,14 +249,15 @@ const SalesManager = () => {
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                   marginBottom: 4,
+                  color: '#142016',
                 }}>
                   {product.name}
                 </p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ fontWeight: 700, color: '#2D5016' }}>${product.price}</span>
+                  <span style={{ fontWeight: 700, color: '#2D5016' }}>EGP {product.price}</span>
                   {product.onSale && product.salePrice && (
                     <span style={{ color: '#e74c3c', fontWeight: 600, fontSize: '0.85rem' }}>
-                      → ${product.salePrice}
+                      → EGP {product.salePrice}
                     </span>
                   )}
                 </div>

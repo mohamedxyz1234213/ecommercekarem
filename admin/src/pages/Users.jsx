@@ -104,7 +104,7 @@ const Users = () => {
       key: 'createdAt',
       label: 'Joined',
       render: (row) => (
-        <span style={{ color: '#888', fontSize: '0.85rem' }}>
+        <span style={{ color: '#4d564a', fontSize: '0.85rem' }}>
           {new Date(row.createdAt).toLocaleDateString()}
         </span>
       ),

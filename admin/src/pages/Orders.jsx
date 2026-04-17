@@ -69,7 +69,7 @@ const Orders = () => {
       render: (row) => (
         <div>
           <div style={{ fontWeight: 600 }}>{row.user?.name || 'Guest'}</div>
-          <div style={{ fontSize: '0.75rem', color: '#888' }}>{row.user?.email || row.email || ''}</div>
+          <div style={{ fontSize: '0.75rem', color: '#4d564a' }}>{row.user?.email || row.email || ''}</div>
         </div>
       ),
     },
@@ -108,7 +108,7 @@ const Orders = () => {
       render: (row) => (
         <div>
           <div style={{ fontSize: '0.85rem' }}>{new Date(row.createdAt).toLocaleDateString()}</div>
-          <div style={{ fontSize: '0.7rem', color: '#888' }}>{new Date(row.createdAt).toLocaleTimeString()}</div>
+          <div style={{ fontSize: '0.7rem', color: '#4d564a' }}>{new Date(row.createdAt).toLocaleTimeString()}</div>
         </div>
       ),
     },
@@ -140,19 +140,19 @@ const Orders = () => {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginBottom: 24 }}>
         <div className="card" style={{ padding: '16px 20px', textAlign: 'center' }}>
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#2D5016' }}>{orders.length}</div>
-          <div style={{ fontSize: '0.8rem', color: '#888' }}>Total Orders</div>
+          <div style={{ fontSize: '0.8rem', color: '#4d564a' }}>Total Orders</div>
         </div>
         <div className="card" style={{ padding: '16px 20px', textAlign: 'center' }}>
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#e67e22' }}>{pendingPayments}</div>
-          <div style={{ fontSize: '0.8rem', color: '#888' }}>Pending InstaPay</div>
+          <div style={{ fontSize: '0.8rem', color: '#4d564a' }}>Pending InstaPay</div>
         </div>
         <div className="card" style={{ padding: '16px 20px', textAlign: 'center' }}>
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#3498db' }}>{processingOrders}</div>
-          <div style={{ fontSize: '0.8rem', color: '#888' }}>Processing</div>
+          <div style={{ fontSize: '0.8rem', color: '#4d564a' }}>Processing</div>
         </div>
         <div className="card" style={{ padding: '16px 20px', textAlign: 'center' }}>
           <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#27ae60' }}>EGP {totalRevenue.toFixed(0)}</div>
-          <div style={{ fontSize: '0.8rem', color: '#888' }}>Revenue</div>
+          <div style={{ fontSize: '0.8rem', color: '#4d564a' }}>Revenue</div>
         </div>
       </div>
 
@@ -160,7 +160,7 @@ const Orders = () => {
       <div className="card" style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <MdFilterList size={18} style={{ color: '#2D5016' }} />
-          <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>Filters</span>
+          <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#142016' }}>Filters</span>
         </div>
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <div className="search-bar" style={{ flex: '1 1 250px' }}>

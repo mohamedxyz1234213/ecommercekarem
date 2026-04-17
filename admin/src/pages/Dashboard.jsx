@@ -7,6 +7,8 @@ import API from '../api/axios';
 import StatsCard from '../components/StatsCard';
 import StatusBadge from '../components/StatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { resolveMediaUrl } from '../utils/resolveMediaUrl';
+import toast from 'react-hot-toast';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({ revenue: 0, orders: 0, users: 0, products: 0 });
@@ -22,40 +24,39 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [statsRes, ordersRes, productsRes, usersRes] = await Promise.allSettled([
+      const [statsRes, productsRes] = await Promise.allSettled([
         API.get('/admin/dashboard'),
-        API.get('/orders?limit=5'),
         API.get('/products?limit=5&sort=-sold'),
-        API.get('/users?limit=1'),
       ]);
 
       if (statsRes.status === 'fulfilled') {
         const s = statsRes.value.data;
         setStats({
-          revenue: s.totalRevenue || s.revenue || 0,
-          orders: s.totalOrders || s.orders || 0,
-          users: s.totalUsers || s.users || 0,
-          products: s.totalProducts || s.products || 0,
+          revenue: s.totalRevenue ?? s.revenue ?? 0,
+          orders: s.totalOrders ?? s.orders ?? 0,
+          users: s.totalUsers ?? s.users ?? 0,
+          products: s.totalProducts ?? s.products ?? 0,
         });
         if (s.revenueData) setRevenueData(s.revenueData);
-      }
-
-      if (ordersRes.status === 'fulfilled') {
-        const orders = ordersRes.value.data.orders || ordersRes.value.data || [];
-        setRecentOrders(Array.isArray(orders) ? orders.slice(0, 5) : []);
+        const ro = s.recentOrders;
+        if (Array.isArray(ro) && ro.length > 0) {
+          setRecentOrders(ro.slice(0, 5));
+        }
+      } else {
+        console.error('Dashboard stats failed:', statsRes.reason);
+        toast.error('Could not load dashboard stats. Check API connection.');
       }
 
       if (productsRes.status === 'fulfilled') {
-        const prods = productsRes.value.data.products || productsRes.value.data || [];
+        const d = productsRes.value.data;
+        const prods = d.products || d || [];
         setTopProducts(Array.isArray(prods) ? prods.slice(0, 5) : []);
+      } else {
+        console.error('Dashboard products failed:', productsRes.reason);
       }
-
-      if (usersRes.status === 'fulfilled' && statsRes.status !== 'fulfilled') {
-        const users = usersRes.value.data.users || usersRes.value.data || [];
-        setStats((prev) => ({ ...prev, users: Array.isArray(users) ? users.length : 0 }));
-      }
-    } catch {
-      // Silent fail - stats will show 0
+    } catch (e) {
+      console.error(e);
+      toast.error('Dashboard request failed.');
     } finally {
       setLoading(false);
     }
@@ -84,7 +85,7 @@ const Dashboard = () => {
           icon={MdAttachMoney}
           label="Total Revenue"
           value={stats.revenue}
-          prefix="$"
+          prefix="EGP "
           isCurrency
           trend="up"
           trendValue={12}
@@ -116,12 +117,12 @@ const Dashboard = () => {
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24, marginBottom: 24 }}>
         <div className="card">
-          <h3 style={{ marginBottom: 20, fontSize: '1.1rem' }}>Revenue Overview</h3>
+          <h3 style={{ marginBottom: 20, fontSize: '1.1rem', color: '#142016' }}>Revenue Overview</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e0d8cc" />
-              <XAxis dataKey="month" stroke="#888" fontSize={12} />
-              <YAxis stroke="#888" fontSize={12} />
+              <XAxis dataKey="month" stroke="#5c6360" fontSize={12} />
+              <YAxis stroke="#5c6360" fontSize={12} />
               <Tooltip
                 contentStyle={{
                   background: '#1A2E0A',
@@ -144,7 +145,7 @@ const Dashboard = () => {
         </div>
 
         <div className="card">
-          <h3 style={{ marginBottom: 20, fontSize: '1.1rem' }}>Top Selling Products</h3>
+          <h3 style={{ marginBottom: 20, fontSize: '1.1rem', color: '#142016' }}>Top Selling Products</h3>
           {topProducts.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {topProducts.map((product, idx) => (
@@ -177,15 +178,15 @@ const Dashboard = () => {
                     {idx + 1}
                   </span>
                   <img
-                    src={product.images?.[0] || 'https://via.placeholder.com/40'}
+                    src={resolveMediaUrl(product.images?.[0]) || 'https://via.placeholder.com/40'}
                     alt={product.name}
                     style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover' }}
                   />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: '0.85rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <p style={{ fontSize: '0.85rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#142016' }}>
                       {product.name}
                     </p>
-                    <p style={{ fontSize: '0.75rem', color: '#888' }}>{product.sold || 0} sold</p>
+                    <p style={{ fontSize: '0.75rem', color: '#4d564a' }}>{product.sold || 0} sold</p>
                   </div>
                   <span style={{ fontWeight: 700, color: '#2D5016', fontSize: '0.85rem' }}>
                     ${product.price}
@@ -194,14 +195,14 @@ const Dashboard = () => {
               ))}
             </div>
           ) : (
-            <p style={{ color: '#888', textAlign: 'center', padding: 20 }}>No products yet</p>
+            <p style={{ color: '#4d564a', textAlign: 'center', padding: 20 }}>No products yet</p>
           )}
         </div>
       </div>
 
       <div className="card">
         <div className="flex-between" style={{ marginBottom: 16 }}>
-          <h3 style={{ fontSize: '1.1rem' }}>Recent Orders</h3>
+          <h3 style={{ fontSize: '1.1rem', color: '#142016' }}>Recent Orders</h3>
           <button className="btn btn-secondary btn-sm" onClick={() => navigate('/orders')}>
             View All
           </button>
@@ -238,19 +239,19 @@ const Dashboard = () => {
                   onMouseEnter={(e) => { e.currentTarget.style.background = '#faf8f5'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.background = 'white'; }}
                 >
-                  <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3' }}>
+                  <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3', color: '#142016' }}>
                     #{(order._id || '').slice(-6).toUpperCase()}
                   </td>
-                  <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3' }}>
+                  <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3', color: '#142016' }}>
                     {order.user?.name || order.shippingAddress?.fullName || 'Guest'}
                   </td>
-                  <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3', fontWeight: 600 }}>
-                    ${order.totalPrice?.toFixed(2) || '0.00'}
+                  <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3', fontWeight: 600, color: '#142016' }}>
+                    EGP {order.totalPrice?.toFixed(2) || '0.00'}
                   </td>
                   <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3' }}>
-                    <StatusBadge status={order.orderStatus || order.status || 'pending'} />
+                    <StatusBadge status={order.status || 'pending'} />
                   </td>
-                  <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3', color: '#888' }}>
+                  <td style={{ padding: '10px 16px', borderBottom: '1px solid #f0ebe3', color: '#4d564a' }}>
                     {new Date(order.createdAt).toLocaleDateString()}
                   </td>
                 </tr>
@@ -258,7 +259,7 @@ const Dashboard = () => {
             </tbody>
           </table>
         ) : (
-          <p style={{ color: '#888', textAlign: 'center', padding: 20 }}>No orders yet</p>
+          <p style={{ color: '#4d564a', textAlign: 'center', padding: 20 }}>No orders yet</p>
         )}
       </div>
     </motion.div>

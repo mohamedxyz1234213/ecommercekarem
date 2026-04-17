@@ -8,6 +8,7 @@ import ReviewStars from '../components/ReviewStars';
 import ProductCard from '../components/ProductCard';
 import AnimatedSection from '../components/AnimatedSection';
 import LoadingSpinner from '../components/LoadingSpinner';
+import { getApiOrigin } from '../utils/apiBase';
 
 const FALLBACK_DETAIL_IMAGE =
   'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22700%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f5f0e8%22/%3E%3C/svg%3E';
@@ -15,7 +16,7 @@ const FALLBACK_DETAIL_IMAGE =
 const normalizeImageUrl = (src) => {
   if (!src) return FALLBACK_DETAIL_IMAGE;
   if (/^https?:\/\//i.test(src) || src.startsWith('data:image')) return src;
-  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  const apiBase = getApiOrigin();
   return src.startsWith('/') ? `${apiBase}${src}` : `${apiBase}/${src}`;
 };
 
@@ -70,7 +71,15 @@ const ProductDetail = () => {
   if (loading) return <div style={{ paddingTop: '120px' }}><LoadingSpinner /></div>;
   if (!product) {
     return (
-      <div style={{ paddingTop: '120px', textAlign: 'center', color: 'var(--gray-500)' }}>
+      <div
+        style={{
+          paddingTop: '120px',
+          minHeight: '50vh',
+          textAlign: 'center',
+          color: 'var(--text-muted)',
+          fontSize: '1.05rem',
+        }}
+      >
         Product not found.
       </div>
     );
@@ -88,111 +97,256 @@ const ProductDetail = () => {
   const selectedSizeStock = availableSizes.find((entry) => entry.size === selectedSize)?.quantity ?? null;
 
   const styles = {
-    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'var(--light)' },
-    container: { maxWidth: '1280px', margin: '0 auto', padding: '2rem 1.5rem 4rem' },
-    back: { display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--gray-500)', fontSize: '0.9rem', marginBottom: '2rem', cursor: 'pointer', textDecoration: 'none' },
-    grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'start' },
+    page: {
+      paddingTop: '100px',
+      minHeight: '100vh',
+      background: 'var(--bg-gradient)',
+      color: 'var(--text)',
+    },
+    container: { maxWidth: '1200px', margin: '0 auto', padding: '1.75rem 1.25rem 4rem' },
+    back: {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      color: '#374151',
+      fontSize: '0.875rem',
+      fontWeight: 600,
+      marginBottom: '1.75rem',
+      cursor: 'pointer',
+      textDecoration: 'none',
+      letterSpacing: '0.02em',
+    },
+    grid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'clamp(2rem, 5vw, 3.5rem)', alignItems: 'start' },
+    galleryCard: {
+      background: '#ffffff',
+      borderRadius: '20px',
+      padding: '1rem',
+      boxShadow: '0 8px 32px rgba(20, 32, 22, 0.08)',
+      border: '1px solid rgba(20, 32, 22, 0.06)',
+    },
     gallery: { display: 'flex', flexDirection: 'column', gap: '1rem' },
-    mainImage: { width: '100%', aspectRatio: '4/5', objectFit: 'cover', borderRadius: 'var(--radius-md)', backgroundColor: 'var(--secondary)' },
-    thumbRow: { display: 'flex', gap: '0.75rem' },
+    mainImage: {
+      width: '100%',
+      aspectRatio: '4/5',
+      objectFit: 'cover',
+      borderRadius: '14px',
+      backgroundColor: '#f4f1ea',
+    },
+    thumbRow: { display: 'flex', gap: '0.625rem', flexWrap: 'wrap' },
     thumb: (active) => ({
-      width: '70px', height: '85px', objectFit: 'cover',
-      borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-      border: active ? '2px solid var(--primary)' : '2px solid transparent',
-      opacity: active ? 1 : 0.6, transition: 'all 0.3s',
+      width: '72px',
+      height: '88px',
+      objectFit: 'cover',
+      borderRadius: '10px',
+      cursor: 'pointer',
+      border: active ? '2px solid #014421' : '2px solid transparent',
+      boxShadow: active ? '0 0 0 2px rgba(1, 68, 33, 0.2)' : 'none',
+      opacity: active ? 1 : 0.72,
+      transition: 'all 0.25s ease',
     }),
-    info: { display: 'flex', flexDirection: 'column', gap: '1rem' },
-    brand: { fontSize: '0.8rem', fontWeight: 600, letterSpacing: '3px', textTransform: 'uppercase', color: 'var(--accent)' },
-    name: { fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 500, lineHeight: 1.2 },
-    priceRow: { display: 'flex', alignItems: 'center', gap: '0.75rem' },
-    price: { fontSize: '1.5rem', fontWeight: 700, color: 'var(--primary)' },
-    oldPrice: { fontSize: '1.1rem', color: 'var(--gray-400)', textDecoration: 'line-through' },
-    discBadge: { backgroundColor: '#FEE2E2', color: '#DC2626', padding: '3px 10px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 700 },
-    desc: { fontSize: '0.95rem', color: 'var(--gray-500)', lineHeight: 1.8 },
-    notesSection: { marginTop: '0.5rem' },
-    noteTitle: { fontSize: '0.8rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--text)', marginBottom: '0.5rem' },
-    noteItem: { display: 'flex', gap: '0.5rem', fontSize: '0.9rem', color: 'var(--gray-500)', marginBottom: '0.25rem' },
-    noteLabel: { fontWeight: 600, color: 'var(--accent)', minWidth: '60px' },
-    divider: { borderTop: '1px solid var(--gray-200)', margin: '0.5rem 0' },
-    qtyRow: { display: 'flex', alignItems: 'center', gap: '1rem' },
-    sizeRow: { display: 'flex', flexDirection: 'column', gap: '0.5rem' },
+    infoCard: {
+      background: '#ffffff',
+      borderRadius: '20px',
+      padding: 'clamp(1.5rem, 3vw, 2.25rem)',
+      boxShadow: '0 8px 32px rgba(20, 32, 22, 0.08)',
+      border: '1px solid rgba(20, 32, 22, 0.06)',
+    },
+    info: { display: 'flex', flexDirection: 'column', gap: '1.125rem' },
+    brand: {
+      fontSize: '0.75rem',
+      fontWeight: 700,
+      letterSpacing: '0.16em',
+      textTransform: 'uppercase',
+      color: '#6b7280',
+    },
+    name: {
+      fontFamily: 'var(--font-heading)',
+      fontSize: 'clamp(1.75rem, 4.2vw, 2.375rem)',
+      fontWeight: 500,
+      lineHeight: 1.2,
+      color: '#142016',
+      margin: 0,
+    },
+    priceRow: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem 1rem' },
+    price: {
+      fontSize: 'clamp(1.35rem, 3vw, 1.65rem)',
+      fontWeight: 700,
+      color: '#014421',
+      letterSpacing: '-0.02em',
+    },
+    oldPrice: { fontSize: '1.05rem', color: '#9ca3af', textDecoration: 'line-through', fontWeight: 500 },
+    discBadge: {
+      backgroundColor: '#fef2f2',
+      color: '#b91c1c',
+      padding: '4px 12px',
+      borderRadius: '999px',
+      fontSize: '0.8125rem',
+      fontWeight: 700,
+    },
+    desc: {
+      fontSize: 'clamp(0.98rem, 1.8vw, 1.0625rem)',
+      color: '#3d4a38',
+      lineHeight: 1.75,
+    },
+    notesSection: { marginTop: '0.25rem' },
+    noteTitle: {
+      fontSize: '0.75rem',
+      fontWeight: 700,
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+      color: '#142016',
+      marginBottom: '0.65rem',
+    },
+    noteItem: { display: 'flex', gap: '0.5rem', fontSize: '0.9375rem', color: '#3d4a38', marginBottom: '0.35rem' },
+    noteLabel: { fontWeight: 600, color: '#014421', minWidth: '72px' },
+    divider: { borderTop: '1px solid #e5e7eb', margin: '0.35rem 0' },
+    qtyRow: { display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' },
+    fieldLabel: { fontSize: '0.8125rem', fontWeight: 700, color: '#142016', letterSpacing: '0.04em' },
+    sizeRow: { display: 'flex', flexDirection: 'column', gap: '0.65rem' },
     sizeButtons: { display: 'flex', gap: '0.5rem', flexWrap: 'wrap' },
     sizeBtn: (active) => ({
-      padding: '0.45rem 0.9rem',
-      borderRadius: 'var(--radius-sm)',
-      border: `1px solid ${active ? 'var(--primary)' : 'var(--gray-200)'}`,
-      backgroundColor: active ? 'rgba(45, 80, 22, 0.08)' : 'var(--white)',
-      color: active ? 'var(--primary)' : 'var(--text)',
+      padding: '0.5rem 1rem',
+      borderRadius: '10px',
+      border: `1.5px solid ${active ? '#014421' : '#e5e7eb'}`,
+      backgroundColor: active ? 'rgba(1, 68, 33, 0.08)' : '#fafaf8',
+      color: active ? '#014421' : '#142016',
       cursor: 'pointer',
       fontWeight: 600,
-      fontSize: '0.85rem',
+      fontSize: '0.875rem',
+      transition: 'border-color 0.2s, background 0.2s',
     }),
-    qtyControl: { display: 'flex', alignItems: 'center', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' },
-    qtyBtn: { width: '40px', height: '40px', backgroundColor: 'var(--white)', border: 'none', fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-    qtyVal: { width: '50px', textAlign: 'center', fontWeight: 600, fontSize: '1rem', border: 'none', borderLeft: '1px solid var(--gray-200)', borderRight: '1px solid var(--gray-200)' },
-    btnRow: { display: 'flex', gap: '1rem', marginTop: '0.5rem' },
+    qtyControl: {
+      display: 'flex',
+      alignItems: 'center',
+      border: '1px solid #e5e7eb',
+      borderRadius: '12px',
+      overflow: 'hidden',
+      background: '#fff',
+    },
+    qtyBtn: {
+      width: '44px',
+      height: '44px',
+      backgroundColor: '#f9faf8',
+      border: 'none',
+      fontSize: '1rem',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#142016',
+    },
+    qtyVal: {
+      minWidth: '52px',
+      textAlign: 'center',
+      fontWeight: 700,
+      fontSize: '1.0625rem',
+      color: '#142016',
+      border: 'none',
+      borderLeft: '1px solid #e5e7eb',
+      borderRight: '1px solid #e5e7eb',
+      background: '#fff',
+      padding: '0 8px',
+    },
+    btnRow: { display: 'flex', gap: '0.75rem', marginTop: '0.75rem' },
     addBtn: {
-      flex: 1, padding: '1rem 2rem', backgroundColor: 'var(--primary)', color: '#fff',
-      border: 'none', borderRadius: 'var(--radius-sm)', fontSize: '0.95rem', fontWeight: 600,
-      letterSpacing: '1px', cursor: 'pointer', display: 'flex', alignItems: 'center',
-      justifyContent: 'center', gap: '0.5rem',
+      flex: 1,
+      padding: '1rem 1.5rem',
+      backgroundColor: '#014421',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '14px',
+      fontSize: '0.9375rem',
+      fontWeight: 700,
+      letterSpacing: '0.06em',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '0.5rem',
+      boxShadow: '0 4px 20px rgba(1, 68, 33, 0.25)',
     },
+    addBtnDisabled: { opacity: 0.45, cursor: 'not-allowed', boxShadow: 'none' },
     wishBtn: {
-      width: '48px', height: '48px', border: '1px solid var(--gray-200)', borderRadius: 'var(--radius-sm)',
-      backgroundColor: 'var(--white)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: '1.2rem', color: 'var(--gray-400)', cursor: 'pointer',
+      width: '52px',
+      height: '52px',
+      border: '1px solid #e5e7eb',
+      borderRadius: '14px',
+      backgroundColor: '#fafaf8',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '1.25rem',
+      color: '#6b7280',
+      cursor: 'pointer',
     },
-    reviewsSection: { marginTop: '4rem' },
-    reviewCard: { backgroundColor: 'var(--white)', borderRadius: 'var(--radius-md)', padding: '1.5rem', boxShadow: 'var(--shadow-sm)', marginBottom: '1rem' },
-    reviewHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' },
-    reviewer: { fontWeight: 600, fontSize: '0.95rem' },
-    reviewDate: { fontSize: '0.8rem', color: 'var(--gray-400)' },
-    reviewText: { fontSize: '0.9rem', color: 'var(--gray-500)', lineHeight: 1.7 },
-    relatedSection: { marginTop: '4rem' },
+    stockHint: { fontSize: '0.8125rem', color: '#6b7280' },
+    reviewsSection: { marginTop: '3.5rem' },
+    reviewCard: {
+      backgroundColor: '#ffffff',
+      borderRadius: '16px',
+      padding: '1.5rem 1.75rem',
+      boxShadow: '0 4px 20px rgba(20, 32, 22, 0.06)',
+      border: '1px solid rgba(20, 32, 22, 0.06)',
+      marginBottom: '1rem',
+    },
+    reviewHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem', gap: '1rem' },
+    reviewer: { fontWeight: 700, fontSize: '1rem', color: '#142016' },
+    reviewDate: { fontSize: '0.8125rem', color: '#6b7280', flexShrink: 0 },
+    reviewText: { fontSize: '0.9375rem', color: '#3d4a38', lineHeight: 1.7 },
+    relatedSection: { marginTop: '3.5rem' },
     relatedGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem' },
-    sectionTitle: { fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 500, marginBottom: '1.5rem' },
+    sectionTitle: {
+      fontFamily: 'var(--font-heading)',
+      fontSize: 'clamp(1.35rem, 3vw, 1.75rem)',
+      fontWeight: 500,
+      marginBottom: '1.35rem',
+      color: '#142016',
+    },
   };
 
   return (
     <motion.div style={styles.page} variants={pageVariants} initial="initial" animate="animate" exit="exit">
       <div style={styles.container}>
         <Link to="/shop" style={styles.back}>
-          <FiArrowLeft /> Back to Shop
+          <FiArrowLeft size={18} strokeWidth={2.5} /> Back to Shop
         </Link>
 
         <div style={styles.grid} className="product-detail-grid">
           <AnimatedSection direction="left">
-            <div style={styles.gallery}>
-              <motion.img
-                key={selectedImage}
-                src={normalizeImageUrl(images?.[selectedImage])}
-                alt={name}
-                style={styles.mainImage}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.3 }}
-              />
-              {images?.length > 1 && (
-                <div style={styles.thumbRow}>
-                  {images.map((img, i) => (
-                    <img
-                      key={i}
-                      src={normalizeImageUrl(img)}
-                      alt={`${name} view ${i + 1}`}
-                      style={styles.thumb(i === selectedImage)}
-                      onClick={() => setSelectedImage(i)}
-                    />
-                  ))}
-                </div>
-              )}
+            <div style={styles.galleryCard}>
+              <div style={styles.gallery}>
+                <motion.img
+                  key={selectedImage}
+                  src={normalizeImageUrl(images?.[selectedImage])}
+                  alt={name}
+                  style={styles.mainImage}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                />
+                {images?.length > 1 && (
+                  <div style={styles.thumbRow}>
+                    {images.map((img, i) => (
+                      <img
+                        key={i}
+                        src={normalizeImageUrl(img)}
+                        alt={`${name} view ${i + 1}`}
+                        style={styles.thumb(i === selectedImage)}
+                        onClick={() => setSelectedImage(i)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </AnimatedSection>
 
           <AnimatedSection direction="right">
-            <div style={styles.info}>
+            <div style={styles.infoCard}>
+              <div style={styles.info}>
               {brand && <span style={styles.brand}>{brand}</span>}
               <h1 style={styles.name}>{name}</h1>
-              <ReviewStars rating={rating || 0} count={numReviews} size={16} />
+              <ReviewStars rating={rating || 0} count={numReviews} size={17} countColor="var(--muted-on-light)" />
 
               <div style={styles.priceRow}>
                 <span style={styles.price}>EGP {(onSale && salePrice ? salePrice : price)?.toFixed(2)}</span>
@@ -224,7 +378,7 @@ const ProductDetail = () => {
 
               {availableSizes.length > 0 && (
                 <div style={styles.sizeRow}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Size:</span>
+                  <span style={styles.fieldLabel}>Size</span>
                   <div style={styles.sizeButtons}>
                     {availableSizes.map((entry) => (
                       <button
@@ -238,15 +392,15 @@ const ProductDetail = () => {
                     ))}
                   </div>
                   {selectedSize && selectedSizeStock !== null && (
-                    <span style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>
-                      Available: {selectedSizeStock}
+                    <span style={styles.stockHint}>
+                      {selectedSizeStock} in stock
                     </span>
                   )}
                 </div>
               )}
 
               <div style={styles.qtyRow}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Quantity:</span>
+                <span style={styles.fieldLabel}>Quantity</span>
                 <div style={styles.qtyControl}>
                   <button style={styles.qtyBtn} onClick={() => setQuantity(Math.max(1, quantity - 1))}><FiMinus /></button>
                   <span style={styles.qtyVal}>{quantity}</span>
@@ -256,9 +410,12 @@ const ProductDetail = () => {
 
               <div style={styles.btnRow}>
                 <motion.button
-                  style={styles.addBtn}
-                  whileHover={{ opacity: 0.9, scale: 1.01 }}
-                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    ...styles.addBtn,
+                    ...(availableSizes.length > 0 && !selectedSize ? styles.addBtnDisabled : {}),
+                  }}
+                  whileHover={availableSizes.length > 0 && !selectedSize ? {} : { scale: 1.01 }}
+                  whileTap={availableSizes.length > 0 && !selectedSize ? {} : { scale: 0.99 }}
                   onClick={() => {
                     if (availableSizes.length > 0 && !selectedSize) {
                       return;
@@ -267,14 +424,17 @@ const ProductDetail = () => {
                   }}
                   disabled={availableSizes.length > 0 && !selectedSize}
                 >
-                  <FiShoppingBag /> {availableSizes.length > 0 && !selectedSize ? 'Select Size' : 'Add to Bag'}
+                  <FiShoppingBag /> {availableSizes.length > 0 && !selectedSize ? 'Select a size' : 'Add to bag'}
                 </motion.button>
                 <motion.button
                   style={styles.wishBtn}
-                  whileHover={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}
+                  whileHover={{ borderColor: '#014421', color: '#014421', backgroundColor: '#f0fdf4' }}
+                  type="button"
+                  aria-label="Wishlist"
                 >
                   <FiHeart />
                 </motion.button>
+              </div>
               </div>
             </div>
           </AnimatedSection>

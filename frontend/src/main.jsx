@@ -7,6 +7,8 @@ import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import App from './App';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 import './index.css';
 
 createRoot(document.getElementById('root')).render(

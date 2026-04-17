@@ -61,49 +61,145 @@ const Login = () => {
     toast('Apple login coming soon!', { icon: '🍎' });
   };
 
+  /* Cream card + dark type: site --white is a green tint, so avoid it for auth surfaces */
+  const c = {
+    cardBg: '#FAF8F5',
+    ink: '#0f1a12',
+    inkMuted: '#3d4d3a',
+    line: '#D4CFC4',
+    fieldBg: '#FFFFFF',
+    fieldBorder: '#B8C4B0',
+    googleBorder: '#DADCE0',
+    googleText: '#2c3136',
+  };
+
   const styles = {
-    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'var(--light)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+    page: {
+      paddingTop: '100px',
+      minHeight: '100vh',
+      background: 'var(--bg-gradient)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     container: { width: '100%', maxWidth: '440px', padding: '2rem 1.5rem 4rem' },
-    card: { backgroundColor: 'var(--white)', borderRadius: 'var(--radius-md)', padding: '2.5rem', boxShadow: 'var(--shadow-md)' },
+    card: {
+      backgroundColor: c.cardBg,
+      borderRadius: 'var(--radius-md)',
+      padding: '2.5rem',
+      boxShadow: '0 20px 50px rgba(0, 0, 0, 0.35)',
+      border: '1px solid rgba(255, 255, 255, 0.5)',
+    },
     header: { textAlign: 'center', marginBottom: '2rem' },
     logo: {
-      fontFamily: 'Inter, var(--font-body)',
-      fontSize: '1rem',
+      fontFamily: 'var(--font-body)',
+      fontSize: '0.75rem',
       fontWeight: 700,
-      letterSpacing: '3px',
+      letterSpacing: '0.28em',
       textTransform: 'uppercase',
-      color: '#F2FFF5',
+      color: '#1a3d12',
       marginBottom: '0.75rem',
     },
-    title: { fontFamily: 'var(--font-heading)', fontSize: '1.75rem', fontWeight: 500, marginBottom: '0.5rem' },
-    subtitle: { fontSize: '0.9rem', color: 'var(--gray-500)' },
+    title: {
+      fontFamily: 'var(--font-heading)',
+      fontSize: '1.85rem',
+      fontWeight: 500,
+      marginBottom: '0.5rem',
+      color: c.ink,
+    },
+    subtitle: { fontSize: '0.95rem', color: c.inkMuted, lineHeight: 1.5 },
     form: { display: 'flex', flexDirection: 'column', gap: '1.25rem' },
     inputWrapper: { position: 'relative' },
-    icon: { position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-400)', fontSize: '1rem' },
-    input: {
-      width: '100%', padding: '0.85rem 1rem 0.85rem 2.75rem',
-      border: '1.5px solid var(--gray-200)', borderRadius: 'var(--radius-sm)',
-      fontSize: '0.9rem', backgroundColor: 'var(--light)',
+    icon: {
+      position: 'absolute',
+      left: '1rem',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      color: '#3d5045',
+      fontSize: '1rem',
     },
-    eyeBtn: { position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--gray-400)', cursor: 'pointer', fontSize: '1rem' },
-    forgotLink: { textAlign: 'right', fontSize: '0.85rem', color: 'var(--accent)', cursor: 'pointer' },
+    input: {
+      width: '100%',
+      padding: '0.85rem 1rem 0.85rem 2.75rem',
+      border: `1.5px solid ${c.fieldBorder}`,
+      borderRadius: 'var(--radius-sm)',
+      fontSize: '0.95rem',
+      backgroundColor: c.fieldBg,
+      color: c.ink,
+    },
+    eyeBtn: {
+      position: 'absolute',
+      right: '1rem',
+      top: '50%',
+      transform: 'translateY(-50%)',
+      background: 'none',
+      border: 'none',
+      color: '#3d5045',
+      cursor: 'pointer',
+      fontSize: '1rem',
+    },
+    forgotLink: {
+      textAlign: 'right',
+      fontSize: '0.85rem',
+      color: '#014421',
+      fontWeight: 600,
+      cursor: 'pointer',
+    },
     submitBtn: {
-      width: '100%', padding: '0.9rem', backgroundColor: 'var(--primary)', color: '#fff',
-      border: 'none', borderRadius: 'var(--radius-sm)', fontSize: '0.95rem', fontWeight: 600,
-      letterSpacing: '1px', cursor: 'pointer',
+      width: '100%',
+      padding: '0.95rem',
+      backgroundColor: '#014421',
+      color: '#fff',
+      border: 'none',
+      borderRadius: 'var(--radius-sm)',
+      fontSize: '0.95rem',
+      fontWeight: 600,
+      letterSpacing: '0.06em',
+      cursor: 'pointer',
     },
     divider: { display: 'flex', alignItems: 'center', gap: '1rem', margin: '0.5rem 0' },
-    dividerLine: { flex: 1, height: '1px', backgroundColor: 'var(--gray-200)' },
-    dividerText: { fontSize: '0.8rem', color: 'var(--gray-400)', textTransform: 'uppercase', letterSpacing: '1px' },
-    socialBtn: {
-      width: '100%', padding: '0.8rem', border: '1.5px solid var(--gray-200)',
-      borderRadius: 'var(--radius-sm)', backgroundColor: 'var(--white)',
-      fontSize: '0.9rem', fontWeight: 500, cursor: 'pointer',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+    dividerLine: { flex: 1, height: '1px', backgroundColor: c.line },
+    dividerText: {
+      fontSize: '0.72rem',
+      color: '#5a635c',
+      textTransform: 'uppercase',
+      letterSpacing: '0.14em',
+      fontWeight: 600,
+    },
+    googleBtn: {
+      width: '100%',
+      padding: '0.85rem 1rem',
+      border: `1px solid ${c.googleBorder}`,
+      borderRadius: '10px',
+      backgroundColor: '#FFFFFF',
+      fontSize: '0.9rem',
+      fontWeight: 600,
+      color: c.googleText,
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '0.75rem',
+      boxShadow: '0 1px 2px rgba(60, 64, 67, 0.08)',
+    },
+    appleBtn: {
+      width: '100%',
+      padding: '0.85rem 1rem',
+      border: 'none',
+      borderRadius: '10px',
+      backgroundColor: '#111827',
+      fontSize: '0.9rem',
+      fontWeight: 600,
+      color: '#F9FAFB',
+      cursor: 'pointer',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: '0.75rem',
     },
     socialBtns: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
-    registerLink: { textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', color: 'var(--gray-500)' },
-    registerAnchor: { color: 'var(--primary)', fontWeight: 600, marginLeft: '0.25rem' },
+    registerLink: { textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', color: c.inkMuted },
+    registerAnchor: { color: '#014421', fontWeight: 700, marginLeft: '0.35rem' },
   };
 
   return (
@@ -121,6 +217,7 @@ const Login = () => {
               <div style={styles.inputWrapper}>
                 <FiMail style={styles.icon} />
                 <input
+                  className="auth-page-input"
                   style={styles.input}
                   type="email"
                   placeholder="Email address"
@@ -132,6 +229,7 @@ const Login = () => {
               <div style={styles.inputWrapper}>
                 <FiLock style={styles.icon} />
                 <input
+                  className="auth-page-input"
                   style={styles.input}
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Password"
@@ -164,21 +262,23 @@ const Login = () => {
 
             <div style={styles.socialBtns}>
               <motion.button
-                style={styles.socialBtn}
-                whileHover={{ borderColor: 'var(--primary)', y: -1 }}
+                style={styles.googleBtn}
+                whileHover={{ boxShadow: '0 2px 8px rgba(60, 64, 67, 0.18)', y: -1 }}
+                whileTap={{ scale: 0.99 }}
                 onClick={() => handleGoogleLogin()}
                 type="button"
               >
-                <FcGoogle size={20} /> Continue with Google
+                <FcGoogle size={22} /> Continue with Google
               </motion.button>
 
               <motion.button
-                style={{ ...styles.socialBtn, backgroundColor: '#000', color: '#fff', border: 'none' }}
-                whileHover={{ opacity: 0.9, y: -1 }}
+                style={styles.appleBtn}
+                whileHover={{ opacity: 0.92, y: -1 }}
+                whileTap={{ scale: 0.99 }}
                 onClick={handleAppleLogin}
                 type="button"
               >
-                <FaApple size={20} /> Continue with Apple
+                <FaApple size={22} /> Continue with Apple
               </motion.button>
             </div>
 
@@ -189,6 +289,11 @@ const Login = () => {
           </div>
         </AnimatedSection>
       </div>
+      <style>{`
+        .auth-page-input::placeholder {
+          color: #6d766f;
+        }
+      `}</style>
     </motion.div>
   );
 };

@@ -33,7 +33,7 @@ const SaleBanner = () => {
   const styles = {
     section: {
       padding: '5rem 0',
-      background: 'linear-gradient(135deg, var(--dark) 0%, var(--primary) 100%)',
+      background: 'linear-gradient(135deg, #dce6d8 0%, #c8d6c2 50%, #bcccb4 100%)',
       position: 'relative',
       overflow: 'hidden',
     },
@@ -51,8 +51,8 @@ const SaleBanner = () => {
     },
     badge: {
       display: 'inline-block',
-      backgroundColor: 'var(--gold)',
-      color: 'var(--dark)',
+      backgroundColor: 'var(--primary)',
+      color: '#fff',
       fontSize: '0.75rem',
       fontWeight: 700,
       letterSpacing: '3px',
@@ -65,19 +65,19 @@ const SaleBanner = () => {
       fontFamily: 'var(--font-heading)',
       fontSize: 'clamp(2rem, 4vw, 3rem)',
       fontWeight: 500,
-      color: '#fff',
+      color: 'var(--text)',
       marginBottom: '1rem',
     },
     desc: {
       fontSize: '1.1rem',
-      color: 'rgba(255,255,255,0.7)',
+      color: 'var(--text-muted)',
       marginBottom: '2rem',
       maxWidth: '500px',
     },
     btn: {
       padding: '0.9rem 2.5rem',
-      backgroundColor: '#fff',
-      color: 'var(--primary)',
+      backgroundColor: 'var(--primary)',
+      color: '#fff',
       borderRadius: 'var(--radius-xl)',
       fontSize: '0.85rem',
       fontWeight: 700,
@@ -91,7 +91,7 @@ const SaleBanner = () => {
     circle: {
       position: 'absolute',
       borderRadius: '50%',
-      border: '1px solid rgba(255,255,255,0.05)',
+      border: '1px solid rgba(20, 32, 22, 0.08)',
     },
   };
 

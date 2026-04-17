@@ -85,7 +85,7 @@ const InstapayPayment = () => {
   };
 
   const styles = {
-    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'var(--light)' },
+    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'transparent' },
     container: { maxWidth: '640px', margin: '0 auto', padding: '2rem 1.5rem 4rem' },
     card: { backgroundColor: 'var(--white)', borderRadius: 'var(--radius-md)', padding: '2.5rem', boxShadow: 'var(--shadow-md)' },
     title: { fontFamily: 'var(--font-heading)', fontSize: '1.75rem', fontWeight: 500, textAlign: 'center', marginBottom: '0.5rem' },
@@ -104,8 +104,8 @@ const InstapayPayment = () => {
       display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem',
       padding: '0.75rem 1rem', backgroundColor: 'var(--secondary)', borderRadius: 'var(--radius-sm)',
     },
-    username: { fontFamily: 'monospace', fontSize: '1.1rem', fontWeight: 700, color: 'var(--primary)', flex: 1 },
-    copyBtn: { background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem' },
+    username: { fontFamily: 'monospace', fontSize: '1.1rem', fontWeight: 700, color: '#f4fbf7', flex: 1 },
+    copyBtn: { background: 'none', border: 'none', color: '#f4fbf7', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.85rem', fontWeight: 600 },
     amountBox: {
       textAlign: 'center', padding: '1.25rem', backgroundColor: 'rgba(45, 80, 22, 0.05)',
       borderRadius: 'var(--radius-sm)', marginBottom: '2rem',
@@ -120,7 +120,7 @@ const InstapayPayment = () => {
     uploadArea: {
       border: '2px dashed var(--gray-200)', borderRadius: 'var(--radius-sm)',
       padding: '2rem', textAlign: 'center', cursor: 'pointer',
-      backgroundColor: 'var(--light)', transition: 'border-color 0.3s',
+      backgroundColor: 'var(--surface-muted)', transition: 'border-color 0.3s',
     },
     uploadIcon: { fontSize: '2rem', color: 'var(--gray-400)', marginBottom: '0.5rem' },
     uploadText: { fontSize: '0.9rem', color: 'var(--gray-500)' },

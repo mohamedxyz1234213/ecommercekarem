@@ -1,6 +1,6 @@
 import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 
-const ReviewStars = ({ rating = 0, count, size = 16, showCount = true }) => {
+const ReviewStars = ({ rating = 0, count, size = 16, showCount = true, countColor }) => {
   const stars = [];
   const fullStars = Math.floor(rating);
   const hasHalf = rating % 1 >= 0.5;
@@ -22,7 +22,7 @@ const ReviewStars = ({ rating = 0, count, size = 16, showCount = true }) => {
         <span
           style={{
             fontSize: size * 0.8,
-            color: 'var(--gray-500)',
+            color: countColor || 'var(--muted-on-light)',
             fontFamily: 'var(--font-body)',
           }}
         >

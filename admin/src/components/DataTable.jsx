@@ -130,7 +130,7 @@ const DataTable = ({ columns, data, pageSize = 10, onRowClick, emptyMessage = 'N
             justifyContent: 'space-between',
             padding: '16px 0',
             fontSize: '0.85rem',
-            color: '#888',
+            color: '#4d564a',
           }}
         >
           <span>

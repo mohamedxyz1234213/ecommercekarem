@@ -1,21 +1,35 @@
 :root {
-  --primary: #014421;   /* Pakistan green */
-  --secondary: #355e3b; /* Hunter green */
-  --accent: #8a9a5b;    /* Moss green */
-  --text: #edf6ee;      /* High-contrast readable text */
-  --light: #013220;     /* Dark green page background */
-  --dark: #013220;
-  --gold: #bcb88a;      /* Sage/sand */
-  --white: #355e3b;     /* Surfaces/cards */
-  --gray-100: #0e3a25;
-  --gray-200: #2b5b39;
-  --gray-300: #507f57;
-  --gray-400: #9fb08d;
-  --gray-500: #d1d7b3;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 10px 26px rgba(0, 0, 0, 0.28);
-  --shadow-lg: 0 18px 40px rgba(0, 0, 0, 0.34);
-  --shadow-xl: 0 26px 70px rgba(0, 0, 0, 0.42);
+  /* Brand */
+  --primary: #014421;
+  --secondary: #2d4a38;
+  --accent: #5d7a62;
+
+  /* Page shell — matches product detail warmth */
+  --bg-gradient: linear-gradient(180deg, #e8e6df 0%, #f0eee8 35%, #e5e2da 100%);
+  --light: #f0eee8;
+  --surface-muted: #f4f1ea;
+  --dark: #142016;
+
+  /* Typography on light surfaces */
+  --text: #1e2b24;
+  --text-muted: #5c6d64;
+  --text-on-dark: #f4fbf7;
+
+  --white: #ffffff;
+  --gold: #8f7d4f;
+  --gold-soft: #c4b896;
+
+  --gray-100: #ebe8e1;
+  --gray-200: #ddd8ce;
+  --gray-300: #c9c3b5;
+  --gray-400: #8a958c;
+  --gray-500: #5f6d62;
+  --muted-on-light: #5c6d64;
+
+  --shadow-sm: 0 2px 12px rgba(20, 32, 22, 0.07);
+  --shadow-md: 0 10px 28px rgba(20, 32, 22, 0.1);
+  --shadow-lg: 0 18px 44px rgba(20, 32, 22, 0.12);
+  --shadow-xl: 0 26px 60px rgba(20, 32, 22, 0.14);
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 20px;
@@ -39,11 +53,16 @@ html {
 body {
   font-family: var(--font-body);
   color: var(--text);
-  background-color: var(--light);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+main {
+  color: var(--text);
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -80,23 +99,23 @@ input, textarea, select {
   border-radius: var(--radius-sm);
   padding: 0.75rem 1rem;
   transition: var(--transition);
-  background: rgba(188, 184, 138, 0.08);
+  background: var(--white);
   color: var(--text);
 }
 
 input:focus, textarea:focus, select:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(188, 184, 138, 0.2);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(1, 68, 33, 0.12);
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: rgba(209, 215, 179, 0.9);
+  color: rgba(30, 43, 36, 0.48);
 }
 
 ::selection {
-  background: var(--gold);
-  color: var(--light);
+  background: var(--primary);
+  color: var(--text-on-dark);
 }
 
 ::-webkit-scrollbar {
@@ -104,29 +123,32 @@ textarea::placeholder {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--light);
+  background: var(--gray-100);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--secondary);
+  background: var(--gray-400);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
+  background: var(--gray-500);
 }
 
 #root {
-  background: var(--light);
+  background: transparent;
 }
 
-/* Keep section rhythm with subtle separators */
 section {
-  background-color: var(--light) !important;
+  background-color: transparent !important;
 }
 
 section + section {
   border-top: 1px solid var(--gray-200);
+}
+
+section.hero-section {
+  background-color: transparent !important;
 }
 
 .container {
@@ -145,20 +167,114 @@ section + section {
   }
 }
 
-/* Slick carousel overrides */
 .slick-prev:before,
 .slick-next:before {
-  color: var(--gold) !important;
+  color: var(--primary) !important;
   font-size: 24px !important;
 }
 
 .slick-dots li button:before {
-  color: var(--accent) !important;
+  color: var(--gray-400) !important;
   font-size: 10px !important;
 }
 
 .slick-dots li.slick-active button:before {
-  color: var(--gold) !important;
+  color: var(--primary) !important;
+}
+
+.featured-fragrances-section {
+  padding-bottom: 6.5rem;
+}
+
+.featured-fragrances-carousel .slick-track {
+  display: flex !important;
+  align-items: stretch;
+}
+
+.featured-fragrances-carousel .slick-slide {
+  height: auto;
+}
+
+.featured-fragrances-carousel .slick-slide > div {
+  height: 100%;
+}
+
+.featured-fragrances-carousel .slick-prev,
+.featured-fragrances-carousel .slick-next {
+  width: 48px;
+  height: 48px;
+}
+
+.featured-fragrances-carousel .slick-prev::before,
+.featured-fragrances-carousel .slick-next::before {
+  display: none !important;
+}
+
+.featured-fragrances-carousel .slick-prev {
+  left: clamp(-6px, -0.5vw, 8px);
+}
+
+.featured-fragrances-carousel .slick-next {
+  right: clamp(-6px, -0.5vw, 8px);
+}
+
+@media (max-width: 900px) {
+  .featured-fragrances-carousel .slick-prev {
+    left: 2px;
+  }
+
+  .featured-fragrances-carousel .slick-next {
+    right: 2px;
+  }
+}
+
+.featured-fragrances-carousel .slick-dots {
+  bottom: -3rem;
+}
+
+.featured-fragrances-carousel .slick-dots li button:before {
+  color: rgba(20, 32, 22, 0.35) !important;
+  opacity: 1 !important;
+  font-size: 11px !important;
+}
+
+.featured-fragrances-carousel .slick-dots li.slick-active button:before {
+  color: var(--primary) !important;
+}
+
+.featured-mobile-carousel::-webkit-scrollbar-thumb {
+  background: rgba(20, 32, 22, 0.2);
+  border-radius: 999px;
+}
+
+.featured-mobile-carousel {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 1.25rem;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  padding: 8px 0 18px;
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  scrollbar-width: thin;
+}
+
+.featured-mobile-carousel::-webkit-scrollbar {
+  height: 6px;
+}
+
+.featured-mobile-carousel__card {
+  flex: 0 0 min(88vw, 340px);
+  width: min(88vw, 340px);
+  max-width: 340px;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 .scrollbar-hide::-webkit-scrollbar {

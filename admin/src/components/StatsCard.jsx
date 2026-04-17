@@ -65,7 +65,7 @@ const StatsCard = ({ icon: Icon, label, value, trend, trendValue, color = '#2D50
       </div>
 
       <div style={{ flex: 1 }}>
-        <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
           {label}
         </p>
         <h3 style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1A1A1A', fontFamily: "'Lato', sans-serif", marginBottom: 4 }}>
@@ -87,7 +87,7 @@ const StatsCard = ({ icon: Icon, label, value, trend, trendValue, color = '#2D50
             >
               {trendValue}%
             </span>
-            <span style={{ fontSize: '0.75rem', color: '#999' }}>vs last month</span>
+            <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>vs last month</span>
           </div>
         )}
       </div>

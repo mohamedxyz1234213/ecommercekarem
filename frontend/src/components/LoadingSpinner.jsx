@@ -23,7 +23,7 @@ const spinnerStyles = {
   text: {
     fontFamily: 'var(--font-heading)',
     fontSize: '1rem',
-    color: 'var(--accent)',
+    color: 'var(--text)',
     letterSpacing: '2px',
   },
 };

@@ -59,9 +59,9 @@ const Profile = () => {
   };
 
   const styles = {
-    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'var(--light)' },
+    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'transparent' },
     container: { maxWidth: '960px', margin: '0 auto', padding: '2rem 1.5rem 4rem' },
-    title: { fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 500, marginBottom: '2rem' },
+    title: { fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 500, marginBottom: '2rem', color: 'var(--text)' },
     grid: { display: 'grid', gridTemplateColumns: '340px 1fr', gap: '2.5rem', alignItems: 'start' },
     profileCard: { backgroundColor: 'var(--white)', borderRadius: 'var(--radius-md)', padding: '2rem', boxShadow: 'var(--shadow-sm)' },
     avatar: {
@@ -87,7 +87,7 @@ const Profile = () => {
     },
     saveBtnRow: { display: 'flex', gap: '0.5rem', marginTop: '1rem' },
     saveBtn: { flex: 1, padding: '0.6rem', backgroundColor: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' },
-    cancelBtn: { flex: 1, padding: '0.6rem', backgroundColor: 'var(--gray-100)', color: 'var(--text)', border: 'none', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', cursor: 'pointer' },
+    cancelBtn: { flex: 1, padding: '0.6rem', backgroundColor: 'var(--gray-200)', color: 'var(--text)', border: 'none', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', cursor: 'pointer' },
     ordersSection: { display: 'flex', flexDirection: 'column', gap: '1rem' },
     ordersTitle: { fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 500, marginBottom: '0.5rem' },
     orderCard: {

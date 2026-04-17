@@ -62,11 +62,11 @@ const Footer = () => {
 
   const styles = {
     footer: {
-      backgroundColor: '#2a0c0c',
-      color: 'rgba(242,235,227,0.86)',
+      background: 'linear-gradient(180deg, #dde3d8 0%, #cfd8cc 100%)',
+      color: 'var(--text)',
       padding: '5rem 0 2rem',
       marginTop: '4rem',
-      borderTop: '1px solid rgba(242,235,227,0.15)',
+      borderTop: '1px solid var(--gray-300)',
     },
     container: {
       maxWidth: '1280px',
@@ -83,7 +83,7 @@ const Footer = () => {
       fontFamily: 'var(--font-heading)',
       fontSize: '1.7rem',
       fontWeight: 600,
-      color: '#F2EBE3',
+      color: 'var(--primary)',
       letterSpacing: '1px',
       textTransform: 'lowercase',
       marginBottom: '1rem',
@@ -91,13 +91,13 @@ const Footer = () => {
     desc: {
       fontSize: '0.9rem',
       lineHeight: 1.8,
-      opacity: 0.7,
+      opacity: 0.92,
       maxWidth: '300px',
     },
     heading: {
       fontFamily: 'var(--font-heading)',
       fontSize: '1.1rem',
-      color: '#f2ebe3',
+      color: 'var(--text)',
       marginBottom: '1.25rem',
       fontWeight: 500,
     },
@@ -109,7 +109,8 @@ const Footer = () => {
     },
     link: {
       fontSize: '0.9rem',
-      opacity: 0.7,
+      color: 'var(--text-muted)',
+      opacity: 0.95,
       transition: 'opacity 0.3s',
     },
     form: {
@@ -119,17 +120,17 @@ const Footer = () => {
     input: {
       flex: 1,
       padding: '0.75rem 1rem',
-      border: '1px solid rgba(255,255,255,0.2)',
+      border: '1px solid var(--gray-300)',
       borderRadius: 'var(--radius-sm) 0 0 var(--radius-sm)',
-      backgroundColor: 'rgba(242,235,227,0.06)',
-      color: '#f2ebe3',
+      backgroundColor: 'var(--white)',
+      color: 'var(--text)',
       fontSize: '0.9rem',
       outline: 'none',
     },
     submitBtn: {
       padding: '0.75rem 1rem',
-      backgroundColor: '#f2ebe3',
-      color: '#3a1010',
+      backgroundColor: 'var(--primary)',
+      color: '#fff',
       border: 'none',
       borderRadius: '0 var(--radius-sm) var(--radius-sm) 0',
       cursor: 'pointer',
@@ -146,11 +147,11 @@ const Footer = () => {
       width: '40px',
       height: '40px',
       borderRadius: '50%',
-      border: '1px solid rgba(255,255,255,0.2)',
+      border: '1px solid var(--gray-300)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: '#f2ebe3',
+      color: 'var(--text)',
       fontSize: '1rem',
       transition: 'all 0.3s',
       cursor: 'pointer',
@@ -158,11 +159,12 @@ const Footer = () => {
       textDecoration: 'none',
     },
     divider: {
-      borderTop: '1px solid rgba(255,255,255,0.1)',
+      borderTop: '1px solid var(--gray-300)',
       paddingTop: '2rem',
       textAlign: 'center',
       fontSize: '0.85rem',
-      opacity: 0.5,
+      color: 'var(--text-muted)',
+      opacity: 0.9,
     },
   };
 

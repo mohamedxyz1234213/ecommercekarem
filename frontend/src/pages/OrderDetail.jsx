@@ -37,7 +37,7 @@ const OrderDetail = () => {
   if (loading) return <div style={{ paddingTop: '120px' }}><LoadingSpinner /></div>;
   if (!order) {
     return (
-      <div style={{ paddingTop: '120px', textAlign: 'center', color: 'var(--gray-500)' }}>
+      <div style={{ paddingTop: '120px', textAlign: 'center', color: 'var(--text-muted)' }}>
         Order not found.
       </div>
     );
@@ -54,7 +54,7 @@ const OrderDetail = () => {
   const currentIndex = statusOrder.indexOf(order.status);
 
   const styles = {
-    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'var(--light)' },
+    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'transparent' },
     container: { maxWidth: '800px', margin: '0 auto', padding: '2rem 1.5rem 4rem' },
     back: { display: 'inline-flex', alignItems: 'center', gap: '0.5rem', color: 'var(--gray-500)', fontSize: '0.9rem', marginBottom: '2rem', textDecoration: 'none' },
     header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' },

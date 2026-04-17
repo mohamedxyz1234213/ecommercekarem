@@ -4,6 +4,7 @@ import { MdSave, MdImage, MdStore, MdCampaign, MdLink, MdAdd, MdDelete, MdEdit }
 import ImageUpload from '../components/ImageUpload';
 import API from '../api/axios';
 import toast from 'react-hot-toast';
+import { resolveMediaUrl } from '../utils/resolveMediaUrl';
 
 const ICON_OPTIONS = [
   { label: 'Instagram', value: 'FiInstagram' },
@@ -151,7 +152,7 @@ const Settings = () => {
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
             <MdStore size={22} style={{ color: '#2D5016' }} />
-            <h3 style={{ fontSize: '1.1rem' }}>Site Information</h3>
+            <h3 style={{ fontSize: '1.1rem', color: '#142016' }}>Site Information</h3>
           </div>
 
           <div className="form-group">
@@ -179,7 +180,7 @@ const Settings = () => {
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
             <MdCampaign size={22} style={{ color: '#2D5016' }} />
-            <h3 style={{ fontSize: '1.1rem' }}>Banner & Announcements</h3>
+            <h3 style={{ fontSize: '1.1rem', color: '#142016' }}>Banner & Announcements</h3>
           </div>
 
           <div className="form-group">
@@ -214,9 +215,9 @@ const Settings = () => {
         <div className="card" style={{ gridColumn: '1 / -1' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
             <MdImage size={22} style={{ color: '#2D5016' }} />
-            <h3 style={{ fontSize: '1.1rem' }}>Hero Section</h3>
+            <h3 style={{ fontSize: '1.1rem', color: '#142016' }}>Hero Section</h3>
           </div>
-          <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: 16 }}>
+          <p style={{ fontSize: '0.85rem', color: '#4d564a', marginBottom: 16 }}>
             Customize the main hero section that appears on the homepage.
           </p>
 
@@ -313,7 +314,7 @@ const Settings = () => {
 
           <div className="form-group" style={{ marginTop: 16 }}>
             <label>Hero Background Image (optional)</label>
-            <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 8 }}>
+            <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 8 }}>
               Upload an image to use as the hero background. Leave empty for the default gradient.
             </p>
             <ImageUpload images={heroImages} onChange={setHeroImages} maxImages={1} />
@@ -324,7 +325,7 @@ const Settings = () => {
             style={{
               marginTop: 16,
               background: heroImages[0]
-                ? `url(${heroImages[0]}) center/cover no-repeat`
+                ? `url(${resolveMediaUrl(heroImages[0])}) center/cover no-repeat`
                 : 'linear-gradient(135deg, #1A2E0A 0%, #2D5016 50%, #3D6B1E 100%)',
               borderRadius: 12,
               padding: '40px 32px',
@@ -341,11 +342,19 @@ const Settings = () => {
               <p style={{ fontSize: '0.7rem', letterSpacing: '4px', color: '#C4A265', marginBottom: 8, textTransform: 'uppercase' }}>
                 {settings.heroSubtitle || 'Subtitle'}
               </p>
-              <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.5rem', fontWeight: 400, marginBottom: 8 }}>
+              <h2
+                style={{
+                  fontFamily: 'var(--font-heading)',
+                  fontSize: '1.5rem',
+                  fontWeight: 400,
+                  marginBottom: 8,
+                  color: '#FAF8F5',
+                }}
+              >
                 {settings.heroTitle || 'Title'} <br />
                 <span style={{ fontStyle: 'italic', color: '#C4A265' }}>{settings.heroTitleHighlight || 'Highlight'}</span>
               </h2>
-              <p style={{ fontSize: '0.8rem', opacity: 0.7, maxWidth: 400, margin: '0 auto' }}>
+              <p style={{ fontSize: '0.8rem', color: 'rgba(250,248,245,0.88)', maxWidth: 400, margin: '0 auto' }}>
                 {settings.heroDescription || 'Description text'}
               </p>
             </div>
@@ -357,7 +366,7 @@ const Settings = () => {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <MdLink size={22} style={{ color: '#2D5016' }} />
-              <h3 style={{ fontSize: '1.1rem' }}>Social Links</h3>
+              <h3 style={{ fontSize: '1.1rem', color: '#142016' }}>Social Links</h3>
             </div>
             <button
               className="btn btn-primary btn-sm"
@@ -367,7 +376,7 @@ const Settings = () => {
             </button>
           </div>
 
-          <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: 16 }}>
+          <p style={{ fontSize: '0.85rem', color: '#4d564a', marginBottom: 16 }}>
             Manage social media links shown in the navbar and/or footer.
           </p>
 
@@ -426,7 +435,7 @@ const Settings = () => {
 
           {/* Social Links List */}
           {settings.socialLinks.length === 0 ? (
-            <p style={{ textAlign: 'center', color: '#888', padding: '20px 0' }}>No social links configured</p>
+            <p style={{ textAlign: 'center', color: '#4d564a', padding: '20px 0' }}>No social links configured</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {settings.socialLinks.map((link) => (
@@ -448,7 +457,7 @@ const Settings = () => {
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{link.platform}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#888', wordBreak: 'break-all' }}>{link.url}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#4d564a', wordBreak: 'break-all' }}>{link.url}</div>
                   </div>
                   <span style={{
                     fontSize: '0.7rem',

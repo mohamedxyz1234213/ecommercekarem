@@ -6,9 +6,9 @@ import SaleBanner from '../components/SaleBanner';
 import AnimatedSection from '../components/AnimatedSection';
 
 const categories = [
-  { name: 'Women', slug: 'women' },
-  { name: 'Men', slug: 'men' },
-  { name: 'Unisex', slug: 'unisex' },
+  { label: 'Men', value: 'Men' },
+  { label: 'Women', value: 'Women' },
+  { label: 'Unisex', value: 'Unisex' },
 ];
 
 const pageVariants = {
@@ -22,6 +22,7 @@ const Home = () => {
     categories: {
       padding: '6rem 0',
       backgroundColor: 'var(--white)',
+      boxShadow: 'inset 0 1px 0 var(--gray-200)',
     },
     container: {
       maxWidth: '1280px',
@@ -46,41 +47,35 @@ const Home = () => {
       fontWeight: 500,
       color: 'var(--text)',
     },
-    catGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-      gap: '2rem',
-    },
-    catCard: {
-      position: 'relative',
-      borderRadius: 'var(--radius-md)',
-      overflow: 'hidden',
-      aspectRatio: '3/4',
-      cursor: 'pointer',
-    },
-    catImg: {
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover',
-      transition: 'transform 0.5s ease',
-    },
-    catOverlay: {
-      position: 'absolute',
-      inset: 0,
-      background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)',
+    catStack: {
+      maxWidth: '420px',
+      margin: '0 auto',
       display: 'flex',
-      alignItems: 'flex-end',
-      padding: '2rem',
+      flexDirection: 'column',
+      gap: '1rem',
     },
-    catName: {
+    catBtn: {
+      display: 'block',
+      width: '100%',
+      padding: '1.125rem 1.5rem',
       fontFamily: 'var(--font-heading)',
-      fontSize: '1.5rem',
-      color: '#fff',
+      fontSize: 'clamp(1.05rem, 2.5vw, 1.2rem)',
       fontWeight: 500,
+      letterSpacing: '0.06em',
+      textTransform: 'uppercase',
+      textAlign: 'center',
+      textDecoration: 'none',
+      color: '#f2ebe3',
+      backgroundColor: '#014421',
+      border: '1px solid rgba(1, 68, 33, 0.5)',
+      borderRadius: '14px',
+      cursor: 'pointer',
+      boxShadow: '0 4px 20px rgba(1, 68, 33, 0.22)',
+      transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
     },
     features: {
       padding: '5rem 0',
-      backgroundColor: 'var(--secondary)',
+      background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.55) 0%, #e8ebe6 100%)',
     },
     featGrid: {
       display: 'grid',
@@ -101,6 +96,7 @@ const Home = () => {
       fontSize: '1.15rem',
       fontWeight: 500,
       marginBottom: '0.5rem',
+      color: 'var(--text)',
     },
     featDesc: {
       fontSize: '0.9rem',
@@ -125,33 +121,20 @@ const Home = () => {
             </div>
           </AnimatedSection>
 
-          <div style={styles.catGrid}>
-            {categories.map((cat, i) => (
-              <AnimatedSection key={cat.slug} delay={i * 0.15}>
-                <Link to={`/shop?category=${cat.slug}`}>
-                  <motion.div
-                    style={styles.catCard}
-                    whileHover={{ scale: 1.02 }}
+          <AnimatedSection delay={0.1}>
+            <div style={styles.catStack}>
+              {categories.map((cat) => (
+                <motion.div key={cat.value} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Link
+                    to={`/shop?category=${encodeURIComponent(cat.value)}`}
+                    style={styles.catBtn}
                   >
-                    <div
-                      style={{
-                        ...styles.catImg,
-                        background:
-                          cat.slug === 'women'
-                            ? 'linear-gradient(135deg, #A85D7D 0%, #6A2C4E 100%)'
-                            : cat.slug === 'men'
-                              ? 'linear-gradient(135deg, #355C7D 0%, #2A3A50 100%)'
-                              : 'linear-gradient(135deg, #8E7C5A 0%, #4C3F2A 100%)',
-                      }}
-                    />
-                    <div style={styles.catOverlay}>
-                      <h3 style={styles.catName}>{cat.name}</h3>
-                    </div>
-                  </motion.div>
-                </Link>
-              </AnimatedSection>
-            ))}
-          </div>
+                    {cat.label}
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
+          </AnimatedSection>
         </div>
       </section>
 

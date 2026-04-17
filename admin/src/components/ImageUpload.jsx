@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { MdCloudUpload, MdClose } from 'react-icons/md';
+import { resolveMediaUrl } from '../utils/resolveMediaUrl';
 
 const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
   const [dragOver, setDragOver] = useState(false);
@@ -35,7 +36,7 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
   };
 
   const getPreview = (img) => {
-    if (typeof img === 'string') return img;
+    if (typeof img === 'string') return resolveMediaUrl(img);
     if (img instanceof File) return URL.createObjectURL(img);
     return '';
   };
@@ -58,10 +59,10 @@ const ImageUpload = ({ images = [], onChange, maxImages = 5 }) => {
         }}
       >
         <MdCloudUpload size={36} style={{ color: '#8B7355', marginBottom: 8 }} />
-        <p style={{ color: '#888', fontSize: '0.9rem' }}>
+        <p style={{ color: '#4d564a', fontSize: '0.9rem' }}>
           Drag & drop images or click to browse
         </p>
-        <p style={{ color: '#aaa', fontSize: '0.8rem', marginTop: 4 }}>
+        <p style={{ color: '#6b7280', fontSize: '0.8rem', marginTop: 4 }}>
           Max {maxImages} images. JPG, PNG, WebP
         </p>
         <input

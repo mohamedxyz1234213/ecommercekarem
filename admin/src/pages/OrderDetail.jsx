@@ -7,6 +7,7 @@ import StatusBadge from '../components/StatusBadge';
 import Modal from '../components/Modal';
 import LoadingSpinner from '../components/LoadingSpinner';
 import toast from 'react-hot-toast';
+import { getApiOrigin } from '../utils/apiBase';
 
 const OrderDetail = () => {
   const { id } = useParams();
@@ -82,7 +83,7 @@ const OrderDetail = () => {
 
   const isInstaPay = (order.paymentMethod || '').toLowerCase() === 'instapay';
   const proofImage = order.instapayProof;
-  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+  const apiBase = getApiOrigin();
   const normalizeAssetUrl = (src) => {
     if (!src) return '';
     if (/^https?:\/\//i.test(src) || src.startsWith('data:image')) return src;
@@ -124,7 +125,7 @@ const OrderDetail = () => {
                 />
                 <div style={{ flex: 1 }}>
                   <p style={{ fontWeight: 600 }}>{item.name || 'Product'}</p>
-                  <p style={{ color: '#888', fontSize: '0.85rem' }}>Qty: {item.quantity}</p>
+                  <p style={{ color: '#4d564a', fontSize: '0.85rem' }}>Qty: {item.quantity}</p>
                 </div>
                 <span style={{ fontWeight: 700, color: '#2D5016' }}>
                   EGP {((item.price || 0) * (item.quantity || 1)).toFixed(2)}
@@ -151,15 +152,15 @@ const OrderDetail = () => {
             <h3 style={{ marginBottom: 16, fontSize: '1rem' }}>Shipping Information</h3>
             <div className="grid-2">
               <div>
-                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 2 }}>Full Name</p>
+                <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 2 }}>Full Name</p>
                 <p style={{ fontWeight: 600 }}>{order.user?.name || '—'}</p>
               </div>
               <div>
-                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 2 }}>Phone</p>
+                <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 2 }}>Phone</p>
                 <p style={{ fontWeight: 600 }}>{order.shippingAddress?.phone || '—'}</p>
               </div>
               <div style={{ gridColumn: '1 / -1' }}>
-                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 2 }}>Address</p>
+                <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 2 }}>Address</p>
                 <p style={{ fontWeight: 600 }}>
                   {[
                     order.shippingAddress?.street,
@@ -278,16 +279,16 @@ const OrderDetail = () => {
             <h3 style={{ marginBottom: 16, fontSize: '1rem' }}>Payment Details</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <div>
-                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 2 }}>Method</p>
+                <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 2 }}>Method</p>
                 <StatusBadge status={order.paymentMethod || 'N/A'} />
               </div>
               <div>
-                <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 2 }}>Status</p>
+                <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 2 }}>Status</p>
                 <StatusBadge status={order.paymentStatus || 'pending'} />
               </div>
               {order.paidAt && (
                 <div>
-                  <p style={{ fontSize: '0.8rem', color: '#888', marginBottom: 2 }}>Paid At</p>
+                  <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 2 }}>Paid At</p>
                   <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>
                     {new Date(order.paidAt).toLocaleString()}
                   </p>
@@ -324,15 +325,15 @@ const OrderDetail = () => {
             <h3 style={{ marginBottom: 16, fontSize: '1rem' }}>Customer</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div>
-                <p style={{ fontSize: '0.8rem', color: '#888' }}>Name</p>
+                <p style={{ fontSize: '0.8rem', color: '#4d564a' }}>Name</p>
                 <p style={{ fontWeight: 600 }}>{order.user?.name || '—'}</p>
               </div>
               <div>
-                <p style={{ fontSize: '0.8rem', color: '#888' }}>Email</p>
+                <p style={{ fontSize: '0.8rem', color: '#4d564a' }}>Email</p>
                 <p style={{ fontWeight: 600 }}>{order.user?.email || order.email || '—'}</p>
               </div>
               <div>
-                <p style={{ fontSize: '0.8rem', color: '#888' }}>Ordered</p>
+                <p style={{ fontSize: '0.8rem', color: '#4d564a' }}>Ordered</p>
                 <p style={{ fontWeight: 600 }}>{new Date(order.createdAt).toLocaleString()}</p>
               </div>
             </div>

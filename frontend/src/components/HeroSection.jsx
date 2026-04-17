@@ -2,24 +2,31 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
+import { getApiOrigin } from '../utils/apiBase';
+
+// Shown when API is slow, fails, or fields are empty.
+const HERO_FALLBACKS = {
+  heroSubtitle: 'Luxury Fragrances',
+  heroTitle: 'Discover Your',
+  heroTitleHighlight: 'Signature Scent',
+  heroDescription:
+    "Curated collection of the world's finest perfumes, each telling a unique story of elegance and sophistication.",
+  heroPrimaryButtonText: 'Shop Now',
+  heroPrimaryButtonLink: '/shop',
+  heroSecondaryButtonText: 'View Collection',
+  heroSecondaryButtonLink: '/shop',
+};
 
 const HeroSection = () => {
-  const [content, setContent] = useState({
-    heroSubtitle: '',
-    heroTitle: '',
-    heroTitleHighlight: '',
-    heroDescription: '',
+  const [content, setContent] = useState(() => ({
+    ...HERO_FALLBACKS,
     heroImage: '',
-    heroPrimaryButtonText: '',
-    heroPrimaryButtonLink: '/shop',
-    heroSecondaryButtonText: '',
-    heroSecondaryButtonLink: '/shop',
-  });
+  }));
 
   const normalizeAssetUrl = (src) => {
     if (!src) return '';
     if (/^https?:\/\//i.test(src) || src.startsWith('data:image')) return src;
-    const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api\/?$/, '');
+    const apiBase = getApiOrigin();
     return src.startsWith('/') ? `${apiBase}${src}` : `${apiBase}/${src}`;
   };
 
@@ -27,19 +34,21 @@ const HeroSection = () => {
     const fetchSettings = async () => {
       try {
         const { data } = await API.get('/settings');
+        const t = (v) => (typeof v === 'string' ? v.trim() : '');
+        const opt = (raw, fb) => (raw === '' ? '' : t(raw) || fb);
         setContent({
-          heroSubtitle: data.heroSubtitle || '',
-          heroTitle: data.heroTitle || '',
-          heroTitleHighlight: data.heroTitleHighlight || '',
-          heroDescription: data.heroDescription || '',
+          heroSubtitle: t(data.heroSubtitle) || HERO_FALLBACKS.heroSubtitle,
+          heroTitle: t(data.heroTitle) || HERO_FALLBACKS.heroTitle,
+          heroTitleHighlight: t(data.heroTitleHighlight) || HERO_FALLBACKS.heroTitleHighlight,
+          heroDescription: t(data.heroDescription) || HERO_FALLBACKS.heroDescription,
           heroImage: normalizeAssetUrl(data.heroImage),
-          heroPrimaryButtonText: data.heroPrimaryButtonText || '',
-          heroPrimaryButtonLink: data.heroPrimaryButtonLink || '/shop',
-          heroSecondaryButtonText: data.heroSecondaryButtonText || '',
-          heroSecondaryButtonLink: data.heroSecondaryButtonLink || '/shop',
+          heroPrimaryButtonText: opt(data.heroPrimaryButtonText, HERO_FALLBACKS.heroPrimaryButtonText),
+          heroPrimaryButtonLink: t(data.heroPrimaryButtonLink) || HERO_FALLBACKS.heroPrimaryButtonLink,
+          heroSecondaryButtonText: opt(data.heroSecondaryButtonText, HERO_FALLBACKS.heroSecondaryButtonText),
+          heroSecondaryButtonLink: t(data.heroSecondaryButtonLink) || HERO_FALLBACKS.heroSecondaryButtonLink,
         });
       } catch {
-        // keep empty if settings request fails
+        // Keep HERO_FALLBACKS + any poster image already set; text stays visible on mobile when API URL is wrong.
       }
     };
     fetchSettings();
@@ -57,9 +66,10 @@ const HeroSection = () => {
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
+      isolation: 'isolate',
       background: hasImage
         ? `url(${content.heroImage}) center/cover no-repeat`
-        : 'linear-gradient(135deg, #013220 0%, #014421 55%, #355E3B 100%)',
+        : 'linear-gradient(135deg, #4a6354 0%, #5d7864 45%, #7d9280 100%)',
     },
     video: {
       position: 'absolute',
@@ -68,22 +78,28 @@ const HeroSection = () => {
       height: '100%',
       objectFit: 'cover',
       zIndex: 0,
+      // Keep video in its own compositor layer below UI (fixes iOS/Safari painting video on top of text)
+      transform: 'translateZ(0)',
+      WebkitTransform: 'translateZ(0)',
     },
     overlay: {
       position: 'absolute',
       inset: 0,
       background:
-        'linear-gradient(rgba(1, 50, 32, 0.55), rgba(1, 50, 32, 0.65)), ' +
-        'radial-gradient(ellipse at 30% 50%, rgba(188, 184, 138, 0.1) 0%, transparent 50%), ' +
-        'radial-gradient(ellipse at 70% 30%, rgba(1, 68, 33, 0.25) 0%, transparent 50%)',
-      zIndex: 1,
+        'linear-gradient(rgba(90, 109, 102, 0.55), rgba(1, 50, 32, 0.65)), ' +
+        'radial-gradient(ellipse at 30% 50%, rgba(131, 130, 116, 0.1) 0%, transparent 50%), ' +
+        'radial-gradient(ellipse at 70% 30%, rgba(149, 170, 160, 0.25) 0%, transparent 50%)',
+      zIndex: 2,
+      pointerEvents: 'none',
     },
     content: {
       position: 'relative',
-      zIndex: 2,
+      zIndex: 3,
       textAlign: 'center',
       maxWidth: '800px',
       padding: '0 2rem',
+      transform: 'translateZ(0)',
+      WebkitTransform: 'translateZ(0)',
     },
     subtitle: {
       fontFamily: 'var(--font-body)',
@@ -91,7 +107,7 @@ const HeroSection = () => {
       fontWeight: 300,
       letterSpacing: '6px',
       textTransform: 'uppercase',
-      color: 'rgba(242,235,227,0.86)',
+      color: 'rgba(242, 235, 227, 0.94)',
       marginBottom: '1.5rem',
     },
     heading: {
@@ -109,7 +125,7 @@ const HeroSection = () => {
     desc: {
       fontSize: '1.1rem',
       fontWeight: 300,
-      color: 'rgba(255,255,255,0.7)',
+      color: 'rgba(255, 255, 255, 0.9)',
       maxWidth: '520px',
       margin: '0 auto 2.5rem',
       lineHeight: 1.7,
@@ -143,7 +159,7 @@ const HeroSection = () => {
       fontWeight: 400,
       letterSpacing: '2px',
       textTransform: 'uppercase',
-      border: '1px solid rgba(242,235,227,0.45)',
+      border: '1px solid rgba(242, 235, 227, 0.65)',
       cursor: 'pointer',
       display: 'inline-block',
       textDecoration: 'none',
@@ -156,24 +172,28 @@ const HeroSection = () => {
       border: '1px solid rgba(196, 162, 101, 0.1)',
       top,
       left,
+      zIndex: 1,
+      pointerEvents: 'none',
     }),
     scrollHint: {
       position: 'absolute',
       bottom: '2rem',
       left: '50%',
-      transform: 'translateX(-50%)',
+      transform: 'translateX(-50%) translateZ(0)',
+      WebkitTransform: 'translateX(-50%) translateZ(0)',
+      zIndex: 3,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       gap: '0.5rem',
-      color: 'rgba(255,255,255,0.4)',
+      color: 'rgba(255, 255, 255, 0.78)',
       fontSize: '0.75rem',
       letterSpacing: '2px',
     },
   };
 
   return (
-    <section style={styles.hero}>
+    <section className="hero-section" style={styles.hero}>
       <video
         autoPlay
         loop
@@ -204,18 +224,18 @@ const HeroSection = () => {
       <div style={styles.content}>
         <motion.p
           style={styles.subtitle}
-          initial={{ opacity: 0, y: 20 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.8 }}
+          transition={{ duration: 0.5 }}
         >
           {content.heroSubtitle}
         </motion.p>
 
         <motion.h1
           style={styles.heading}
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.8 }}
+          transition={{ duration: 0.5 }}
         >
           {content.heroTitle} <br />
           <span style={styles.headingItalic}>{content.heroTitleHighlight}</span>
@@ -223,25 +243,27 @@ const HeroSection = () => {
 
         <motion.p
           style={styles.desc}
-          initial={{ opacity: 0, y: 20 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6, duration: 0.8 }}
+          transition={{ duration: 0.5 }}
         >
           {content.heroDescription}
         </motion.p>
 
         <motion.div
           style={styles.btnRow}
-          initial={{ opacity: 0, y: 20 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.8 }}
+          transition={{ duration: 0.5 }}
         >
           <Link to={content.heroPrimaryButtonLink} style={styles.btnPrimary}>
             {content.heroPrimaryButtonText}
           </Link>
-          <Link to={content.heroSecondaryButtonLink} style={styles.btnSecondary}>
-            {content.heroSecondaryButtonText}
-          </Link>
+          {content.heroSecondaryButtonText ? (
+            <Link to={content.heroSecondaryButtonLink} style={styles.btnSecondary}>
+              {content.heroSecondaryButtonText}
+            </Link>
+          ) : null}
         </motion.div>
       </div>
 

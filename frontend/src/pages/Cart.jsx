@@ -18,10 +18,10 @@ const Cart = () => {
   const navigate = useNavigate();
 
   const styles = {
-    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'var(--light)' },
+    page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'transparent' },
     container: { maxWidth: '1280px', margin: '0 auto', padding: '2rem 1.5rem 4rem' },
     header: { marginBottom: '2rem' },
-    title: { fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 500 },
+    title: { fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 500, color: 'var(--text)' },
     empty: {
       textAlign: 'center', padding: '4rem 0',
     },

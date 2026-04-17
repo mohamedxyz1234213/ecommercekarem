@@ -16,12 +16,14 @@ createRoot(document.getElementById('root')).render(
           toastOptions={{
             duration: 3000,
             style: {
-              background: '#1A2E0A',
-              color: '#FAF8F5',
+              background: '#ffffff',
+              color: '#142016',
               fontFamily: 'Lato, sans-serif',
+              border: '1px solid #c4bfb3',
+              boxShadow: '0 8px 24px rgba(20, 32, 22, 0.12)',
             },
-            success: { iconTheme: { primary: '#C4A265', secondary: '#FAF8F5' } },
-            error: { iconTheme: { primary: '#e74c3c', secondary: '#FAF8F5' } },
+            success: { iconTheme: { primary: '#1e7a4c', secondary: '#ffffff' } },
+            error: { iconTheme: { primary: '#c0392b', secondary: '#ffffff' } },
           }}
         />
       </AuthProvider>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+/* framer-motion — `motion` is used as Motion.div / Motion.a / etc. */
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
   FiShoppingBag,
   FiUser,
@@ -39,8 +40,8 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [socialLinks, setSocialLinks] = useState([]);
-  const [siteName, setSiteName] = useState('vybe');
-  const { isAuthenticated, user, logout } = useAuth();
+  const [siteName, setSiteName] = useState('Vybe');
+  const { isAuthenticated, logout } = useAuth();
   const { cartCount, setIsDrawerOpen } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
@@ -53,14 +54,24 @@ const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    setMobileOpen(false);
-  }, [location]);
+    if (!mobileOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e) => {
+      if (e.key === 'Escape') setMobileOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [mobileOpen]);
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const { data } = await API.get('/settings');
-        setSiteName(data.siteName || 'vybe');
+        setSiteName(data.siteName || 'Vybe');
         const links = (data.socialLinks || []).filter(
           (link) => link.enabled && (link.location === 'navbar' || link.location === 'both')
         );
@@ -72,8 +83,10 @@ const Navbar = () => {
     fetchSettings();
   }, []);
 
-  const navBg = scrolled || !isHome ? 'rgba(58, 16, 16, 0.95)' : 'transparent';
-  const textColor = '#F2EBE3';
+  const lightNav = scrolled || !isHome;
+  const onHeroCream = '#f2ebe3';
+  const ink = '#142016';
+  const navText = lightNav ? ink : onHeroCream;
 
   const links = [
     { label: 'Home', path: '/' },
@@ -88,9 +101,9 @@ const Navbar = () => {
       right: 0,
       zIndex: 1000,
       padding: scrolled ? '0.75rem 0' : '1.25rem 0',
-      backgroundColor: navBg,
-      backdropFilter: scrolled || !isHome ? 'blur(20px)' : 'none',
-      boxShadow: scrolled || !isHome ? 'var(--shadow-sm)' : 'none',
+      backgroundColor: lightNav ? 'rgba(248, 246, 242, 0.94)' : 'transparent',
+      backdropFilter: lightNav ? 'blur(20px)' : 'none',
+      boxShadow: lightNav ? 'var(--shadow-sm)' : 'none',
       transition: 'all 0.4s ease',
     },
     container: {
@@ -103,12 +116,13 @@ const Navbar = () => {
     },
     logo: {
       fontFamily: 'var(--font-heading)',
-      fontSize: '1.5rem',
-      fontWeight: 600,
-      color: '#F2EBE3',
+      fontSize: '1.85rem',
+      fontWeight: 650,
+      color: navText,
       letterSpacing: '1.5px',
-      textTransform: 'lowercase',
+      textTransform: '',
       cursor: 'pointer',
+      marginLeft: '1rem',
     },
     linksDesktop: {
       display: 'flex',
@@ -120,7 +134,7 @@ const Navbar = () => {
       fontWeight: 500,
       letterSpacing: '1px',
       textTransform: 'uppercase',
-      color: textColor,
+      color: navText,
       position: 'relative',
     },
     actions: {
@@ -131,7 +145,7 @@ const Navbar = () => {
     iconBtn: {
       background: 'none',
       border: 'none',
-      color: textColor,
+      color: navText,
       fontSize: '1.25rem',
       position: 'relative',
       display: 'flex',
@@ -145,7 +159,7 @@ const Navbar = () => {
       right: '-8px',
       backgroundColor: 'var(--primary)',
       color: '#fff',
-      fontSize: '0.65rem',
+      fontSize: '0.85rem',
       fontWeight: 700,
       width: '18px',
       height: '18px',
@@ -155,9 +169,9 @@ const Navbar = () => {
       justifyContent: 'center',
     },
     authBtn: {
-      backgroundColor: 'var(--secondary)',
-      color: 'var(--primary)',
-      border: '1px solid rgba(242,235,227,0.45)',
+      backgroundColor: lightNav ? 'var(--primary)' : 'rgba(242, 235, 227, 0.14)',
+      color: lightNav ? '#fff' : navText,
+      border: lightNav ? '1px solid var(--primary)' : '1px solid rgba(242, 235, 227, 0.55)',
       padding: '0.5rem 1.5rem',
       borderRadius: 'var(--radius-xl)',
       fontSize: '0.85rem',
@@ -169,44 +183,144 @@ const Navbar = () => {
       display: 'none',
       background: 'none',
       border: 'none',
-      color: textColor,
+      color: navText,
       fontSize: '1.5rem',
       cursor: 'pointer',
     },
-    mobileOverlay: {
+    mobileMenuShell: {
       position: 'fixed',
       inset: 0,
-      backgroundColor: 'rgba(0,0,0,0.5)',
-      zIndex: 999,
-    },
-    mobileMenu: {
-      position: 'fixed',
-      top: 0,
-      right: 0,
-      width: '280px',
-      height: '100vh',
-      backgroundColor: '#3a1010',
       zIndex: 1001,
-      padding: '2rem 1.5rem',
       display: 'flex',
       flexDirection: 'column',
-      gap: '1.5rem',
+      background: 'var(--bg-gradient)',
+      paddingTop: 'max(env(safe-area-inset-top), 0px)',
+      paddingBottom: 'max(env(safe-area-inset-bottom), 0px)',
+      paddingLeft: 'max(env(safe-area-inset-left), 0px)',
+      paddingRight: 'max(env(safe-area-inset-right), 0px)',
+      overflow: 'hidden',
+    },
+    mobileMenuHeader: {
+      flexShrink: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: '1.25rem 1.5rem',
+      borderBottom: '1px solid var(--gray-200)',
+    },
+    mobileMenuBrand: {
+      fontFamily: 'var(--font-heading)',
+      fontSize: '1.35rem',
+      fontWeight: 600,
+      color: 'var(--text)',
+      letterSpacing: '0.06em',
+      textDecoration: 'none',
     },
     mobileClose: {
-      alignSelf: 'flex-end',
-      background: 'none',
-      border: 'none',
-      fontSize: '1.5rem',
-      color: '#f2ebe3',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 48,
+      height: 48,
+      borderRadius: '50%',
+      background: 'var(--gray-100)',
+      border: '1px solid var(--gray-200)',
+      fontSize: '1.35rem',
+      color: 'var(--text)',
       cursor: 'pointer',
+      transition: 'background 0.2s ease, transform 0.2s ease',
+    },
+    mobileMenuBody: {
+      flex: 1,
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch',
+      padding: '2rem 1.5rem 2.5rem',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      minHeight: 0,
     },
     mobileLink: {
-      fontSize: '1.1rem',
-      fontWeight: 500,
-      color: '#f2ebe3',
-      padding: '0.75rem 0',
-      borderBottom: '1px solid rgba(242,235,227,0.2)',
+      fontFamily: 'var(--font-heading)',
+      fontSize: 'clamp(1.85rem, 7.5vw, 2.75rem)',
+      fontWeight: 400,
+      color: 'var(--text)',
+      padding: '0.65rem 0',
       display: 'block',
+      textDecoration: 'none',
+      letterSpacing: '0.02em',
+      lineHeight: 1.15,
+      borderBottom: '1px solid var(--gray-200)',
+    },
+    mobileLinkMuted: {
+      fontFamily: 'var(--font-body)',
+      fontSize: '1rem',
+      fontWeight: 500,
+      letterSpacing: '0.12em',
+      textTransform: 'uppercase',
+      color: 'var(--text-muted)',
+    },
+    mobileMenuFooter: {
+      flexShrink: 0,
+      padding: '1.25rem 1.5rem 1.5rem',
+      borderTop: '1px solid var(--gray-200)',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '1rem',
+      alignItems: 'center',
+    },
+    mobileSocialRow: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: '0.75rem',
+      justifyContent: 'center',
+    },
+    mobileSocialIcon: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: 44,
+      height: 44,
+      borderRadius: '50%',
+      background: 'var(--white)',
+      border: '1px solid var(--gray-200)',
+      color: 'var(--text)',
+      fontSize: '1.1rem',
+    },
+  };
+
+  const menuContainerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        when: 'beforeChildren',
+        staggerChildren: 0.065,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const menuItemVariants = {
+    hidden: { opacity: 0, y: 28 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { type: 'spring', stiffness: 380, damping: 32, mass: 0.85 },
+    },
+  };
+
+  const menuRevealVariants = {
+    hidden: { opacity: 0, clipPath: 'inset(0 0 100% 0)' },
+    show: {
+      opacity: 1,
+      clipPath: 'inset(0 0 0% 0)',
+      transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+    },
+    exit: {
+      opacity: 0,
+      clipPath: 'inset(0 0 100% 0)',
+      transition: { duration: 0.36, ease: [0.4, 0, 1, 1] },
     },
   };
 
@@ -254,14 +368,14 @@ const Navbar = () => {
             >
               <FiShoppingBag />
               {cartCount > 0 && (
-                <motion.span
+                <Motion.span
                   style={styles.badge}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   key={cartCount}
                 >
                   {cartCount}
-                </motion.span>
+                </Motion.span>
               )}
             </button>
 
@@ -307,68 +421,157 @@ const Navbar = () => {
 
       <AnimatePresence>
         {mobileOpen && (
-          <>
-            <motion.div
-              style={styles.mobileOverlay}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.div
-              style={styles.mobileMenu}
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'tween', duration: 0.3 }}
-            >
-              <button
+          <Motion.div
+            key="mobile-full-menu"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Site navigation"
+            style={styles.mobileMenuShell}
+            variants={menuRevealVariants}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+          >
+            <header style={styles.mobileMenuHeader}>
+              <Link to="/" style={styles.mobileMenuBrand} onClick={() => setMobileOpen(false)}>
+                {siteName}
+              </Link>
+              <Motion.button
+                type="button"
                 style={styles.mobileClose}
                 onClick={() => setMobileOpen(false)}
                 aria-label="Close menu"
+                whileTap={{ scale: 0.94 }}
+                whileHover={{ backgroundColor: 'var(--gray-200)' }}
               >
                 <FiX />
-              </button>
+              </Motion.button>
+            </header>
+
+            <Motion.div
+              style={styles.mobileMenuBody}
+              variants={menuContainerVariants}
+              initial="hidden"
+              animate="show"
+            >
               {links.map((link) => (
-                <Link key={link.path} to={link.path} style={styles.mobileLink}>
-                  {link.label}
-                </Link>
+                <Motion.div key={link.path} variants={menuItemVariants} style={{ width: '100%' }}>
+                  <Link
+                    to={link.path}
+                    style={styles.mobileLink}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                </Motion.div>
               ))}
-              <Link to="/cart" style={styles.mobileLink}>
-                Cart ({cartCount})
-              </Link>
+              <Motion.div variants={menuItemVariants} style={{ width: '100%' }}>
+                <Link
+                  to="/cart"
+                  style={{ ...styles.mobileLink, ...styles.mobileLinkMuted }}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Cart {cartCount > 0 ? `· ${cartCount}` : ''}
+                </Link>
+              </Motion.div>
               {isAuthenticated ? (
                 <>
-                  <Link to="/profile" style={styles.mobileLink}>
-                    Profile
-                  </Link>
-                  <button
-                    onClick={logout}
-                    style={{
-                      ...styles.mobileLink,
-                      background: 'none',
-                      textAlign: 'left',
-                      width: '100%',
-                      cursor: 'pointer',
-                      border: 'none',
-                      fontFamily: 'var(--font-body)',
-                    }}
-                  >
-                    Logout
-                  </button>
+                  <Motion.div variants={menuItemVariants} style={{ width: '100%' }}>
+                    <Link
+                      to="/profile"
+                      style={styles.mobileLink}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Profile
+                    </Link>
+                  </Motion.div>
+                  <Motion.div variants={menuItemVariants} style={{ width: '100%' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        logout();
+                        setMobileOpen(false);
+                      }}
+                      style={{
+                        ...styles.mobileLink,
+                        ...styles.mobileLinkMuted,
+                        background: 'none',
+                        textAlign: 'left',
+                        width: '100%',
+                        cursor: 'pointer',
+                        border: 'none',
+                        borderBottom: '1px solid var(--gray-200)',
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </Motion.div>
                 </>
               ) : (
                 <>
-                  <Link to="/login" style={styles.mobileLink}>
-                    Sign In
-                  </Link>
-                  <Link to="/register" style={styles.mobileLink}>
-                    Create Account
-                  </Link>
+                  <Motion.div variants={menuItemVariants} style={{ width: '100%' }}>
+                    <Link
+                      to="/login"
+                      style={{ ...styles.mobileLink, ...styles.mobileLinkMuted }}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Sign In
+                    </Link>
+                  </Motion.div>
+                  <Motion.div variants={menuItemVariants} style={{ width: '100%' }}>
+                    <Link
+                      to="/register"
+                      style={{ ...styles.mobileLink, ...styles.mobileLinkMuted }}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Create Account
+                    </Link>
+                  </Motion.div>
                 </>
               )}
-            </motion.div>
-          </>
+            </Motion.div>
+
+            {socialLinks.length > 0 && (
+              <Motion.footer
+                style={styles.mobileMenuFooter}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.35, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-muted)',
+                  }}
+                >
+                  Follow us
+                </span>
+                <div style={styles.mobileSocialRow}>
+                  {socialLinks.map((sl, i) => {
+                    const IconComponent = ICON_MAP[sl.icon] || FiGlobe;
+                    return (
+                      <Motion.a
+                        key={sl._id || i}
+                        href={sl.url}
+                        target={sl.url.startsWith('mailto:') ? undefined : '_blank'}
+                        rel="noopener noreferrer"
+                        style={styles.mobileSocialIcon}
+                        aria-label={sl.platform}
+                        title={sl.platform}
+                        onClick={() => setMobileOpen(false)}
+                        whileTap={{ scale: 0.92 }}
+                        whileHover={{ backgroundColor: 'var(--gray-100)' }}
+                      >
+                        <IconComponent />
+                      </Motion.a>
+                    );
+                  })}
+                </div>
+              </Motion.footer>
+            )}
+          </Motion.div>
         )}
       </AnimatePresence>
 
