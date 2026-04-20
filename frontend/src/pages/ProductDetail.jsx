@@ -96,6 +96,20 @@ const ProductDetail = () => {
 
   const selectedSizeStock = availableSizes.find((entry) => entry.size === selectedSize)?.quantity ?? null;
 
+  // Max purchasable quantity for the current selection
+  const maxQty = availableSizes.length > 0
+    ? (selectedSize && selectedSizeStock !== null ? selectedSizeStock : null)
+    : (product.stock || 0);
+
+  // Stock display for the "low stock" hint
+  const stockDisplay = availableSizes.length > 0
+    ? (selectedSize ? selectedSizeStock : null)
+    : (product.stock || 0);
+
+  const isOutOfStock = availableSizes.length > 0
+    ? availableSizes.length === 0
+    : (product.stock || 0) === 0;
+
   const styles = {
     page: {
       paddingTop: '100px',
@@ -385,15 +399,24 @@ const ProductDetail = () => {
                         key={entry.size}
                         type="button"
                         style={styles.sizeBtn(selectedSize === entry.size)}
-                        onClick={() => setSelectedSize(entry.size)}
+                        onClick={() => {
+                          setSelectedSize(entry.size);
+                          setQuantity(1);
+                        }}
                       >
                         {entry.size}
+                        {entry.quantity === 1 && (
+                          <span style={{ marginLeft: '4px', fontSize: '0.6rem', color: '#dc2626', fontWeight: 700 }}>●</span>
+                        )}
                       </button>
                     ))}
                   </div>
                   {selectedSize && selectedSizeStock !== null && (
-                    <span style={styles.stockHint}>
-                      {selectedSizeStock} in stock
+                    <span style={{
+                      ...styles.stockHint,
+                      ...(selectedSizeStock === 1 ? { color: '#dc2626', fontWeight: 700 } : selectedSizeStock <= 3 ? { color: '#d97706', fontWeight: 600 } : {}),
+                    }}>
+                      {selectedSizeStock === 1 ? '🔴 Last piece!' : selectedSizeStock <= 3 ? `Only ${selectedSizeStock} left!` : `${selectedSizeStock} in stock`}
                     </span>
                   )}
                 </div>
@@ -404,27 +427,47 @@ const ProductDetail = () => {
                 <div style={styles.qtyControl}>
                   <button style={styles.qtyBtn} onClick={() => setQuantity(Math.max(1, quantity - 1))}><FiMinus /></button>
                   <span style={styles.qtyVal}>{quantity}</span>
-                  <button style={styles.qtyBtn} onClick={() => setQuantity(quantity + 1)}><FiPlus /></button>
+                  <button
+                    style={{
+                      ...styles.qtyBtn,
+                      ...(maxQty !== null && quantity >= maxQty ? { opacity: 0.4, cursor: 'not-allowed' } : {}),
+                    }}
+                    onClick={() => {
+                      if (maxQty !== null && quantity >= maxQty) return;
+                      setQuantity(quantity + 1);
+                    }}
+                    disabled={maxQty !== null && quantity >= maxQty}
+                  >
+                    <FiPlus />
+                  </button>
                 </div>
+                {stockDisplay !== null && stockDisplay <= 3 && stockDisplay > 0 && (
+                  <span style={{
+                    fontSize: '0.8125rem',
+                    color: stockDisplay === 1 ? '#dc2626' : '#d97706',
+                    fontWeight: 700,
+                  }}>
+                    {stockDisplay === 1 ? '🔴 Last piece!' : `Only ${stockDisplay} left!`}
+                  </span>
+                )}
               </div>
 
               <div style={styles.btnRow}>
                 <motion.button
                   style={{
                     ...styles.addBtn,
-                    ...(availableSizes.length > 0 && !selectedSize ? styles.addBtnDisabled : {}),
+                    ...((availableSizes.length > 0 && !selectedSize) || isOutOfStock ? styles.addBtnDisabled : {}),
                   }}
-                  whileHover={availableSizes.length > 0 && !selectedSize ? {} : { scale: 1.01 }}
-                  whileTap={availableSizes.length > 0 && !selectedSize ? {} : { scale: 0.99 }}
+                  whileHover={(availableSizes.length > 0 && !selectedSize) || isOutOfStock ? {} : { scale: 1.01 }}
+                  whileTap={(availableSizes.length > 0 && !selectedSize) || isOutOfStock ? {} : { scale: 0.99 }}
                   onClick={() => {
-                    if (availableSizes.length > 0 && !selectedSize) {
-                      return;
-                    }
+                    if ((availableSizes.length > 0 && !selectedSize) || isOutOfStock) return;
                     addToCart(product, quantity, selectedSize);
                   }}
-                  disabled={availableSizes.length > 0 && !selectedSize}
+                  disabled={(availableSizes.length > 0 && !selectedSize) || isOutOfStock}
                 >
-                  <FiShoppingBag /> {availableSizes.length > 0 && !selectedSize ? 'Select a size' : 'Add to bag'}
+                  <FiShoppingBag />
+                  {isOutOfStock ? 'Out of Stock' : availableSizes.length > 0 && !selectedSize ? 'Select a size' : 'Add to bag'}
                 </motion.button>
                 <motion.button
                   style={styles.wishBtn}

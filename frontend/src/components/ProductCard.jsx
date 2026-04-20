@@ -18,9 +18,11 @@ const normalizeImageUrl = (src) => {
 /** Light-surface card with explicit contrast (avoids theme --white = green tint) */
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
-  const { _id, name, price, salePrice, images, rating, numReviews, brand, onSale } = product;
+  const { _id, name, price, salePrice, images, rating, numReviews, brand, onSale, stock } = product;
   const displayImage = normalizeImageUrl(images?.[0]);
   const discount = onSale && salePrice ? Math.round((1 - salePrice / price) * 100) : 0;
+  const isOutOfStock = (stock || 0) === 0;
+  const isLastPiece = (stock || 0) === 1;
 
   const styles = {
     card: {
@@ -69,16 +71,17 @@ const ProductCard = ({ product }) => {
       width: '44px',
       height: '44px',
       borderRadius: '50%',
-      backgroundColor: '#014421',
+      backgroundColor: isOutOfStock ? '#9ca3af' : '#014421',
       color: '#fff',
       border: 'none',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      cursor: 'pointer',
+      cursor: isOutOfStock ? 'not-allowed' : 'pointer',
       fontSize: '1.05rem',
       zIndex: 2,
-      boxShadow: '0 4px 14px rgba(1, 68, 33, 0.35)',
+      boxShadow: isOutOfStock ? 'none' : '0 4px 14px rgba(1, 68, 33, 0.35)',
+      opacity: isOutOfStock ? 0.6 : 1,
     },
     info: {
       padding: '1.125rem 1.25rem 1.35rem',
@@ -145,6 +148,47 @@ const ProductCard = ({ product }) => {
       <Link to={`/product/${_id}`} style={{ textDecoration: 'none', color: 'inherit', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={styles.imageWrapper}>
           {onSale && discount > 0 && <div style={styles.saleTape}>Sale {discount}%</div>}
+          {isLastPiece && (
+            <div style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              backgroundColor: '#dc2626',
+              color: '#fff',
+              fontSize: '0.6rem',
+              fontWeight: 700,
+              padding: '4px 9px',
+              borderRadius: '6px',
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              zIndex: 2,
+              boxShadow: '0 2px 8px rgba(220, 38, 38, 0.4)',
+            }}>
+              Last Piece!
+            </div>
+          )}
+          {isOutOfStock && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundColor: 'rgba(255,255,255,0.65)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 2,
+            }}>
+              <span style={{
+                backgroundColor: '#6b7280',
+                color: '#fff',
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                padding: '6px 14px',
+                borderRadius: '8px',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+              }}>Out of Stock</span>
+            </div>
+          )}
           <motion.img
             src={displayImage}
             alt={name}
@@ -176,14 +220,15 @@ const ProductCard = ({ product }) => {
       </Link>
       <motion.button
         style={styles.addBtn}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.94 }}
+        whileHover={isOutOfStock ? {} : { scale: 1.08 }}
+        whileTap={isOutOfStock ? {} : { scale: 0.94 }}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          addToCart(product);
+          if (!isOutOfStock) addToCart(product);
         }}
-        aria-label="Add to cart"
+        aria-label={isOutOfStock ? 'Out of stock' : 'Add to cart'}
+        disabled={isOutOfStock}
       >
         <FiShoppingBag />
       </motion.button>

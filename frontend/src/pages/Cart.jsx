@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiPlus, FiMinus, FiTrash2, FiArrowLeft, FiArrowRight } from 'react-icons/fi';
-import { useCart } from '../context/CartContext';
+import { useCart, getItemMaxStock } from '../context/CartContext';
 import AnimatedSection from '../components/AnimatedSection';
 
 const FALLBACK_CART_IMAGE =
@@ -107,6 +107,14 @@ const Cart = () => {
                         {item.selectedSize && (
                           <p style={{ fontSize: '0.8rem', color: 'var(--gray-500)' }}>Size: {item.selectedSize}</p>
                         )}
+                        {(() => {
+                          const max = getItemMaxStock(item);
+                          return max <= 3 && max > 0 ? (
+                            <p style={{ fontSize: '0.75rem', color: max === 1 ? '#dc2626' : '#d97706', fontWeight: 700, marginTop: '2px' }}>
+                              {max === 1 ? '🔴 Last piece!' : `Only ${max} left!`}
+                            </p>
+                          ) : null;
+                        })()}
                       </div>
                       <div style={styles.itemBottom}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -119,8 +127,15 @@ const Cart = () => {
                             </button>
                             <span style={styles.qtyVal}>{item.quantity}</span>
                             <button
-                              style={styles.qtyBtn}
-                              onClick={() => updateQuantity(item._id, item.selectedSize, item.quantity + 1)}
+                              style={{
+                                ...styles.qtyBtn,
+                                ...(item.quantity >= getItemMaxStock(item) ? { opacity: 0.4, cursor: 'not-allowed' } : {}),
+                              }}
+                              onClick={() => {
+                                if (item.quantity >= getItemMaxStock(item)) return;
+                                updateQuantity(item._id, item.selectedSize, item.quantity + 1);
+                              }}
+                              disabled={item.quantity >= getItemMaxStock(item)}
                             >
                               <FiPlus />
                             </button>

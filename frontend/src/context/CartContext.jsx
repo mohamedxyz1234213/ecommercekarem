@@ -9,6 +9,19 @@ export const useCart = () => {
   return context;
 };
 
+/**
+ * Returns the maximum purchasable stock for an item or product given a selected size.
+ * Works with both cart items (which have selectedSize set) and raw product objects.
+ */
+export const getItemMaxStock = (item, selectedSize) => {
+  const size = selectedSize !== undefined ? selectedSize : (item.selectedSize || '');
+  if (Array.isArray(item.sizeStocks) && item.sizeStocks.length > 0 && size) {
+    const entry = item.sizeStocks.find((e) => e.size === size);
+    return entry ? (entry.quantity || 0) : 0;
+  }
+  return item.stock || 0;
+};
+
 const loadCart = () => {
   try {
     const stored = localStorage.getItem('cart');
@@ -28,19 +41,30 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = useCallback((product, quantity = 1, selectedSize = '') => {
     setItems((prev) => {
+      const maxStock = getItemMaxStock(product, selectedSize);
       const existing = prev.find(
         (item) => item._id === product._id && (item.selectedSize || '') === (selectedSize || '')
       );
       if (existing) {
+        const newQty = Math.min(existing.quantity + quantity, maxStock);
+        if (newQty === existing.quantity) {
+          toast.error(`Only ${maxStock} in stock!`);
+          return prev;
+        }
         toast.success('Cart updated!');
         return prev.map((item) =>
           item._id === product._id && (item.selectedSize || '') === (selectedSize || '')
-            ? { ...item, quantity: item.quantity + quantity }
+            ? { ...item, quantity: newQty }
             : item
         );
       }
+      if (maxStock === 0) {
+        toast.error('This item is out of stock');
+        return prev;
+      }
+      const clampedQty = Math.min(quantity, maxStock);
       toast.success('Added to cart!');
-      return [...prev, { ...product, quantity, selectedSize: selectedSize || '' }];
+      return [...prev, { ...product, quantity: clampedQty, selectedSize: selectedSize || '' }];
     });
     setIsDrawerOpen(true);
   }, []);
@@ -57,11 +81,14 @@ export const CartProvider = ({ children }) => {
   const updateQuantity = useCallback((productId, selectedSize = '', quantity) => {
     if (quantity < 1) return;
     setItems((prev) =>
-      prev.map((item) =>
-        item._id === productId && (item.selectedSize || '') === (selectedSize || '')
-          ? { ...item, quantity }
-          : item
-      )
+      prev.map((item) => {
+        if (item._id === productId && (item.selectedSize || '') === (selectedSize || '')) {
+          const maxStock = getItemMaxStock(item, selectedSize);
+          const capped = maxStock > 0 ? Math.min(quantity, maxStock) : quantity;
+          return { ...item, quantity: capped };
+        }
+        return item;
+      })
     );
   }, []);
 
