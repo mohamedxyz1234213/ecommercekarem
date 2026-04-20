@@ -14,7 +14,7 @@ export const useCart = () => {
  * Works with both cart items (which have selectedSize set) and raw product objects.
  */
 export const getItemMaxStock = (item, selectedSize) => {
-  const size = selectedSize !== undefined ? selectedSize : (item.selectedSize || '');
+  const size = (selectedSize !== undefined && selectedSize !== null) ? selectedSize : (item.selectedSize || '');
   if (Array.isArray(item.sizeStocks) && item.sizeStocks.length > 0 && size) {
     const entry = item.sizeStocks.find((e) => e.size === size);
     return entry ? (entry.quantity || 0) : 0;

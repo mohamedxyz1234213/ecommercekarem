@@ -106,7 +106,7 @@ const ProductDetail = () => {
     ? (selectedSize ? selectedSizeStock : null)
     : (product.stock || 0);
 
-  const isOutOfStock = availableSizes.length > 0
+  const isOutOfStock = Array.isArray(product.sizeStocks) && product.sizeStocks.length > 0
     ? availableSizes.length === 0
     : (product.stock || 0) === 0;
 
