@@ -135,7 +135,14 @@ const ProductForm = () => {
     setLoading(true);
     try {
       const existingImageUrls = images.filter((img) => typeof img === 'string');
-      const newImageFiles = images.filter((img) => img instanceof File);
+      const newImageFiles = images.filter(
+        (img) =>
+          typeof img === 'object' &&
+          img !== null &&
+          typeof img.name === 'string' &&
+          typeof img.size === 'number' &&
+          typeof img.type === 'string'
+      );
 
       let uploadedImageUrls = [];
       if (newImageFiles.length > 0) {
@@ -145,6 +152,9 @@ const ProductForm = () => {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         uploadedImageUrls = Array.isArray(data) ? data.map((item) => item.url).filter(Boolean) : [];
+        if (uploadedImageUrls.length !== newImageFiles.length) {
+          throw new Error('Some images failed to upload. Please try again.');
+        }
       }
 
       const payload = {

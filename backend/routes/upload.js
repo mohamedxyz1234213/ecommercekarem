@@ -20,13 +20,13 @@ router.post('/', uploadLimiter, auth, (req, res) => {
   uploadSingle(req, res, async (err) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ message: 'File too large. Maximum size is 5MB.' });
+        return res.status(400).json({ message: 'File too large. Maximum size is 15MB per image.' });
       }
       return res.status(400).json({ message: err.message });
     }
 
     if (!req.file) {
-      return res.status(400).json({ message: 'No file uploaded' });
+      return res.status(400).json({ message: 'No image uploaded. Please choose a JPG, PNG, GIF, or WebP file.' });
     }
 
     if (!hasCloudinaryConfig()) {
@@ -51,7 +51,7 @@ router.post('/multiple', uploadLimiter, auth, (req, res) => {
   uploadProductImages(req, res, async (err) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ message: 'File too large. Maximum size is 5MB.' });
+        return res.status(400).json({ message: 'File too large. Maximum size is 15MB per image.' });
       }
       if (err.code === 'LIMIT_UNEXPECTED_FILE') {
         return res.status(400).json({ message: 'Maximum 10 files allowed.' });
@@ -60,7 +60,7 @@ router.post('/multiple', uploadLimiter, auth, (req, res) => {
     }
 
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: 'No files uploaded' });
+      return res.status(400).json({ message: 'No images uploaded. Please choose image files first.' });
     }
 
     if (!hasCloudinaryConfig()) {
