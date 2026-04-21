@@ -2,6 +2,7 @@ const express = require('express');
 const rateLimit = require('express-rate-limit');
 const { auth } = require('../middleware/auth');
 const { uploadSingle, uploadProductImages } = require('../middleware/upload');
+const { uploadImageBuffer, hasCloudinaryConfig } = require('../utils/cloudinary');
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ const uploadLimiter = rateLimit({
 // @route   POST /api/upload
 // @desc    Upload single image
 router.post('/', uploadLimiter, auth, (req, res) => {
-  uploadSingle(req, res, (err) => {
+  uploadSingle(req, res, async (err) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ message: 'File too large. Maximum size is 5MB.' });
@@ -28,17 +29,26 @@ router.post('/', uploadLimiter, auth, (req, res) => {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    res.json({
-      url: `/uploads/${req.file.filename}`,
-      filename: req.file.filename,
-    });
+    if (!hasCloudinaryConfig()) {
+      return res.status(500).json({ message: 'Image storage is not configured on server' });
+    }
+
+    try {
+      const result = await uploadImageBuffer(req.file.buffer, { folder: 'vybe/products' });
+      return res.json({
+        url: result.secure_url,
+        filename: result.public_id,
+      });
+    } catch (uploadError) {
+      return res.status(500).json({ message: `Image upload failed: ${uploadError.message}` });
+    }
   });
 });
 
 // @route   POST /api/upload/multiple
 // @desc    Upload multiple images
 router.post('/multiple', uploadLimiter, auth, (req, res) => {
-  uploadProductImages(req, res, (err) => {
+  uploadProductImages(req, res, async (err) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ message: 'File too large. Maximum size is 5MB.' });
@@ -53,12 +63,22 @@ router.post('/multiple', uploadLimiter, auth, (req, res) => {
       return res.status(400).json({ message: 'No files uploaded' });
     }
 
-    const urls = req.files.map((file) => ({
-      url: `/uploads/${file.filename}`,
-      filename: file.filename,
-    }));
+    if (!hasCloudinaryConfig()) {
+      return res.status(500).json({ message: 'Image storage is not configured on server' });
+    }
 
-    res.json(urls);
+    try {
+      const uploaded = await Promise.all(
+        req.files.map((file) => uploadImageBuffer(file.buffer, { folder: 'vybe/products' }))
+      );
+      const urls = uploaded.map((item) => ({
+        url: item.secure_url,
+        filename: item.public_id,
+      }));
+      return res.json(urls);
+    } catch (uploadError) {
+      return res.status(500).json({ message: `Image upload failed: ${uploadError.message}` });
+    }
   });
 });
 

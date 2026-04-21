@@ -10,6 +10,7 @@ const {
   sendStatusUpdate,
   sendAdminNotification,
 } = require('../utils/email');
+const { uploadImageBuffer, hasCloudinaryConfig } = require('../utils/cloudinary');
 const { sanitize } = require('../utils/sanitize');
 
 const isValidEmail = (value) => /^\S+@\S+\.\S+$/.test(String(value || '').trim());
@@ -168,13 +169,17 @@ const submitInstapayProof = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: 'Payment proof image is required' });
     }
+    if (!hasCloudinaryConfig()) {
+      return res.status(500).json({ message: 'Image storage is not configured on server' });
+    }
 
     const instapayUsername = String(req.body.instapayUsername || '').trim();
     if (!instapayUsername) {
       return res.status(400).json({ message: 'InstaPay username is required' });
     }
 
-    order.instapayProof = `/uploads/${req.file.filename}`;
+    const proofUpload = await uploadImageBuffer(req.file.buffer, { folder: 'vybe/instapay' });
+    order.instapayProof = proofUpload.secure_url;
     order.instapayUsername = instapayUsername;
     order.email = submittedEmail;
     order.paymentStatus = 'pending';
