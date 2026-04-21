@@ -25,7 +25,7 @@ const InstapayPayment = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const INSTAPAY_USERNAME = 'NewSession';
+  const INSTAPAY_USERNAME = '01017602432';
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
