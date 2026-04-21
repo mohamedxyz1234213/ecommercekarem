@@ -6,6 +6,7 @@ const { auth } = require('../middleware/auth');
 const {
   register,
   login,
+  googleLogin,
   getMe,
   updateMe,
   googleCallback,
@@ -57,6 +58,9 @@ router.post(
   ],
   login
 );
+
+// @route   POST /api/auth/google
+router.post('/google', authLimiter, googleLogin);
 
 // @route   GET /api/auth/me
 router.get('/me', authLimiter, auth, getMe);

@@ -9,6 +9,16 @@ const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
 
+const authResponse = (user, token) => ({
+  _id: user._id,
+  name: user.name,
+  email: user.email,
+  role: user.role,
+  avatar: user.avatar,
+  wishlist: user.wishlist || [],
+  token,
+});
+
 // @desc    Register new user
 // @route   POST /api/auth/register
 const register = async (req, res) => {
@@ -32,15 +42,7 @@ const register = async (req, res) => {
     // Send async registration welcome email (non-blocking)
     sendRegistrationWelcome(user).catch(() => {});
 
-    res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-      wishlist: user.wishlist || [],
-      token,
-    });
+    res.status(201).json(authResponse(user, token));
   } catch (error) {
     console.error('Register error:', error.message);
     res.status(500).json({ message: 'Server error' });
@@ -79,18 +81,74 @@ const login = async (req, res) => {
     // Send async login notification email (non-blocking)
     sendLoginWelcome(user).catch(() => {});
 
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-      wishlist: user.wishlist || [],
-      token,
-    });
+    res.json(authResponse(user, token));
   } catch (error) {
     console.error('Login error:', error.message);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Google sign-in via access token from frontend
+// @route   POST /api/auth/google
+const googleLogin = async (req, res) => {
+  try {
+    const accessToken = String(req.body.credential || '').trim();
+    if (!accessToken) {
+      return res.status(400).json({ message: 'Google access token is required' });
+    }
+
+    const googleRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (!googleRes.ok) {
+      return res.status(401).json({ message: 'Invalid Google token' });
+    }
+
+    const profile = await googleRes.json();
+    const email = String(profile.email || '').trim().toLowerCase();
+    if (!email) {
+      return res.status(400).json({ message: 'Google account email is required' });
+    }
+
+    let user = await User.findOne({ email });
+    let isNewUser = false;
+
+    if (!user) {
+      user = await User.create({
+        name: profile.name || profile.given_name || 'Google User',
+        email,
+        googleId: profile.sub || null,
+        avatar: profile.picture || '',
+      });
+      isNewUser = true;
+    } else {
+      let changed = false;
+      if (!user.googleId && profile.sub) {
+        user.googleId = profile.sub;
+        changed = true;
+      }
+      if (!user.avatar && profile.picture) {
+        user.avatar = profile.picture;
+        changed = true;
+      }
+      if (changed) {
+        await user.save();
+      }
+    }
+
+    const token = generateToken(user._id);
+
+    if (isNewUser) {
+      sendRegistrationWelcome(user).catch(() => {});
+    } else {
+      sendLoginWelcome(user).catch(() => {});
+    }
+
+    return res.json(authResponse(user, token));
+  } catch (error) {
+    console.error('googleLogin error:', error.message);
+    return res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -244,6 +302,7 @@ const removeFromWishlist = async (req, res) => {
 module.exports = {
   register,
   login,
+  googleLogin,
   getMe,
   updateMe,
   googleCallback,
