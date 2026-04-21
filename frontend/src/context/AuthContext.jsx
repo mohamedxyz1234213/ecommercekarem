@@ -91,11 +91,12 @@ export const AuthProvider = ({ children }) => {
   const googleLogin = useCallback(async (credential) => {
     try {
       const { data } = await API.post('/auth/google', { credential });
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setUser(data.user);
+      const authData = normalizeAuthResponse(data);
+      localStorage.setItem('token', authData.token);
+      localStorage.setItem('user', JSON.stringify(authData.user));
+      setUser(authData.user);
       toast.success('Welcome!');
-      return data;
+      return authData;
     } catch (error) {
       const msg = error.response?.data?.message || 'Google login failed';
       toast.error(msg);
