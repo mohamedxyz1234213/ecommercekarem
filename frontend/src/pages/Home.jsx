@@ -145,9 +145,8 @@ const Home = () => {
             <div style={styles.featGrid}>
               {[
                 { icon: '✦', title: 'Authentic Products', desc: '100% genuine fragrances sourced directly from brands' },
-                { icon: '❖', title: 'Free Shipping', desc: 'Complimentary delivery on orders over EGP 500' },
+                { icon: '❖', title: 'Fast Shipping', desc: 'Complimentary delivery on orders over EGP 500' },
                 { icon: '◆', title: 'Gift Wrapping', desc: 'Elegant packaging for every special occasion' },
-                { icon: '♦', title: 'Easy Returns', desc: '14-day hassle-free return policy' },
               ].map((feat) => (
                 <div key={feat.title} style={styles.featItem}>
                   <div style={styles.featIcon}>{feat.icon}</div>
