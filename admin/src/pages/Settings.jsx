@@ -137,11 +137,11 @@ const Settings = () => {
     }));
   };
 
-  const handleShippingZoneChange = (zoneId, key, value) => {
+  const handleShippingZoneChange = (zoneIndex, key, value) => {
     setSettings((prev) => ({
       ...prev,
-      shippingZones: prev.shippingZones.map((zone) =>
-        zone._id === zoneId ? { ...zone, [key]: key === 'fee' ? Number(value) || 0 : value } : zone
+      shippingZones: prev.shippingZones.map((zone, index) =>
+        index === zoneIndex ? { ...zone, [key]: key === 'fee' ? Number(value) || 0 : value } : zone
       ),
     }));
   };
@@ -160,7 +160,6 @@ const Settings = () => {
       shippingZones: [
         ...prev.shippingZones,
         {
-          _id: `temp-${Date.now()}`,
           governorate,
           area,
           fee,
@@ -171,10 +170,10 @@ const Settings = () => {
     setNewShippingZone({ governorate: '', area: '', fee: '' });
   };
 
-  const handleRemoveShippingZone = (zoneId) => {
+  const handleRemoveShippingZone = (zoneIndex) => {
     setSettings((prev) => ({
       ...prev,
-      shippingZones: prev.shippingZones.filter((zone) => zone._id !== zoneId),
+      shippingZones: prev.shippingZones.filter((_, index) => index !== zoneIndex),
     }));
   };
 
@@ -591,9 +590,9 @@ const Settings = () => {
             <p style={{ textAlign: 'center', color: '#4d564a', padding: '14px 0' }}>No shipping zones configured</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {settings.shippingZones.map((zone) => (
+              {settings.shippingZones.map((zone, index) => (
                 <div
-                  key={zone._id}
+                  key={zone._id || `${zone.governorate}-${zone.area}-${index}`}
                   style={{
                     display: 'grid',
                     gridTemplateColumns: '1fr 1fr 160px auto auto',
@@ -607,30 +606,30 @@ const Settings = () => {
                   <input
                     className="form-control"
                     value={zone.governorate}
-                    onChange={(e) => handleShippingZoneChange(zone._id, 'governorate', e.target.value)}
+                    onChange={(e) => handleShippingZoneChange(index, 'governorate', e.target.value)}
                   />
                   <input
                     className="form-control"
                     value={zone.area}
-                    onChange={(e) => handleShippingZoneChange(zone._id, 'area', e.target.value)}
+                    onChange={(e) => handleShippingZoneChange(index, 'area', e.target.value)}
                   />
                   <input
                     className="form-control"
                     type="number"
                     min="0"
                     value={zone.fee}
-                    onChange={(e) => handleShippingZoneChange(zone._id, 'fee', e.target.value)}
+                    onChange={(e) => handleShippingZoneChange(index, 'fee', e.target.value)}
                   />
                   <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.82rem' }}>
                     <input
                       type="checkbox"
                       checked={zone.enabled !== false}
-                      onChange={(e) => handleShippingZoneChange(zone._id, 'enabled', e.target.checked)}
+                      onChange={(e) => handleShippingZoneChange(index, 'enabled', e.target.checked)}
                     />
                     Enabled
                   </label>
                   <button
-                    onClick={() => handleRemoveShippingZone(zone._id)}
+                    onClick={() => handleRemoveShippingZone(index)}
                     style={{
                       background: 'none',
                       border: 'none',
