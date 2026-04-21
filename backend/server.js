@@ -103,6 +103,29 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Warmup endpoint (useful for scheduled pings on serverless platforms).
+// This does not fully eliminate cold starts on Vercel, but helps reduce them.
+app.get('/api/warmup', async (req, res) => {
+  try {
+    const dbState = mongoose.connection.readyState;
+    // Optional lightweight DB roundtrip if connected.
+    if (dbState === 1) {
+      await mongoose.connection.db.admin().ping();
+    }
+    return res.json({
+      status: 'warmed',
+      dbConnected: dbState === 1,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    return res.status(500).json({
+      status: 'warmup_failed',
+      message: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
 // 404 handler
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
