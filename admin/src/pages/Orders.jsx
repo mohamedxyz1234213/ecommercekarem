@@ -201,6 +201,7 @@ const Orders = () => {
           >
             <option value="">All Methods</option>
             <option value="instapay">InstaPay</option>
+            <option value="cod">Cash on Delivery</option>
           </select>
         </div>
       </div>

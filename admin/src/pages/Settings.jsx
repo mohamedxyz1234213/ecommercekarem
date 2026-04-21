@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MdSave, MdImage, MdStore, MdCampaign, MdLink, MdAdd, MdDelete, MdEdit } from 'react-icons/md';
+import { MdSave, MdImage, MdStore, MdCampaign, MdLink, MdAdd, MdDelete, MdLocalShipping } from 'react-icons/md';
 import ImageUpload from '../components/ImageUpload';
 import API from '../api/axios';
 import toast from 'react-hot-toast';
@@ -34,12 +34,14 @@ const Settings = () => {
     heroSecondaryButtonText: '',
     heroSecondaryButtonLink: '',
     socialLinks: [],
+    shippingZones: [],
   });
   const [heroImages, setHeroImages] = useState([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newLink, setNewLink] = useState({ platform: '', url: '', icon: 'FiInstagram', location: 'both', enabled: true });
   const [showAddLink, setShowAddLink] = useState(false);
+  const [newShippingZone, setNewShippingZone] = useState({ governorate: '', area: '', fee: '' });
 
   useEffect(() => {
     fetchSettings();
@@ -62,6 +64,7 @@ const Settings = () => {
         heroSecondaryButtonText: data.heroSecondaryButtonText || '',
         heroSecondaryButtonLink: data.heroSecondaryButtonLink || '',
         socialLinks: data.socialLinks || [],
+        shippingZones: data.shippingZones || [],
       });
       if (data.heroImage) {
         setHeroImages([data.heroImage]);
@@ -131,6 +134,47 @@ const Settings = () => {
       socialLinks: prev.socialLinks.map((link) =>
         link._id === linkId ? { ...link, enabled: !link.enabled } : link
       ),
+    }));
+  };
+
+  const handleShippingZoneChange = (zoneId, key, value) => {
+    setSettings((prev) => ({
+      ...prev,
+      shippingZones: prev.shippingZones.map((zone) =>
+        zone._id === zoneId ? { ...zone, [key]: key === 'fee' ? Number(value) || 0 : value } : zone
+      ),
+    }));
+  };
+
+  const handleAddShippingZone = () => {
+    const governorate = newShippingZone.governorate.trim();
+    const area = newShippingZone.area.trim();
+    const fee = Number(newShippingZone.fee);
+    if (!governorate || !area || Number.isNaN(fee) || fee < 0) {
+      toast.error('Governorate, area, and valid fee are required');
+      return;
+    }
+
+    setSettings((prev) => ({
+      ...prev,
+      shippingZones: [
+        ...prev.shippingZones,
+        {
+          _id: `temp-${Date.now()}`,
+          governorate,
+          area,
+          fee,
+          enabled: true,
+        },
+      ],
+    }));
+    setNewShippingZone({ governorate: '', area: '', fee: '' });
+  };
+
+  const handleRemoveShippingZone = (zoneId) => {
+    setSettings((prev) => ({
+      ...prev,
+      shippingZones: prev.shippingZones.filter((zone) => zone._id !== zoneId),
     }));
   };
 
@@ -489,6 +533,114 @@ const Settings = () => {
                       display: 'flex',
                     }}
                     title="Remove"
+                  >
+                    <MdDelete size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="card" style={{ gridColumn: '1 / -1' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <MdLocalShipping size={22} style={{ color: '#2D5016' }} />
+            <h3 style={{ fontSize: '1.1rem', color: '#142016' }}>Egypt Shipping Zones</h3>
+          </div>
+          <p style={{ fontSize: '0.85rem', color: '#4d564a', marginBottom: 16 }}>
+            Set shipping fee per governorate and area. Use area <strong>all</strong> (or *) as a governorate-wide default.
+          </p>
+
+          <div style={{ background: '#FAF8F5', borderRadius: 8, padding: 16, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 180px auto', gap: 12, alignItems: 'end' }}>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontSize: '0.8rem' }}>Governorate</label>
+                <input
+                  className="form-control"
+                  value={newShippingZone.governorate}
+                  onChange={(e) => setNewShippingZone({ ...newShippingZone, governorate: e.target.value })}
+                  placeholder="e.g. Cairo"
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontSize: '0.8rem' }}>Area</label>
+                <input
+                  className="form-control"
+                  value={newShippingZone.area}
+                  onChange={(e) => setNewShippingZone({ ...newShippingZone, area: e.target.value })}
+                  placeholder="e.g. Nasr City or all"
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: 0 }}>
+                <label style={{ fontSize: '0.8rem' }}>Fee (EGP)</label>
+                <input
+                  className="form-control"
+                  type="number"
+                  min="0"
+                  value={newShippingZone.fee}
+                  onChange={(e) => setNewShippingZone({ ...newShippingZone, fee: e.target.value })}
+                />
+              </div>
+              <button className="btn btn-primary" onClick={handleAddShippingZone} style={{ height: 42 }}>
+                <MdAdd size={16} /> Add Zone
+              </button>
+            </div>
+          </div>
+
+          {settings.shippingZones.length === 0 ? (
+            <p style={{ textAlign: 'center', color: '#4d564a', padding: '14px 0' }}>No shipping zones configured</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {settings.shippingZones.map((zone) => (
+                <div
+                  key={zone._id}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr 160px auto auto',
+                    gap: 10,
+                    alignItems: 'center',
+                    padding: 12,
+                    border: '1px solid #e0d8cc',
+                    borderRadius: 8,
+                  }}
+                >
+                  <input
+                    className="form-control"
+                    value={zone.governorate}
+                    onChange={(e) => handleShippingZoneChange(zone._id, 'governorate', e.target.value)}
+                  />
+                  <input
+                    className="form-control"
+                    value={zone.area}
+                    onChange={(e) => handleShippingZoneChange(zone._id, 'area', e.target.value)}
+                  />
+                  <input
+                    className="form-control"
+                    type="number"
+                    min="0"
+                    value={zone.fee}
+                    onChange={(e) => handleShippingZoneChange(zone._id, 'fee', e.target.value)}
+                  />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: '0.82rem' }}>
+                    <input
+                      type="checkbox"
+                      checked={zone.enabled !== false}
+                      onChange={(e) => handleShippingZoneChange(zone._id, 'enabled', e.target.checked)}
+                    />
+                    Enabled
+                  </label>
+                  <button
+                    onClick={() => handleRemoveShippingZone(zone._id)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#e74c3c',
+                      cursor: 'pointer',
+                      padding: 4,
+                      display: 'flex',
+                      justifyContent: 'center',
+                    }}
+                    title="Remove zone"
                   >
                     <MdDelete size={18} />
                   </button>

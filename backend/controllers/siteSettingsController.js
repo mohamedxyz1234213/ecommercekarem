@@ -32,6 +32,7 @@ const updateSettings = async (req, res) => {
       'siteName',
       'tagline',
       'bannerText',
+      'shippingZones',
     ];
 
     allowedFields.forEach((field) => {

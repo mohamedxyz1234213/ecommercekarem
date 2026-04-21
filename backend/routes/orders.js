@@ -38,7 +38,7 @@ router.post(
     body('shippingAddress.city').trim().notEmpty().withMessage('City is required'),
     body('shippingAddress.zipCode').trim().notEmpty().withMessage('Zip code is required'),
     body('shippingAddress.country').trim().notEmpty().withMessage('Country is required'),
-    body('paymentMethod').isIn(['instapay']).withMessage('Valid payment method is required'),
+    body('paymentMethod').isIn(['instapay', 'cod']).withMessage('Valid payment method is required'),
     body('email').trim().isEmail().withMessage('Valid email is required'),
   ],
   createOrder

@@ -33,6 +33,33 @@ const socialLinkSchema = new mongoose.Schema(
   { _id: true }
 );
 
+const shippingZoneSchema = new mongoose.Schema(
+  {
+    governorate: {
+      type: String,
+      required: [true, 'Governorate is required'],
+      trim: true,
+      maxlength: [80, 'Governorate cannot exceed 80 characters'],
+    },
+    area: {
+      type: String,
+      required: [true, 'Area is required'],
+      trim: true,
+      maxlength: [80, 'Area cannot exceed 80 characters'],
+    },
+    fee: {
+      type: Number,
+      required: [true, 'Shipping fee is required'],
+      min: [0, 'Shipping fee cannot be negative'],
+    },
+    enabled: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  { _id: true }
+);
+
 const siteSettingsSchema = new mongoose.Schema(
   {
     // Hero section
@@ -118,6 +145,10 @@ const siteSettingsSchema = new mongoose.Schema(
       default: '',
       trim: true,
       maxlength: [300, 'Banner text cannot exceed 300 characters'],
+    },
+    shippingZones: {
+      type: [shippingZoneSchema],
+      default: [],
     },
   },
   { timestamps: true }

@@ -58,7 +58,7 @@ const orderSchema = new mongoose.Schema({
   paymentMethod: {
     type: String,
     required: true,
-    enum: ['instapay'],
+    enum: ['instapay', 'cod'],
   },
   paymentStatus: {
     type: String,
@@ -77,6 +77,16 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true,
     min: [0, 'Total price cannot be negative'],
+  },
+  itemsPrice: {
+    type: Number,
+    default: 0,
+    min: [0, 'Items price cannot be negative'],
+  },
+  shippingPrice: {
+    type: Number,
+    default: 0,
+    min: [0, 'Shipping price cannot be negative'],
   },
   status: {
     type: String,

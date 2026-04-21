@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { FiSmartphone } from 'react-icons/fi';
+import { FiSmartphone, FiTruck } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
@@ -18,8 +18,6 @@ const Checkout = () => {
   const { items, cartTotal, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const shipping = cartTotal >= 500 ? 0 : 50;
-  const total = cartTotal + shipping;
 
   const [form, setForm] = useState({
     fullName: user?.name || '',
@@ -31,17 +29,79 @@ const Checkout = () => {
     zipCode: '',
     notes: '',
   });
-  const [paymentMethod] = useState('instapay');
+  const [paymentMethod, setPaymentMethod] = useState('instapay');
   const [submitting, setSubmitting] = useState(false);
+  const [shippingZones, setShippingZones] = useState([]);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const { data } = await API.get('/settings');
+        setShippingZones(Array.isArray(data.shippingZones) ? data.shippingZones.filter((z) => z.enabled !== false) : []);
+      } catch {
+        setShippingZones([]);
+      } finally {
+        setSettingsLoading(false);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const governorates = useMemo(
+    () =>
+      Array.from(new Set(shippingZones.map((zone) => String(zone.governorate || '').trim()).filter(Boolean))),
+    [shippingZones]
+  );
+
+  const areaOptions = useMemo(
+    () =>
+      shippingZones
+        .filter((zone) => String(zone.governorate || '').trim() === form.city)
+        .map((zone) => String(zone.area || '').trim())
+        .filter((area) => area && area !== '*' && area.toLowerCase() !== 'all'),
+    [shippingZones, form.city]
+  );
+
+  const shipping = useMemo(() => {
+    const exact = shippingZones.find(
+      (zone) =>
+        String(zone.governorate || '').trim() === form.city &&
+        String(zone.area || '').trim() === form.area
+    );
+    if (exact) return Number(exact.fee || 0);
+
+    const fallback = shippingZones.find(
+      (zone) =>
+        String(zone.governorate || '').trim() === form.city &&
+        ['all', '*'].includes(String(zone.area || '').trim().toLowerCase())
+    );
+    return fallback ? Number(fallback.fee || 0) : null;
+  }, [shippingZones, form.city, form.area]);
+
+  const total = cartTotal + (shipping || 0);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name === 'city') {
+      setForm({ ...form, city: value, area: '' });
+      return;
+    }
+    setForm({ ...form, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.fullName || !form.phone || !form.address || !form.city) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+    if (areaOptions.length > 0 && !form.area) {
+      toast.error('Please select your area');
+      return;
+    }
+    if (shipping === null) {
+      toast.error('Shipping is unavailable for this location');
       return;
     }
     const normalizedEmail = String(form.email || user?.email || '').trim().toLowerCase();
@@ -77,7 +137,12 @@ const Checkout = () => {
       const { data } = await API.post('/orders', orderData);
 
       clearCart();
-      navigate('/instapay-payment', { state: { orderId: data._id || 'new', total } });
+      if (paymentMethod === 'instapay') {
+        navigate('/instapay-payment', { state: { orderId: data._id || 'new', total } });
+      } else {
+        toast.success('Order placed successfully!');
+        navigate('/profile');
+      }
     } catch (err) {
       const message = err?.response?.data?.message || 'Failed to place order. Please try again.';
       toast.error(message);
@@ -168,12 +233,30 @@ const Checkout = () => {
                   </div>
                   <div style={styles.fieldRow} className="checkout-field-row">
                     <div style={styles.field}>
-                      <label style={styles.label}>City *</label>
-                      <input style={styles.input} name="city" value={form.city} onChange={handleChange} required />
+                      <label style={styles.label}>Governorate *</label>
+                      <select style={styles.input} name="city" value={form.city} onChange={handleChange} required>
+                        <option value="">Select governorate</option>
+                        {governorates.map((governorate) => (
+                          <option key={governorate} value={governorate}>
+                            {governorate}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div style={styles.field}>
-                      <label style={styles.label}>Area</label>
-                      <input style={styles.input} name="area" value={form.area} onChange={handleChange} />
+                      <label style={styles.label}>Area {areaOptions.length > 0 ? '*' : ''}</label>
+                      {areaOptions.length > 0 ? (
+                        <select style={styles.input} name="area" value={form.area} onChange={handleChange} required>
+                          <option value="">Select area</option>
+                          {areaOptions.map((area) => (
+                            <option key={area} value={area}>
+                              {area}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input style={styles.input} name="area" value={form.area} onChange={handleChange} placeholder="Area (optional)" />
+                      )}
                     </div>
                   </div>
                   <div style={styles.field}>
@@ -191,11 +274,24 @@ const Checkout = () => {
                 <div style={styles.paymentSection}>
                   <h3 style={styles.sectionTitle}>Payment Method</h3>
                   <div style={styles.paymentOptions}>
-                    <div style={styles.paymentCard(true)}>
+                    <div
+                      style={styles.paymentCard(paymentMethod === 'instapay')}
+                      onClick={() => setPaymentMethod('instapay')}
+                    >
                       <FiSmartphone style={styles.paymentIcon} />
                       <div>
                         <p style={styles.paymentName}>InstaPay</p>
                         <p style={styles.paymentDesc}>Transfer via InstaPay</p>
+                      </div>
+                    </div>
+                    <div
+                      style={styles.paymentCard(paymentMethod === 'cod')}
+                      onClick={() => setPaymentMethod('cod')}
+                    >
+                      <FiTruck style={styles.paymentIcon} />
+                      <div>
+                        <p style={styles.paymentName}>Cash on Delivery</p>
+                        <p style={styles.paymentDesc}>Pay when your order arrives</p>
                       </div>
                     </div>
                   </div>
@@ -222,7 +318,15 @@ const Checkout = () => {
                 </div>
                 <div style={styles.summaryItem}>
                   <span style={{ color: 'var(--gray-500)' }}>Shipping</span>
-                  <span>{shipping === 0 ? 'Free' : `EGP ${shipping.toFixed(2)}`}</span>
+                  <span>
+                    {settingsLoading
+                      ? 'Loading...'
+                      : shipping === null
+                        ? 'Unavailable'
+                        : shipping === 0
+                          ? 'Free'
+                          : `EGP ${shipping.toFixed(2)}`}
+                  </span>
                 </div>
                 <div style={styles.summaryDivider} />
                 <div style={styles.summaryTotal}>

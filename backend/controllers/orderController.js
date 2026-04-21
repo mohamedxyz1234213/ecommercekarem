@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const User = require('../models/User');
+const SiteSettings = require('../models/SiteSettings');
 const {
   sendOrderConfirmation,
   sendInstapayApproval,
@@ -14,6 +15,30 @@ const { uploadImageBuffer, hasCloudinaryConfig } = require('../utils/cloudinary'
 const { sanitize } = require('../utils/sanitize');
 
 const isValidEmail = (value) => /^\S+@\S+\.\S+$/.test(String(value || '').trim());
+
+const normalizeArea = (value) => String(value || '').trim().toLowerCase();
+
+const resolveShippingFee = (zones, governorate, area) => {
+  const normalizedGovernorate = normalizeArea(governorate);
+  const normalizedArea = normalizeArea(area);
+
+  const enabledZones = Array.isArray(zones) ? zones.filter((zone) => zone?.enabled !== false) : [];
+  const exactMatch = enabledZones.find(
+    (zone) =>
+      normalizeArea(zone.governorate) === normalizedGovernorate &&
+      normalizeArea(zone.area) === normalizedArea
+  );
+  if (exactMatch) return Number(exactMatch.fee || 0);
+
+  const governorateFallback = enabledZones.find(
+    (zone) =>
+      normalizeArea(zone.governorate) === normalizedGovernorate &&
+      ['all', '*'].includes(normalizeArea(zone.area))
+  );
+  if (governorateFallback) return Number(governorateFallback.fee || 0);
+
+  return null;
+};
 
 // @desc    Create new order
 // @route   POST /api/orders
@@ -107,6 +132,22 @@ const createOrder = async (req, res) => {
       await product.save();
     }
 
+    if (String(shippingAddress.country || '').trim().toLowerCase() !== 'egypt') {
+      return res.status(400).json({ message: 'Shipping is available only inside Egypt' });
+    }
+
+    const settings = await SiteSettings.getSettings();
+    const shippingFee = resolveShippingFee(
+      settings.shippingZones,
+      shippingAddress.city,
+      shippingAddress.state
+    );
+    if (shippingFee === null) {
+      return res.status(400).json({
+        message: 'Shipping fee is not configured for this governorate/area. Please contact support.',
+      });
+    }
+
     const order = await Order.create({
       user: req.user._id,
       items: orderItems,
@@ -114,7 +155,9 @@ const createOrder = async (req, res) => {
       paymentMethod,
       instapayProof: instapayProof || '',
       instapayUsername: instapayUsername || '',
-      totalPrice,
+      itemsPrice: totalPrice,
+      shippingPrice: shippingFee,
+      totalPrice: totalPrice + shippingFee,
       email: normalizedEmail,
     });
 

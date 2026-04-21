@@ -84,6 +84,12 @@ const statusBadge = (status) => {
   return `<span style="display:inline-block;background-color:${style.bg};color:${style.color};padding:4px 14px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;">${label}</span>`;
 };
 
+const paymentMethodLabel = (method) => {
+  if (method === 'instapay') return 'InstaPay';
+  if (method === 'cod') return 'Cash on Delivery';
+  return method || 'N/A';
+};
+
 const formatOrderItems = (items) => {
   const rows = items
     .map(
@@ -125,7 +131,7 @@ const sendOrderConfirmation = async (order, user) => {
         </tr>
         <tr>
           <td style="color:#6b7280;font-size:13px;padding-bottom:6px;">Payment Method</td>
-          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:6px;">${order.paymentMethod === 'instapay' ? 'InstaPay' : order.paymentMethod}</td>
+          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:6px;">${paymentMethodLabel(order.paymentMethod)}</td>
         </tr>
         <tr>
           <td style="color:#6b7280;font-size:13px;">Status</td>
@@ -257,7 +263,7 @@ const sendAdminNotification = async (order) => {
         </tr>
         <tr>
           <td style="color:#6b7280;font-size:13px;padding-bottom:8px;">Payment Method</td>
-          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:8px;">${order.paymentMethod === 'instapay' ? 'InstaPay' : order.paymentMethod}</td>
+          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:8px;">${paymentMethodLabel(order.paymentMethod)}</td>
         </tr>
         <tr>
           <td style="color:#6b7280;font-size:13px;padding-bottom:8px;">Items</td>
