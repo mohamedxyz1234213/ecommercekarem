@@ -33,6 +33,13 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // CORS — in development, allow any origin so phone (LAN IP + Vite port) can reach the API.
+const normalizeOrigin = (value) => String(value || '').trim().replace(/\/$/, '');
+
+const extraAllowedOrigins = String(process.env.CORS_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((origin) => normalizeOrigin(origin))
+  .filter(Boolean);
+
 const allowedOrigins = new Set(
   [
     process.env.CLIENT_URL || 'http://localhost:3000',
@@ -41,11 +48,15 @@ const allowedOrigins = new Set(
     'http://localhost:5174',
     'http://127.0.0.1:5173',
     'http://127.0.0.1:5174',
-  ].filter(Boolean)
+    ...extraAllowedOrigins,
+  ]
+    .map((origin) => normalizeOrigin(origin))
+    .filter(Boolean)
 );
 
 const corsAllowAny =
   process.env.NODE_ENV !== 'production' || process.env.CORS_ALLOW_ALL === 'true';
+const allowVercelPreviews = process.env.CORS_ALLOW_VERCEL_PREVIEWS === 'true';
 
 app.use(
   cors({
@@ -53,10 +64,18 @@ app.use(
       if (!origin) {
         return callback(null, true);
       }
-      if (corsAllowAny || allowedOrigins.has(origin)) {
+      const normalized = normalizeOrigin(origin);
+      const isVercelPreview = normalized.endsWith('.vercel.app');
+
+      if (
+        corsAllowAny ||
+        allowedOrigins.has(normalized) ||
+        (allowVercelPreviews && isVercelPreview)
+      ) {
         return callback(null, true);
       }
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
+      console.warn(`CORS blocked for origin: ${normalized}`);
+      return callback(new Error(`CORS blocked for origin: ${normalized}`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
