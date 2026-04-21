@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiUser, FiMail, FiPhone, FiEdit2, FiPackage, FiChevronRight } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiEdit2, FiPackage, FiChevronRight, FiHeart, FiShoppingBag, FiTrash2 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import API from '../api/axios';
 import AnimatedSection from '../components/AnimatedSection';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ProductCard from '../components/ProductCard';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -15,6 +18,8 @@ const pageVariants = {
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
+  const { addToCart } = useCart();
+  const { wishlistItems, removeFromWishlist, loadingWishlist } = useWishlist();
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -108,6 +113,32 @@ const Profile = () => {
       color: statusColors[status]?.text || '#374151',
     }),
     emptyOrders: { textAlign: 'center', padding: '3rem', color: 'var(--gray-400)', fontSize: '0.95rem' },
+    wishlistSection: { marginTop: '2rem' },
+    wishlistGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
+      gap: '1rem',
+    },
+    wishlistHead: {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: '0.75rem',
+      gap: '0.75rem',
+    },
+    wishlistActions: { display: 'flex', gap: '0.5rem' },
+    smallBtn: {
+      border: '1px solid var(--gray-200)',
+      backgroundColor: 'var(--white)',
+      borderRadius: 'var(--radius-sm)',
+      padding: '0.4rem 0.65rem',
+      cursor: 'pointer',
+      color: 'var(--text)',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '0.35rem',
+      fontSize: '0.8rem',
+    },
   };
 
   return (
@@ -196,6 +227,44 @@ const Profile = () => {
                     </Link>
                   </motion.div>
                 ))
+              )}
+            </div>
+
+            <div id="wishlist" style={styles.wishlistSection}>
+              <div style={styles.wishlistHead}>
+                <h2 style={styles.ordersTitle}>
+                  <FiHeart style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
+                  Wishlist ({wishlistItems.length})
+                </h2>
+              </div>
+              {loadingWishlist ? (
+                <LoadingSpinner />
+              ) : wishlistItems.length === 0 ? (
+                <p style={styles.emptyOrders}>Your wishlist is empty</p>
+              ) : (
+                <div style={styles.wishlistGrid}>
+                  {wishlistItems.map((item) => (
+                    <div key={item._id}>
+                      <ProductCard product={item} />
+                      <div style={styles.wishlistActions}>
+                        <button
+                          style={styles.smallBtn}
+                          onClick={() => addToCart(item)}
+                          type="button"
+                        >
+                          <FiShoppingBag /> Add to cart
+                        </button>
+                        <button
+                          style={styles.smallBtn}
+                          onClick={() => removeFromWishlist(item._id)}
+                          type="button"
+                        >
+                          <FiTrash2 /> Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </AnimatedSection>

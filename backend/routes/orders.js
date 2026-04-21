@@ -15,8 +15,6 @@ const apiLimiter = rateLimit({
 const {
   createOrder,
   submitInstapayProof,
-  paymobCallback,
-  paymobRedirect,
   getMyOrders,
   getAllOrders,
   getOrderById,
@@ -25,21 +23,7 @@ const {
   rejectInstapay,
 } = require('../controllers/orderController');
 
-const webhookLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 200,
-  message: { message: 'Too many webhook requests' },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
 const router = express.Router();
-
-// @route   POST /api/orders/paymob-callback (Paymob webhook — no auth, verified by HMAC)
-router.post('/paymob-callback', webhookLimiter, paymobCallback);
-
-// @route   GET /api/orders/paymob-redirect (Paymob redirect after payment)
-router.get('/paymob-redirect', webhookLimiter, paymobRedirect);
 
 // @route   POST /api/orders
 router.post(
@@ -54,7 +38,7 @@ router.post(
     body('shippingAddress.city').trim().notEmpty().withMessage('City is required'),
     body('shippingAddress.zipCode').trim().notEmpty().withMessage('Zip code is required'),
     body('shippingAddress.country').trim().notEmpty().withMessage('Country is required'),
-    body('paymentMethod').isIn(['paymob', 'instapay']).withMessage('Valid payment method is required'),
+    body('paymentMethod').isIn(['instapay']).withMessage('Valid payment method is required'),
     body('email').trim().isEmail().withMessage('Valid email is required'),
   ],
   createOrder

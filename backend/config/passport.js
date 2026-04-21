@@ -2,6 +2,7 @@ const LocalStrategy = require('passport-local').Strategy;
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const { sendRegistrationWelcome } = require('../utils/email');
 
 module.exports = function (passport) {
   // Local Strategy
@@ -66,6 +67,9 @@ module.exports = function (passport) {
               googleId: profile.id,
               avatar: profile.photos[0] ? profile.photos[0].value : '',
             });
+
+            // Send welcome email only for newly created Google users.
+            sendRegistrationWelcome(user).catch(() => {});
 
             return done(null, user);
           } catch (error) {

@@ -58,7 +58,7 @@ const orderSchema = new mongoose.Schema({
   paymentMethod: {
     type: String,
     required: true,
-    enum: ['paymob', 'instapay'],
+    enum: ['instapay'],
   },
   paymentStatus: {
     type: String,
@@ -70,14 +70,6 @@ const orderSchema = new mongoose.Schema({
     default: '',
   },
   instapayUsername: {
-    type: String,
-    default: '',
-  },
-  paymobOrderId: {
-    type: String,
-    default: '',
-  },
-  paymobTransactionId: {
     type: String,
     default: '',
   },

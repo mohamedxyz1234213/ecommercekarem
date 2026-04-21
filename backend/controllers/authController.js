@@ -1,7 +1,9 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 const User = require('../models/User');
-const { sendLoginWelcome } = require('../utils/email');
+const Product = require('../models/Product');
+const { sendLoginWelcome, sendRegistrationWelcome } = require('../utils/email');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -27,12 +29,16 @@ const register = async (req, res) => {
 
     const token = generateToken(user._id);
 
+    // Send async registration welcome email (non-blocking)
+    sendRegistrationWelcome(user).catch(() => {});
+
     res.status(201).json({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
       avatar: user.avatar,
+      wishlist: user.wishlist || [],
       token,
     });
   } catch (error) {
@@ -79,6 +85,7 @@ const login = async (req, res) => {
       email: user.email,
       role: user.role,
       avatar: user.avatar,
+      wishlist: user.wishlist || [],
       token,
     });
   } catch (error) {
@@ -104,6 +111,7 @@ const getMe = async (req, res) => {
       avatar: user.avatar,
       address: user.address,
       phone: user.phone,
+      wishlist: user.wishlist || [],
       createdAt: user.createdAt,
     });
   } catch (error) {
@@ -137,6 +145,7 @@ const updateMe = async (req, res) => {
       avatar: updated.avatar,
       phone: updated.phone,
       address: updated.address,
+      wishlist: updated.wishlist || [],
       createdAt: updated.createdAt,
     });
   } catch (error) {
@@ -161,4 +170,85 @@ const logout = (req, res) => {
   res.json({ message: 'Logged out successfully' });
 };
 
-module.exports = { register, login, getMe, updateMe, googleCallback, logout };
+// @desc    Get current user's wishlist
+// @route   GET /api/auth/wishlist
+const getWishlist = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate('wishlist');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    return res.json({ wishlist: user.wishlist || [] });
+  } catch (error) {
+    console.error('getWishlist error:', error.message);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Add product to wishlist
+// @route   POST /api/auth/wishlist/:productId
+const addToWishlist = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: 'Invalid product ID' });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const exists = user.wishlist.some((id) => id.toString() === productId);
+    if (!exists) {
+      user.wishlist.push(productId);
+      await user.save();
+    }
+
+    return res.json({ message: 'Added to wishlist', wishlist: user.wishlist });
+  } catch (error) {
+    console.error('addToWishlist error:', error.message);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Remove product from wishlist
+// @route   DELETE /api/auth/wishlist/:productId
+const removeFromWishlist = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: 'Invalid product ID' });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.wishlist = user.wishlist.filter((id) => id.toString() !== productId);
+    await user.save();
+
+    return res.json({ message: 'Removed from wishlist', wishlist: user.wishlist });
+  } catch (error) {
+    console.error('removeFromWishlist error:', error.message);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  getMe,
+  updateMe,
+  googleCallback,
+  logout,
+  getWishlist,
+  addToWishlist,
+  removeFromWishlist,
+};

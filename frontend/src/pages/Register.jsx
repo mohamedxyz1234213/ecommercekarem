@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
-import { FaApple } from 'react-icons/fa';
 import { useGoogleLogin } from '@react-oauth/google';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
@@ -22,10 +21,11 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  if (isAuthenticated) {
-    navigate('/');
-    return null;
-  }
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -47,7 +47,6 @@ const Register = () => {
     setLoading(true);
     try {
       await register(form.name, form.email, form.password);
-      navigate('/');
     } catch {
       // error handled in context
     } finally {
@@ -59,17 +58,12 @@ const Register = () => {
     onSuccess: async (response) => {
       try {
         await googleLogin(response.access_token);
-        navigate('/');
       } catch {
         // error handled in context
       }
     },
     onError: () => toast.error('Google signup failed'),
   });
-
-  const handleAppleSignup = () => {
-    toast('Apple signup coming soon!', { icon: '🍎' });
-  };
 
   const c = {
     cardBg: '#FAF8F5',
@@ -184,21 +178,6 @@ const Register = () => {
       gap: '0.75rem',
       boxShadow: '0 1px 2px rgba(60, 64, 67, 0.08)',
     },
-    appleBtn: {
-      width: '100%',
-      padding: '0.85rem 1rem',
-      border: 'none',
-      borderRadius: '10px',
-      backgroundColor: '#111827',
-      fontSize: '0.9rem',
-      fontWeight: 600,
-      color: '#F9FAFB',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '0.75rem',
-    },
     socialBtns: { display: 'flex', flexDirection: 'column', gap: '0.75rem' },
     loginLink: { textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', color: c.inkMuted },
     loginAnchor: { color: '#014421', fontWeight: 700, marginLeft: '0.35rem' },
@@ -298,15 +277,6 @@ const Register = () => {
                 <FcGoogle size={22} /> Sign up with Google
               </motion.button>
 
-              <motion.button
-                style={styles.appleBtn}
-                whileHover={{ opacity: 0.92, y: -1 }}
-                whileTap={{ scale: 0.99 }}
-                onClick={handleAppleSignup}
-                type="button"
-              >
-                <FaApple size={22} /> Sign up with Apple
-              </motion.button>
             </div>
 
             <p style={styles.loginLink}>

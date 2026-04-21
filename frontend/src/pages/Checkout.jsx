@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { FiCreditCard, FiSmartphone } from 'react-icons/fi';
+import { FiSmartphone } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
@@ -31,7 +31,7 @@ const Checkout = () => {
     zipCode: '',
     notes: '',
   });
-  const [paymentMethod, setPaymentMethod] = useState('paymob');
+  const [paymentMethod] = useState('instapay');
   const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
@@ -76,17 +76,8 @@ const Checkout = () => {
 
       const { data } = await API.post('/orders', orderData);
 
-      if (paymentMethod === 'instapay') {
-        clearCart();
-        navigate('/instapay-payment', { state: { orderId: data._id || 'new', total } });
-      } else if (paymentMethod === 'paymob' && data.paymentUrl) {
-        clearCart();
-        window.location.href = data.paymentUrl;
-      } else {
-        toast.success('Order placed successfully!');
-        clearCart();
-        navigate('/profile');
-      }
+      clearCart();
+      navigate('/instapay-payment', { state: { orderId: data._id || 'new', total } });
     } catch (err) {
       const message = err?.response?.data?.message || 'Failed to place order. Please try again.';
       toast.error(message);
@@ -200,14 +191,7 @@ const Checkout = () => {
                 <div style={styles.paymentSection}>
                   <h3 style={styles.sectionTitle}>Payment Method</h3>
                   <div style={styles.paymentOptions}>
-                    <div style={styles.paymentCard(paymentMethod === 'paymob')} onClick={() => setPaymentMethod('paymob')}>
-                      <FiCreditCard style={styles.paymentIcon} />
-                      <div>
-                        <p style={styles.paymentName}>Paymob</p>
-                        <p style={styles.paymentDesc}>Credit/Debit card via Paymob</p>
-                      </div>
-                    </div>
-                    <div style={styles.paymentCard(paymentMethod === 'instapay')} onClick={() => setPaymentMethod('instapay')}>
+                    <div style={styles.paymentCard(true)}>
                       <FiSmartphone style={styles.paymentIcon} />
                       <div>
                         <p style={styles.paymentName}>InstaPay</p>

@@ -125,7 +125,7 @@ const sendOrderConfirmation = async (order, user) => {
         </tr>
         <tr>
           <td style="color:#6b7280;font-size:13px;padding-bottom:6px;">Payment Method</td>
-          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:6px;">${order.paymentMethod === 'instapay' ? 'InstaPay' : order.paymentMethod === 'paymob' ? 'Card (Paymob)' : order.paymentMethod}</td>
+          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:6px;">${order.paymentMethod === 'instapay' ? 'InstaPay' : order.paymentMethod}</td>
         </tr>
         <tr>
           <td style="color:#6b7280;font-size:13px;">Status</td>
@@ -236,30 +236,6 @@ const sendInstapayRejection = async (order, user) => {
   return sendEmail(order.email || user.email, subject, emailWrapper(content));
 };
 
-const sendPaymobPaymentConfirmation = async (order, user) => {
-  const subject = `Payment Confirmed — Order #${order._id.toString().slice(-8).toUpperCase()}`;
-  const content = `
-    <div style="text-align:center;margin-bottom:28px;">
-      <div style="display:inline-block;background-color:#d1fae5;border-radius:50%;width:64px;height:64px;line-height:64px;font-size:32px;margin-bottom:12px;">✅</div>
-      <h2 style="margin:0 0 8px;color:#014421;font-size:22px;font-weight:700;">Payment Successful!</h2>
-      <p style="margin:0;color:#6b7280;font-size:15px;">Your card payment via Paymob has been confirmed.</p>
-    </div>
-
-    <p style="color:#374151;font-size:15px;">Hi <strong>${user.name}</strong>,</p>
-    <p style="color:#374151;font-size:15px;margin-bottom:24px;">Your payment for order <strong style="color:#014421;">#${order._id.toString().slice(-8).toUpperCase()}</strong> has been successfully processed. Your order is now being prepared for shipment.</p>
-
-    ${formatOrderItems(order.items)}
-
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:16px;border-top:2px solid #e8e3da;padding-top:16px;">
-      <tr>
-        <td style="font-size:16px;font-weight:700;color:#142016;">Total Charged</td>
-        <td style="text-align:right;font-size:20px;font-weight:800;color:#014421;">EGP ${order.totalPrice.toFixed(2)}</td>
-      </tr>
-    </table>
-  `;
-  return sendEmail(order.email || user.email, subject, emailWrapper(content));
-};
-
 const sendAdminNotification = async (order) => {
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) return;
@@ -281,7 +257,7 @@ const sendAdminNotification = async (order) => {
         </tr>
         <tr>
           <td style="color:#6b7280;font-size:13px;padding-bottom:8px;">Payment Method</td>
-          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:8px;">${order.paymentMethod === 'instapay' ? 'InstaPay' : order.paymentMethod === 'paymob' ? 'Card (Paymob)' : order.paymentMethod}</td>
+          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:8px;">${order.paymentMethod === 'instapay' ? 'InstaPay' : order.paymentMethod}</td>
         </tr>
         <tr>
           <td style="color:#6b7280;font-size:13px;padding-bottom:8px;">Items</td>
@@ -317,13 +293,34 @@ const sendLoginWelcome = async (user) => {
   return sendEmail(user.email, subject, emailWrapper(content));
 };
 
+const sendRegistrationWelcome = async (user) => {
+  if (!user?.email) return;
+  const subject = `Welcome to vybe, ${user.name || 'there'}!`;
+  const content = `
+    <h2 style="margin:0 0 8px;color:#014421;font-size:22px;font-weight:700;">Welcome to vybe!</h2>
+    <p style="margin:0 0 20px;color:#6b7280;font-size:15px;">
+      Hi <strong style="color:#142016;">${user.name || 'there'}</strong>, your account has been created successfully.
+    </p>
+
+    <div style="background-color:#f9f6f1;border-radius:12px;padding:18px;margin-bottom:20px;">
+      <p style="margin:0 0 6px;color:#6b7280;font-size:13px;">Registered Email</p>
+      <p style="margin:0;color:#142016;font-size:15px;font-weight:700;">${user.email}</p>
+    </div>
+
+    <p style="margin:0;color:#374151;font-size:14px;line-height:1.7;">
+      You can now browse fragrances, save products to your wishlist, and place orders from your account dashboard.
+    </p>
+  `;
+  return sendEmail(user.email, subject, emailWrapper(content));
+};
+
 module.exports = {
   sendEmail,
   sendOrderConfirmation,
   sendInstapayApproval,
   sendInstapayRejection,
-  sendPaymobPaymentConfirmation,
   sendStatusUpdate,
   sendAdminNotification,
   sendLoginWelcome,
+  sendRegistrationWelcome,
 };

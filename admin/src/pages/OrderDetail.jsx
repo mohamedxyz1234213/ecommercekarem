@@ -240,37 +240,6 @@ const OrderDetail = () => {
             </div>
           )}
 
-          {/* Paymob payment info */}
-          {order.paymentMethod === 'paymob' && (
-            <div className="card">
-              <h3 style={{ marginBottom: 16, fontSize: '1rem' }}>Paymob Payment Details</h3>
-              {order.paymobOrderId && (
-                <p style={{ fontSize: '0.85rem', marginBottom: 8 }}>
-                  <strong>Paymob Order ID:</strong> {order.paymobOrderId}
-                </p>
-              )}
-              {order.paymobTransactionId && (
-                <p style={{ fontSize: '0.85rem', marginBottom: 8 }}>
-                  <strong>Transaction ID:</strong> {order.paymobTransactionId}
-                </p>
-              )}
-              {order.paymentStatus === 'approved' && (
-                <div style={{ padding: '12px 16px', background: '#e8f5e9', borderRadius: 8, color: '#2e7d32', fontWeight: 600, textAlign: 'center' }}>
-                  ✓ Payment Confirmed {order.paidAt ? `on ${new Date(order.paidAt).toLocaleString()}` : ''}
-                </div>
-              )}
-              {order.paymentStatus === 'rejected' && (
-                <div style={{ padding: '12px 16px', background: '#fbe9e7', borderRadius: 8, color: '#c62828', fontWeight: 600, textAlign: 'center' }}>
-                  ✗ Payment Failed
-                </div>
-              )}
-              {order.paymentStatus === 'pending' && (
-                <div style={{ padding: '12px 16px', background: '#fff3e0', borderRadius: 8, color: '#e65100', fontWeight: 600, textAlign: 'center' }}>
-                  ⏳ Awaiting Payment Confirmation
-                </div>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Sidebar */}

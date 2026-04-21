@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiShoppingBag } from 'react-icons/fi';
+import { FiShoppingBag, FiHeart } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import ReviewStars from './ReviewStars';
 import { getApiOrigin } from '../utils/apiBase';
 
@@ -18,11 +19,13 @@ const normalizeImageUrl = (src) => {
 /** Light-surface card with explicit contrast (avoids theme --white = green tint) */
 const ProductCard = ({ product }) => {
   const { addToCart } = useCart();
+  const { isWishlisted, toggleWishlist } = useWishlist();
   const { _id, name, price, salePrice, images, rating, numReviews, brand, onSale, stock } = product;
   const displayImage = normalizeImageUrl(images?.[0]);
   const discount = onSale && salePrice ? Math.round((1 - salePrice / price) * 100) : 0;
   const isOutOfStock = (stock || 0) === 0;
   const isLastPiece = (stock || 0) === 1;
+  const wished = isWishlisted(_id);
 
   const styles = {
     card: {
@@ -82,6 +85,23 @@ const ProductCard = ({ product }) => {
       zIndex: 2,
       boxShadow: isOutOfStock ? 'none' : '0 4px 14px rgba(1, 68, 33, 0.35)',
       opacity: isOutOfStock ? 0.6 : 1,
+    },
+    wishBtn: {
+      position: 'absolute',
+      top: '14px',
+      right: '14px',
+      width: '38px',
+      height: '38px',
+      borderRadius: '50%',
+      border: '1px solid rgba(20, 32, 22, 0.18)',
+      backgroundColor: wished ? '#014421' : 'rgba(255, 255, 255, 0.9)',
+      color: wished ? '#fff' : '#4b5563',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      zIndex: 3,
+      boxShadow: '0 4px 12px rgba(20, 32, 22, 0.12)',
     },
     info: {
       padding: '1.125rem 1.25rem 1.35rem',
@@ -147,6 +167,20 @@ const ProductCard = ({ product }) => {
     >
       <Link to={`/product/${_id}`} style={{ textDecoration: 'none', color: 'inherit', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={styles.imageWrapper}>
+          <motion.button
+            type="button"
+            style={styles.wishBtn}
+            whileHover={{ scale: 1.06 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleWishlist(product);
+            }}
+            aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
+          >
+            <FiHeart fill={wished ? 'currentColor' : 'none'} />
+          </motion.button>
           {onSale && discount > 0 && <div style={styles.saleTape}>Sale {discount}%</div>}
           {isLastPiece && (
             <div style={{

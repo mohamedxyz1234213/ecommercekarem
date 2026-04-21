@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import {
   FiShoppingBag,
+  FiHeart,
   FiUser,
   FiMenu,
   FiX,
@@ -21,6 +22,7 @@ import {
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import API from '../api/axios';
 
 const ICON_MAP = {
@@ -43,6 +45,7 @@ const Navbar = () => {
   const [siteName, setSiteName] = useState('Vybe');
   const { isAuthenticated, logout } = useAuth();
   const { cartCount, setIsDrawerOpen } = useCart();
+  const { wishlistCount } = useWishlist();
   const location = useLocation();
   const navigate = useNavigate();
   const isHome = location.pathname === '/';
@@ -381,6 +384,23 @@ const Navbar = () => {
 
             {isAuthenticated ? (
               <>
+                <button
+                  style={styles.iconBtn}
+                  onClick={() => navigate('/profile#wishlist')}
+                  aria-label="Wishlist"
+                >
+                  <FiHeart />
+                  {wishlistCount > 0 && (
+                    <Motion.span
+                      style={styles.badge}
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      key={wishlistCount}
+                    >
+                      {wishlistCount}
+                    </Motion.span>
+                  )}
+                </button>
                 <button
                   style={styles.iconBtn}
                   onClick={() => navigate('/profile')}

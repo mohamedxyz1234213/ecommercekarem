@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import App from './App';
 import 'slick-carousel/slick/slick.css';
@@ -16,31 +17,33 @@ createRoot(document.getElementById('root')).render(
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'placeholder-client-id'}>
       <BrowserRouter>
         <AuthProvider>
-          <CartProvider>
-            <ErrorBoundary>
-              <App />
-            </ErrorBoundary>
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                duration: 3000,
-                style: {
-                  background: '#163022',
-                  color: '#E6F1E9',
-                  fontFamily: "'Lato', sans-serif",
-                  borderRadius: '12px',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.35)',
-                  border: '1px solid #2A4A38',
-                },
-                success: {
-                  iconTheme: { primary: '#2f7a3f', secondary: '#163022' },
-                },
-                error: {
-                  iconTheme: { primary: '#DC2626', secondary: '#163022' },
-                },
-              }}
-            />
-          </CartProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <ErrorBoundary>
+                <App />
+              </ErrorBoundary>
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  duration: 3000,
+                  style: {
+                    background: '#163022',
+                    color: '#E6F1E9',
+                    fontFamily: "'Lato', sans-serif",
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.35)',
+                    border: '1px solid #2A4A38',
+                  },
+                  success: {
+                    iconTheme: { primary: '#2f7a3f', secondary: '#163022' },
+                  },
+                  error: {
+                    iconTheme: { primary: '#DC2626', secondary: '#163022' },
+                  },
+                }}
+              />
+            </CartProvider>
+          </WishlistProvider>
         </AuthProvider>
       </BrowserRouter>
     </GoogleOAuthProvider>

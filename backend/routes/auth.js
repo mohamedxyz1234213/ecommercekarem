@@ -10,6 +10,9 @@ const {
   updateMe,
   googleCallback,
   logout,
+  getWishlist,
+  addToWishlist,
+  removeFromWishlist,
 } = require('../controllers/authController');
 
 const router = express.Router();
@@ -74,5 +77,14 @@ router.get(
 
 // @route   POST /api/auth/logout
 router.post('/logout', logout);
+
+// @route   GET /api/auth/wishlist
+router.get('/wishlist', authLimiter, auth, getWishlist);
+
+// @route   POST /api/auth/wishlist/:productId
+router.post('/wishlist/:productId', authLimiter, auth, addToWishlist);
+
+// @route   DELETE /api/auth/wishlist/:productId
+router.delete('/wishlist/:productId', authLimiter, auth, removeFromWishlist);
 
 module.exports = router;

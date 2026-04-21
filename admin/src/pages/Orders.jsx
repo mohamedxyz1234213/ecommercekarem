@@ -200,7 +200,6 @@ const Orders = () => {
             onChange={(e) => setPaymentMethodFilter(e.target.value)}
           >
             <option value="">All Methods</option>
-            <option value="paymob">Paymob</option>
             <option value="instapay">InstaPay</option>
           </select>
         </div>

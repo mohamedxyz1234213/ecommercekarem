@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { FiShoppingBag, FiHeart, FiMinus, FiPlus, FiArrowLeft } from 'react-icons/fi';
 import API from '../api/axios';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 import ReviewStars from '../components/ReviewStars';
 import ProductCard from '../components/ProductCard';
 import AnimatedSection from '../components/AnimatedSection';
@@ -29,6 +30,7 @@ const pageVariants = {
 const ProductDetail = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
+  const { isWishlisted, toggleWishlist } = useWishlist();
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,6 +97,7 @@ const ProductDetail = () => {
         : [];
 
   const selectedSizeStock = availableSizes.find((entry) => entry.size === selectedSize)?.quantity ?? null;
+  const wished = isWishlisted(product._id);
 
   // Max purchasable quantity for the current selection
   const maxQty = availableSizes.length > 0
@@ -470,12 +473,22 @@ const ProductDetail = () => {
                   {isOutOfStock ? 'Out of Stock' : availableSizes.length > 0 && !selectedSize ? 'Select a size' : 'Add to bag'}
                 </motion.button>
                 <motion.button
-                  style={styles.wishBtn}
-                  whileHover={{ borderColor: '#014421', color: '#014421', backgroundColor: '#f0fdf4' }}
+                  style={{
+                    ...styles.wishBtn,
+                    ...(wished
+                      ? { borderColor: '#014421', color: '#fff', backgroundColor: '#014421' }
+                      : {}),
+                  }}
+                  whileHover={{
+                    borderColor: '#014421',
+                    color: wished ? '#fff' : '#014421',
+                    backgroundColor: wished ? '#014421' : '#f0fdf4',
+                  }}
                   type="button"
-                  aria-label="Wishlist"
+                  aria-label={wished ? 'Remove from wishlist' : 'Add to wishlist'}
+                  onClick={() => toggleWishlist(product)}
                 >
-                  <FiHeart />
+                  <FiHeart fill={wished ? 'currentColor' : 'none'} />
                 </motion.button>
               </div>
               </div>

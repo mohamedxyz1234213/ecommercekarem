@@ -8,10 +8,9 @@ A modern, full-stack MERN e-commerce platform for luxury perfumes with an elegan
 
 ### Customer Frontend (port 3000)
 - 🎨 Modern, animated UI with Framer Motion
-- 🔐 Email/password login, Google OAuth, Apple login
+- 🔐 Email/password login and Google OAuth
 - 🛒 Shopping cart with slide-in drawer
 - 🏷️ Sale badges and sale tape ribbons on products
-- 💳 Payment via Paymob integration
 - 📱 InstaPay payment with proof upload
 - ⭐ Product reviews and ratings
 - 🔍 Search, filter, and sort products
@@ -84,9 +83,6 @@ npm run dev    # Starts on port 3001
 | Deep Green | `#1A2E0A` | Dark elements |
 
 ## 💳 Payment Methods
-
-### Paymob
-Configure your Paymob API keys in the backend `.env` file.
 
 ### InstaPay
 1. Customer selects InstaPay at checkout

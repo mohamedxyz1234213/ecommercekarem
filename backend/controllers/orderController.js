@@ -9,9 +9,7 @@ const {
   sendInstapayRejection,
   sendStatusUpdate,
   sendAdminNotification,
-  sendPaymobPaymentConfirmation,
 } = require('../utils/email');
-const { initiatePaymobPayment, verifyPaymobHMAC } = require('../utils/paymob');
 const { sanitize } = require('../utils/sanitize');
 
 const isValidEmail = (value) => /^\S+@\S+\.\S+$/.test(String(value || '').trim());
@@ -121,30 +119,6 @@ const createOrder = async (req, res) => {
 
     const populatedOrder = await Order.findById(order._id).populate('user', 'name email');
 
-    // If Paymob payment, initiate payment and return redirect URL
-    if (paymentMethod === 'paymob') {
-      try {
-        const { paymentUrl, paymobOrderId } = await initiatePaymobPayment(
-          populatedOrder,
-          req.user
-        );
-        order.paymobOrderId = String(paymobOrderId);
-        await order.save();
-
-        // Send order confirmation email (payment pending)
-        sendOrderConfirmation(populatedOrder, req.user).catch(() => {});
-        sendAdminNotification(populatedOrder).catch(() => {});
-
-        return res.status(201).json({ ...populatedOrder.toObject(), paymentUrl });
-      } catch (paymobError) {
-        console.error('Paymob payment initiation error:', paymobError.message);
-        // Order is still created, just no redirect URL — user can retry
-        sendOrderConfirmation(populatedOrder, req.user).catch(() => {});
-        sendAdminNotification(populatedOrder).catch(() => {});
-        return res.status(201).json(populatedOrder);
-      }
-    }
-
     // For InstaPay, send emails normally
     sendOrderConfirmation(populatedOrder, req.user).catch(() => {});
     sendAdminNotification(populatedOrder).catch(() => {});
@@ -213,94 +187,6 @@ const submitInstapayProof = async (req, res) => {
   } catch (error) {
     console.error('submitInstapayProof error:', error.message);
     return res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// @desc    Paymob webhook callback
-// @route   POST /api/orders/paymob-callback
-const paymobCallback = async (req, res) => {
-  try {
-    // Verify HMAC signature for security
-    const hmac = req.query.hmac || req.body.hmac;
-    if (!verifyPaymobHMAC(req.body, hmac)) {
-      console.error('Paymob HMAC verification failed');
-      return res.status(403).json({ message: 'Invalid HMAC signature' });
-    }
-
-    const obj = req.body.obj || req.body;
-    const success = obj.success === true || obj.success === 'true';
-    const paymobOrderId = String(obj.order?.id || obj.order);
-    const transactionId = String(obj.id);
-
-    // Find order by paymobOrderId
-    const order = await Order.findOne({ paymobOrderId });
-    if (!order) {
-      console.error(`Paymob callback: Order not found for paymobOrderId ${paymobOrderId}`);
-      return res.status(404).json({ message: 'Order not found' });
-    }
-
-    if (success) {
-      order.paymentStatus = 'approved';
-      order.status = 'processing';
-      order.paymobTransactionId = transactionId;
-      order.paidAt = new Date();
-      await order.save();
-
-      // Send payment confirmation email
-      const user = await User.findById(order.user);
-      if (user) {
-        sendPaymobPaymentConfirmation(order, user).catch(() => {});
-        sendStatusUpdate(order, user).catch(() => {});
-      }
-    } else {
-      order.paymentStatus = 'rejected';
-      order.status = 'cancelled';
-      order.paymobTransactionId = transactionId;
-
-      // Restore stock on failed payment (only once)
-      if (!order.stockRestored) {
-        for (const item of order.items) {
-          const product = await Product.findById(item.product);
-          if (!product) continue;
-
-          product.stock = (product.stock || 0) + item.quantity;
-          if (item.size && Array.isArray(product.sizeStocks) && product.sizeStocks.length > 0) {
-            product.sizeStocks = product.sizeStocks.map((entry) =>
-              entry.size === item.size
-                ? { ...entry, quantity: entry.quantity + item.quantity }
-                : entry
-            );
-          }
-          await product.save();
-        }
-        order.stockRestored = true;
-      }
-      await order.save();
-
-      const user = await User.findById(order.user);
-      if (user) {
-        sendStatusUpdate(order, user).catch(() => {});
-      }
-    }
-
-    res.status(200).json({ message: 'Callback processed' });
-  } catch (error) {
-    console.error('paymobCallback error:', error.message);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-// @desc    Paymob payment redirect (after iframe)
-// @route   GET /api/orders/paymob-redirect
-const paymobRedirect = async (req, res) => {
-  const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
-  const success = req.query.success === 'true';
-  const orderId = req.query.merchant_order_id || req.query.order;
-
-  if (success) {
-    res.redirect(`${clientUrl}/profile?payment=success&order=${orderId || ''}`);
-  } else {
-    res.redirect(`${clientUrl}/profile?payment=failed&order=${orderId || ''}`);
   }
 };
 
@@ -492,6 +378,7 @@ const approveInstapay = async (req, res) => {
     const user = await User.findById(order.user);
     if (user) {
       sendInstapayApproval(order, user).catch(() => {});
+      sendStatusUpdate(order, user).catch(() => {});
     }
 
     res.json({ message: 'InstaPay payment approved', order });
@@ -552,6 +439,7 @@ const rejectInstapay = async (req, res) => {
     const user = await User.findById(order.user);
     if (user) {
       sendInstapayRejection(order, user).catch(() => {});
+      sendStatusUpdate(order, user).catch(() => {});
     }
 
     res.json({ message: 'InstaPay payment rejected', order });
@@ -567,8 +455,6 @@ const rejectInstapay = async (req, res) => {
 module.exports = {
   createOrder,
   submitInstapayProof,
-  paymobCallback,
-  paymobRedirect,
   getMyOrders,
   getAllOrders,
   getOrderById,
