@@ -45,6 +45,7 @@ const Login = () => {
   };
 
   const handleGoogleLogin = useGoogleLogin({
+    scope: 'openid profile email',
     onSuccess: async (response) => {
       try {
         await googleLogin(response.access_token);

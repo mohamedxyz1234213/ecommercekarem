@@ -55,6 +55,7 @@ const Register = () => {
   };
 
   const handleGoogleSignup = useGoogleLogin({
+    scope: 'openid profile email',
     onSuccess: async (response) => {
       try {
         await googleLogin(response.access_token);
