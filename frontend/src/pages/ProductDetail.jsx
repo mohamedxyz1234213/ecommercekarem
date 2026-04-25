@@ -44,7 +44,7 @@ const StarInput = ({ value, onChange, size = 28 }) => {
           aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
           role="button"
           tabIndex={0}
-          onKeyDown={(e) => e.key === 'Enter' && onChange(star)}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onChange(star)}
         >
           {star <= (hovered || value) ? (
             <FaStar size={size} />
