@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiFilter, FiX, FiChevronDown } from 'react-icons/fi';
+import { FiFilter, FiX, FiSearch } from 'react-icons/fi';
 import API from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import AnimatedSection from '../components/AnimatedSection';
@@ -14,17 +14,25 @@ const pageVariants = {
 };
 
 const Shop = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || '',
     brand: '',
     minPrice: '',
     maxPrice: '',
     sort: 'newest',
+    search: searchParams.get('search') || '',
   });
+
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || '';
+    setFilters((f) => ({ ...f, search: urlSearch }));
+    setSearchInput(urlSearch);
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -49,6 +57,7 @@ const Shop = () => {
   }, [filters]);
 
   const filteredProducts = products.filter((p) => {
+    if (filters.search && !p.name?.toLowerCase().includes(filters.search.toLowerCase())) return false;
     if (filters.category && p.category !== filters.category) return false;
     if (filters.brand && p.brand !== filters.brand) return false;
     const price = p.salePrice || p.price;
@@ -125,6 +134,27 @@ const Shop = () => {
       color: 'var(--gray-400)', fontSize: '1.1rem',
       fontFamily: 'var(--font-heading)',
     },
+    searchBar: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.5rem',
+      backgroundColor: 'var(--white)',
+      border: '1px solid var(--gray-200)',
+      borderRadius: 'var(--radius-sm)',
+      padding: '0.45rem 1rem',
+      flex: '1 1 220px',
+      maxWidth: '360px',
+    },
+    searchInput: {
+      flex: 1,
+      border: 'none',
+      outline: 'none',
+      fontSize: '0.875rem',
+      background: 'transparent',
+      color: 'var(--text)',
+      padding: '0',
+      boxShadow: 'none',
+    },
   };
 
   return (
@@ -139,6 +169,50 @@ const Shop = () => {
 
         <div style={styles.topBar}>
           <p style={styles.count}>{sortedProducts.length} products</p>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const q = searchInput.trim();
+              setFilters((f) => ({ ...f, search: q }));
+              const next = new URLSearchParams(searchParams);
+              if (q) next.set('search', q); else next.delete('search');
+              setSearchParams(next);
+            }}
+            style={styles.searchBar}
+          >
+            <FiSearch style={{ color: 'var(--text-muted)', fontSize: '1rem', flexShrink: 0 }} />
+            <input
+              type="text"
+              value={searchInput}
+              onChange={(e) => {
+                setSearchInput(e.target.value);
+                if (!e.target.value.trim()) {
+                  setFilters((f) => ({ ...f, search: '' }));
+                  const next = new URLSearchParams(searchParams);
+                  next.delete('search');
+                  setSearchParams(next);
+                }
+              }}
+              placeholder="Search perfumes…"
+              style={styles.searchInput}
+            />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchInput('');
+                  setFilters((f) => ({ ...f, search: '' }));
+                  const next = new URLSearchParams(searchParams);
+                  next.delete('search');
+                  setSearchParams(next);
+                }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', padding: 0 }}
+                aria-label="Clear search"
+              >
+                <FiX />
+              </button>
+            )}
+          </form>
           <div style={styles.controls}>
             <button style={styles.filterBtn} onClick={() => setFiltersOpen(!filtersOpen)}>
               {filtersOpen ? <FiX /> : <FiFilter />}
@@ -220,7 +294,11 @@ const Shop = () => {
             <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
               <button
                 style={styles.clearBtn}
-                onClick={() => setFilters({ category: '', brand: '', minPrice: '', maxPrice: '', sort: 'newest' })}
+                onClick={() => {
+                  setFilters({ category: '', brand: '', minPrice: '', maxPrice: '', sort: 'newest', search: '' });
+                  setSearchInput('');
+                  setSearchParams({});
+                }}
               >
                 Clear All
               </button>
@@ -239,7 +317,11 @@ const Shop = () => {
                 </AnimatedSection>
               ))
             ) : (
-              <p style={styles.noProducts}>No products found matching your filters.</p>
+              <p style={styles.noProducts}>
+                {filters.search
+                  ? `No perfumes found for "${filters.search}".`
+                  : 'No products found matching your filters.'}
+              </p>
             )}
           </div>
         )}
