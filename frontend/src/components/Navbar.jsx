@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 /* framer-motion — `motion` is used as Motion.div / Motion.a / etc. */
 import { motion as Motion, AnimatePresence } from 'framer-motion';
@@ -19,6 +19,7 @@ import {
   FiGlobe,
   FiMusic,
   FiMessageCircle,
+  FiSearch,
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -43,6 +44,9 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [socialLinks, setSocialLinks] = useState([]);
   const [siteName, setSiteName] = useState('Vybe');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = useRef(null);
   const { isAuthenticated, logout } = useAuth();
   const { cartCount, setIsDrawerOpen } = useCart();
   const { wishlistCount } = useWishlist();
@@ -85,6 +89,24 @@ const Navbar = () => {
     };
     fetchSettings();
   }, []);
+
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) {
+      navigate(`/shop?search=${encodeURIComponent(q)}`);
+    } else {
+      navigate('/shop');
+    }
+    setSearchOpen(false);
+    setSearchQuery('');
+  };
 
   const lightNav = scrolled || !isHome;
   const onHeroCream = '#f2ebe3';
@@ -367,6 +389,13 @@ const Navbar = () => {
           <div style={styles.actions}>
             <button
               style={styles.iconBtn}
+              onClick={() => setSearchOpen((v) => !v)}
+              aria-label="Search"
+            >
+              <FiSearch />
+            </button>
+            <button
+              style={styles.iconBtn}
               onClick={() => setIsDrawerOpen(true)}
               aria-label="Open cart"
             >
@@ -441,6 +470,97 @@ const Navbar = () => {
       </nav>
 
       <AnimatePresence>
+        {searchOpen && (
+          <Motion.div
+            key="search-bar"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              position: 'fixed',
+              top: scrolled ? '58px' : '72px',
+              left: 0,
+              right: 0,
+              zIndex: 999,
+              backgroundColor: 'rgba(248, 246, 242, 0.97)',
+              backdropFilter: 'blur(20px)',
+              boxShadow: '0 4px 20px rgba(20, 32, 22, 0.1)',
+              padding: '0.85rem 1.5rem',
+              display: 'flex',
+              justifyContent: 'center',
+            }}
+          >
+            <form
+              onSubmit={handleSearchSubmit}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                width: '100%',
+                maxWidth: '540px',
+              }}
+            >
+              <FiSearch style={{ color: 'var(--text-muted)', fontSize: '1.1rem', flexShrink: 0 }} />
+              <input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search perfumes…"
+                style={{
+                  flex: 1,
+                  border: 'none',
+                  borderBottom: '1.5px solid var(--gray-300)',
+                  borderRadius: 0,
+                  padding: '0.35rem 0.25rem',
+                  fontSize: '1rem',
+                  background: 'transparent',
+                  color: 'var(--text)',
+                  outline: 'none',
+                  boxShadow: 'none',
+                }}
+              />
+              <button
+                type="submit"
+                style={{
+                  padding: '0.4rem 1.1rem',
+                  backgroundColor: 'var(--primary)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 'var(--radius-sm)',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              >
+                Search
+              </button>
+              <button
+                type="button"
+                onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--text-muted)',
+                  fontSize: '1.2rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '4px',
+                  flexShrink: 0,
+                }}
+                aria-label="Close search"
+              >
+                <FiX />
+              </button>
+            </form>
+          </Motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {mobileOpen && (
           <Motion.div
             key="mobile-full-menu"
@@ -475,6 +595,52 @@ const Navbar = () => {
               initial="hidden"
               animate="show"
             >
+              <Motion.div variants={menuItemVariants} style={{ width: '100%', paddingBottom: '1rem' }}>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const q = searchQuery.trim();
+                    navigate(q ? `/shop?search=${encodeURIComponent(q)}` : '/shop');
+                    setSearchQuery('');
+                    setMobileOpen(false);
+                  }}
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1.5px solid var(--gray-300)', paddingBottom: '0.5rem' }}
+                >
+                  <FiSearch style={{ color: 'var(--text-muted)', fontSize: '1.1rem', flexShrink: 0 }} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search perfumes…"
+                    style={{
+                      flex: 1,
+                      border: 'none',
+                      borderRadius: 0,
+                      padding: '0.35rem 0.25rem',
+                      fontSize: '1rem',
+                      background: 'transparent',
+                      color: 'var(--text)',
+                      outline: 'none',
+                      boxShadow: 'none',
+                    }}
+                  />
+                  <button
+                    type="submit"
+                    style={{
+                      padding: '0.4rem 1rem',
+                      backgroundColor: 'var(--primary)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '0.85rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Go
+                  </button>
+                </form>
+              </Motion.div>
               {links.map((link) => (
                 <Motion.div key={link.path} variants={menuItemVariants} style={{ width: '100%' }}>
                   <Link

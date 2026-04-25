@@ -43,7 +43,7 @@ const ProductCard = ({ product }) => {
     imageWrapper: {
       position: 'relative',
       overflow: 'hidden',
-      aspectRatio: '3/4',
+      aspectRatio: '4/5',
       backgroundColor: '#f4f1ea',
     },
     image: {
@@ -104,10 +104,10 @@ const ProductCard = ({ product }) => {
       boxShadow: '0 4px 12px rgba(20, 32, 22, 0.12)',
     },
     info: {
-      padding: '1.125rem 1.25rem 1.35rem',
+      padding: '0.9rem 1.1rem 1.1rem',
       display: 'flex',
       flexDirection: 'column',
-      gap: '0.4rem',
+      gap: '0.35rem',
       flex: 1,
     },
     brand: {
