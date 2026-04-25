@@ -150,6 +150,61 @@ const siteSettingsSchema = new mongoose.Schema(
       type: [shippingZoneSchema],
       default: [],
     },
+
+    // About Us page
+    aboutTitle: {
+      type: String,
+      default: 'Our Story',
+      trim: true,
+      maxlength: [200, 'About title cannot exceed 200 characters'],
+    },
+    aboutSubtitle: {
+      type: String,
+      default: 'A Luxury Egyptian Perfume House',
+      trim: true,
+      maxlength: [300, 'About subtitle cannot exceed 300 characters'],
+    },
+    aboutStory: {
+      type: String,
+      default:
+        'Born from the ancient art of Egyptian perfumery, KARÉME blends centuries-old traditions with modern luxury. Our master perfumers source the finest raw materials — rare oud from the heart of Arabia, fresh florals from the Nile Delta, and precious resins carried by camel across desert trade routes — to craft fragrances that tell the story of Egypt\'s rich heritage.',
+      trim: true,
+      maxlength: [2000, 'About story cannot exceed 2000 characters'],
+    },
+    aboutMission: {
+      type: String,
+      default:
+        'To celebrate the art of Egyptian perfumery by creating exceptional, hand-crafted fragrances that connect people to the timeless beauty and mystique of the ancient East.',
+      trim: true,
+      maxlength: [500, 'About mission cannot exceed 500 characters'],
+    },
+    aboutFoundedYear: {
+      type: String,
+      default: '2020',
+      trim: true,
+      maxlength: [10, 'Founded year cannot exceed 10 characters'],
+    },
+    aboutImage: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    // Brand values (3)
+    aboutValue1Title: { type: String, default: 'Authenticity', trim: true, maxlength: [100, 'Value title too long'] },
+    aboutValue1Desc: { type: String, default: 'Every bottle carries the genuine soul of Egyptian perfumery — never synthetic, never artificial.', trim: true, maxlength: [300, 'Value description too long'] },
+    aboutValue2Title: { type: String, default: 'Craftsmanship', trim: true, maxlength: [100, 'Value title too long'] },
+    aboutValue2Desc: { type: String, default: 'Each fragrance is meticulously blended by hand, aged to perfection, and poured with care in small batches.', trim: true, maxlength: [300, 'Value description too long'] },
+    aboutValue3Title: { type: String, default: 'Heritage', trim: true, maxlength: [100, 'Value title too long'] },
+    aboutValue3Desc: { type: String, default: 'Rooted in 5,000 years of Egyptian civilisation, our scents are a living tribute to the pharaohs\' love of fragrance.', trim: true, maxlength: [300, 'Value description too long'] },
+    // Stats (4)
+    aboutStat1Value: { type: String, default: '5+', trim: true, maxlength: [20, 'Stat value too long'] },
+    aboutStat1Label: { type: String, default: 'Years of Excellence', trim: true, maxlength: [100, 'Stat label too long'] },
+    aboutStat2Value: { type: String, default: '200+', trim: true, maxlength: [20, 'Stat value too long'] },
+    aboutStat2Label: { type: String, default: 'Unique Fragrances', trim: true, maxlength: [100, 'Stat label too long'] },
+    aboutStat3Value: { type: String, default: '10K+', trim: true, maxlength: [20, 'Stat value too long'] },
+    aboutStat3Label: { type: String, default: 'Happy Customers', trim: true, maxlength: [100, 'Stat label too long'] },
+    aboutStat4Value: { type: String, default: '100%', trim: true, maxlength: [20, 'Stat value too long'] },
+    aboutStat4Label: { type: String, default: 'Natural Ingredients', trim: true, maxlength: [100, 'Stat label too long'] },
   },
   { timestamps: true }
 );

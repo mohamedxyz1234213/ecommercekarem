@@ -94,6 +94,7 @@ const Navbar = () => {
   const links = [
     { label: 'Home', path: '/' },
     { label: 'Shop', path: '/shop' },
+    { label: 'About Us', path: '/about' },
   ];
 
   const styles = {

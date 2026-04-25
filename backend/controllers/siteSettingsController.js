@@ -33,6 +33,27 @@ const updateSettings = async (req, res) => {
       'tagline',
       'bannerText',
       'shippingZones',
+      // About Us
+      'aboutTitle',
+      'aboutSubtitle',
+      'aboutStory',
+      'aboutMission',
+      'aboutFoundedYear',
+      'aboutImage',
+      'aboutValue1Title',
+      'aboutValue1Desc',
+      'aboutValue2Title',
+      'aboutValue2Desc',
+      'aboutValue3Title',
+      'aboutValue3Desc',
+      'aboutStat1Value',
+      'aboutStat1Label',
+      'aboutStat2Value',
+      'aboutStat2Label',
+      'aboutStat3Value',
+      'aboutStat3Label',
+      'aboutStat4Value',
+      'aboutStat4Label',
     ];
 
     allowedFields.forEach((field) => {
