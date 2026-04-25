@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import ScrollToTop from './components/ScrollToTop';
 import Footer from './components/Footer';
 import CartDrawer from './components/CartDrawer';
 import LoadingSpinner from './components/LoadingSpinner';
@@ -28,6 +29,7 @@ function App() {
 
   return (
     <>
+      <ScrollToTop />
       <Navbar />
       <CartDrawer />
       <main style={{ minHeight: '100vh' }}>
