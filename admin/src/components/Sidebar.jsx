@@ -9,6 +9,7 @@ import {
   MdLocalOffer,
   MdChevronLeft,
   MdChevronRight,
+  MdRateReview,
 } from 'react-icons/md';
 
 const navItems = [
@@ -16,6 +17,7 @@ const navItems = [
   { path: '/products', label: 'Products', icon: MdInventory },
   { path: '/orders', label: 'Orders', icon: MdShoppingCart },
   { path: '/users', label: 'Users', icon: MdPeople },
+  { path: '/reviews', label: 'Reviews', icon: MdRateReview },
   { path: '/sales', label: 'Sales Manager', icon: MdLocalOffer },
   { path: '/settings', label: 'Settings', icon: MdSettings },
 ];
