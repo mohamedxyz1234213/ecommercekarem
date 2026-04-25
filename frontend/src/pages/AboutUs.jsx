@@ -6,21 +6,21 @@ import { getApiOrigin } from '../utils/apiBase';
 
 const ABOUT_FALLBACKS = {
   aboutTitle: 'Our Story',
-  aboutSubtitle: 'A Luxury Egyptian Perfume House',
+  aboutSubtitle: 'Egyptian Perfume House',
   aboutStory:
-    "Born from the ancient art of Egyptian perfumery, KARÉME blends centuries-old traditions with modern luxury. Our master perfumers source the finest raw materials — rare oud from the heart of Arabia, fresh florals from the Nile Delta, and precious resins carried by camel across desert trade routes — to craft fragrances that tell the story of Egypt's rich heritage.",
+    "We craft premium fragrances inspired by the beauty and tradition of Egypt, bringing you quality scents made with care and passion.",
   aboutMission:
-    "To celebrate the art of Egyptian perfumery by creating exceptional, hand-crafted fragrances that connect people to the timeless beauty and mystique of the ancient East.",
-  aboutFoundedYear: '2020',
+    "To create exceptional fragrances that celebrate craftsmanship and connect people to beauty.",
+  aboutFoundedYear: '2025',
   aboutImage: '',
   aboutValue1Title: 'Authenticity',
-  aboutValue1Desc: 'Every bottle carries the genuine soul of Egyptian perfumery — never synthetic, never artificial.',
+  aboutValue1Desc: 'Real ingredients, genuine quality — nothing artificial.',
   aboutValue2Title: 'Craftsmanship',
-  aboutValue2Desc: 'Each fragrance is meticulously blended by hand, aged to perfection, and poured with care in small batches.',
+  aboutValue2Desc: 'Every fragrance is carefully blended and crafted in small batches.',
   aboutValue3Title: 'Heritage',
-  aboutValue3Desc: "Rooted in 5,000 years of Egyptian civilisation, our scents are a living tribute to the pharaohs' love of fragrance.",
-  aboutStat1Value: '5+',
-  aboutStat1Label: 'Years of Excellence',
+  aboutValue3Desc: 'Inspired by Egyptian tradition and the timeless art of scent.',
+  aboutStat1Value: '1',
+  aboutStat1Label: 'Year of Experience',
   aboutStat2Value: '200+',
   aboutStat2Label: 'Unique Fragrances',
   aboutStat3Value: '10K+',
@@ -48,14 +48,12 @@ const stagger = {
 
 const AboutUs = () => {
   const [content, setContent] = useState(ABOUT_FALLBACKS);
-  const [siteName, setSiteName] = useState('KARÉME');
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         const { data } = await API.get('/settings');
         const t = (v) => (typeof v === 'string' ? v.trim() : '');
-        setSiteName(t(data.siteName) || 'KARÉME');
         setContent({
           aboutTitle: t(data.aboutTitle) || ABOUT_FALLBACKS.aboutTitle,
           aboutSubtitle: t(data.aboutSubtitle) || ABOUT_FALLBACKS.aboutSubtitle,
@@ -237,9 +235,7 @@ const AboutUs = () => {
               {/* Gold ornamental lines */}
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1rem', color: '#c4a265' }}>
                 <div style={{ width: '1px', height: '60px', background: 'rgba(196,162,101,0.4)' }} />
-                <span style={{ fontSize: '2.5rem', letterSpacing: '0.1em', fontFamily: 'var(--font-heading)', color: 'rgba(196,162,101,0.8)' }}>
-                  {siteName}
-                </span>
+                <span style={{ fontSize: '2rem', color: 'rgba(196,162,101,0.8)' }}>✦</span>
                 <div style={{ width: '60px', height: '1px', background: 'rgba(196,162,101,0.4)' }} />
                 <span style={{ fontSize: '0.65rem', letterSpacing: '5px', textTransform: 'uppercase', color: 'rgba(196,162,101,0.5)' }}>
                   EST. {content.aboutFoundedYear}
@@ -293,8 +289,8 @@ const AboutUs = () => {
                 marginBottom: '1.75rem',
               }}
             >
-              Perfume as an{' '}
-              <span style={{ fontStyle: 'italic', color: '#4a6741' }}>Art Form</span>
+              Crafted with{' '}
+              <span style={{ fontStyle: 'italic', color: '#4a6741' }}>Passion</span>
             </motion.h2>
             <motion.p
               variants={fadeUp}
@@ -538,17 +534,15 @@ const AboutUs = () => {
               marginBottom: '1.5rem',
             }}
           >
-            Fragrance Has Been an Egyptian{' '}
-            <span style={{ fontStyle: 'italic', color: '#c4a265' }}>Sacred Art</span>
-            {' '}for 5,000 Years
+            Inspired by Egyptian{' '}
+            <span style={{ fontStyle: 'italic', color: '#c4a265' }}>Tradition</span>
           </motion.h2>
           <motion.p
             variants={fadeUp}
             style={{ fontSize: '1rem', lineHeight: 1.8, color: 'rgba(255,255,255,0.75)', marginBottom: '2rem' }}
           >
-            From the kyphi incense burned in ancient temples to the legendary perfumes of Queen Cleopatra,
-            Egypt has always been synonymous with the art of scent. We carry that legacy forward — every
-            drop is a bridge between civilisations.
+            Egypt has always been home to the art of scent. We carry that legacy forward,
+            crafting every fragrance with passion and pride.
           </motion.p>
           <motion.div variants={fadeUp}>
             <Link
