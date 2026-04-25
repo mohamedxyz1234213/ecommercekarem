@@ -256,7 +256,7 @@ section.hero-section {
   scroll-snap-type: x mandatory;
   scroll-padding-inline: 1.25rem;
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;
   padding: 8px 0 18px;
   margin-left: -1rem;
   margin-right: -1rem;
