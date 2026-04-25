@@ -1,10 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FiShoppingBag, FiHeart, FiMinus, FiPlus, FiArrowLeft } from 'react-icons/fi';
+import { FaStar, FaRegStar } from 'react-icons/fa';
+import toast from 'react-hot-toast';
 import API from '../api/axios';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useAuth } from '../context/AuthContext';
 import ReviewStars from '../components/ReviewStars';
 import ProductCard from '../components/ProductCard';
 import AnimatedSection from '../components/AnimatedSection';
@@ -27,10 +30,38 @@ const pageVariants = {
   exit: { opacity: 0, transition: { duration: 0.3 } },
 };
 
+const StarInput = ({ value, onChange, size = 28 }) => {
+  const [hovered, setHovered] = useState(0);
+  return (
+    <div style={{ display: 'flex', gap: '4px', cursor: 'pointer' }}>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <span
+          key={star}
+          onMouseEnter={() => setHovered(star)}
+          onMouseLeave={() => setHovered(0)}
+          onClick={() => onChange(star)}
+          style={{ color: 'var(--gold)', lineHeight: 1 }}
+          aria-label={`Rate ${star} star${star > 1 ? 's' : ''}`}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onChange(star)}
+        >
+          {star <= (hovered || value) ? (
+            <FaStar size={size} />
+          ) : (
+            <FaRegStar size={size} />
+          )}
+        </span>
+      ))}
+    </div>
+  );
+};
+
 const ProductDetail = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -38,12 +69,34 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedSize, setSelectedSize] = useState('');
 
+  // Reviews state
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+
+  const fetchReviews = useCallback(async (productId) => {
+    setReviewsLoading(true);
+    try {
+      const { data } = await API.get(`/products/${productId}/reviews`);
+      setReviews(Array.isArray(data) ? data : []);
+    } catch {
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
       setSelectedImage(0);
       setQuantity(1);
       setSelectedSize('');
+      setReviews([]);
+      setReviewRating(0);
+      setReviewComment('');
       try {
         const { data } = await API.get(`/products/${id}`);
         const fetchedProduct = data?.product || data || null;
@@ -60,6 +113,8 @@ const ProductDetail = () => {
         } else {
           setRelated([]);
         }
+
+        await fetchReviews(id);
       } catch {
         setProduct(null);
         setRelated([]);
@@ -68,7 +123,48 @@ const ProductDetail = () => {
       }
     };
     fetchProduct();
-  }, [id]);
+  }, [id, fetchReviews]);
+
+  const userReview = user ? reviews.find((r) => r.user?._id === user._id || r.user === user._id) : null;
+
+  useEffect(() => {
+    if (userReview) {
+      setReviewRating(userReview.rating);
+      setReviewComment(userReview.comment);
+    }
+  }, [userReview]);
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (reviewRating === 0) {
+      toast.error('Please select a star rating');
+      return;
+    }
+    if (!reviewComment.trim()) {
+      toast.error('Please write a comment');
+      return;
+    }
+    setReviewSubmitting(true);
+    try {
+      await API.put(`/products/${id}/review`, { rating: reviewRating, comment: reviewComment.trim() });
+      toast.success(userReview ? 'Review updated!' : 'Review submitted!');
+      // Refresh reviews and product rating
+      const [reviewsRes, productRes] = await Promise.all([
+        API.get(`/products/${id}/reviews`),
+        API.get(`/products/${id}`),
+      ]);
+      setReviews(Array.isArray(reviewsRes.data) ? reviewsRes.data : []);
+      setProduct((prev) => {
+        const updated = productRes.data?.product || productRes.data;
+        return updated ? { ...prev, rating: updated.rating, numReviews: updated.numReviews } : prev;
+      });
+    } catch (error) {
+      const msg = error.response?.data?.errors?.[0]?.msg || error.response?.data?.message || 'Failed to submit review';
+      toast.error(msg);
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   if (loading) return <div style={{ paddingTop: '120px' }}><LoadingSpinner /></div>;
   if (!product) {
@@ -87,7 +183,7 @@ const ProductDetail = () => {
     );
   }
 
-  const { name, brand, price, salePrice, onSale, description, images, rating, numReviews, notes, reviews, sizes } = product;
+  const { name, brand, price, salePrice, onSale, description, images, rating, numReviews, notes, sizes } = product;
   const discount = onSale && salePrice ? Math.round((1 - salePrice / price) * 100) : 0;
   const availableSizes =
     Array.isArray(product.sizeStocks) && product.sizeStocks.length > 0
@@ -310,6 +406,57 @@ const ProductDetail = () => {
     reviewer: { fontWeight: 700, fontSize: '1rem', color: '#142016' },
     reviewDate: { fontSize: '0.8125rem', color: '#6b7280', flexShrink: 0 },
     reviewText: { fontSize: '0.9375rem', color: '#3d4a38', lineHeight: 1.7 },
+    reviewFormCard: {
+      backgroundColor: '#ffffff',
+      borderRadius: '16px',
+      padding: '1.75rem',
+      boxShadow: '0 4px 20px rgba(20, 32, 22, 0.06)',
+      border: '1px solid rgba(20, 32, 22, 0.06)',
+      marginBottom: '1.75rem',
+    },
+    reviewFormTitle: {
+      fontFamily: 'var(--font-heading)',
+      fontSize: '1.1rem',
+      fontWeight: 600,
+      color: '#142016',
+      marginBottom: '1.25rem',
+    },
+    reviewFormLabel: { fontSize: '0.8125rem', fontWeight: 700, color: '#142016', letterSpacing: '0.04em', marginBottom: '0.5rem', display: 'block' },
+    reviewTextarea: {
+      width: '100%',
+      minHeight: '110px',
+      padding: '0.75rem 1rem',
+      borderRadius: '10px',
+      border: '1.5px solid #e5e7eb',
+      fontSize: '0.9375rem',
+      color: '#142016',
+      fontFamily: 'var(--font-body)',
+      resize: 'vertical',
+      marginTop: '0.5rem',
+      outline: 'none',
+      boxSizing: 'border-box',
+    },
+    reviewSubmitBtn: {
+      marginTop: '1rem',
+      padding: '0.75rem 2rem',
+      backgroundColor: '#014421',
+      color: '#fff',
+      border: 'none',
+      borderRadius: '10px',
+      fontSize: '0.9375rem',
+      fontWeight: 700,
+      cursor: 'pointer',
+      letterSpacing: '0.04em',
+    },
+    loginPrompt: {
+      backgroundColor: '#f9faf8',
+      borderRadius: '12px',
+      padding: '1.25rem 1.5rem',
+      fontSize: '0.9375rem',
+      color: '#6b7280',
+      marginBottom: '1.5rem',
+      border: '1px solid #e5e7eb',
+    },
     relatedSection: { marginTop: '3.5rem' },
     relatedGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.5rem' },
     sectionTitle: {
@@ -497,11 +644,64 @@ const ProductDetail = () => {
         </div>
 
         {/* Reviews */}
-        {reviews?.length > 0 && (
-          <div style={styles.reviewsSection}>
-            <AnimatedSection>
-              <h2 style={styles.sectionTitle}>Customer Reviews</h2>
-              {reviews.map((review) => (
+        <div style={styles.reviewsSection}>
+          <AnimatedSection>
+            <h2 style={styles.sectionTitle}>Customer Reviews</h2>
+
+            {/* Review form / login prompt */}
+            {user ? (
+              <div style={styles.reviewFormCard}>
+                <p style={styles.reviewFormTitle}>
+                  {userReview ? 'Update Your Review' : 'Write a Review'}
+                </p>
+                <form onSubmit={handleReviewSubmit}>
+                  <label style={styles.reviewFormLabel}>Your Rating</label>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <StarInput value={reviewRating} onChange={setReviewRating} size={28} />
+                  </div>
+                  <label style={styles.reviewFormLabel}>Your Comment</label>
+                  <textarea
+                    style={styles.reviewTextarea}
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    placeholder="Share your experience with this product..."
+                    maxLength={1000}
+                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                    <button
+                      type="submit"
+                      style={{
+                        ...styles.reviewSubmitBtn,
+                        ...(reviewSubmitting ? { opacity: 0.6, cursor: 'not-allowed' } : {}),
+                      }}
+                      disabled={reviewSubmitting}
+                    >
+                      {reviewSubmitting ? 'Submitting...' : userReview ? 'Update Review' : 'Submit Review'}
+                    </button>
+                    {userReview && (
+                      <span style={{ fontSize: '0.8125rem', color: '#6b7280' }}>
+                        You reviewed this on {new Date(userReview.createdAt).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </form>
+              </div>
+            ) : (
+              <div style={styles.loginPrompt}>
+                <Link to="/login" style={{ color: '#014421', fontWeight: 700 }}>Sign in</Link>
+                {' '}to leave a review for this product.
+              </div>
+            )}
+
+            {/* Reviews list */}
+            {reviewsLoading ? (
+              <div style={{ padding: '2rem 0', textAlign: 'center', color: '#6b7280' }}>Loading reviews…</div>
+            ) : reviews.length === 0 ? (
+              <div style={{ padding: '1rem 0', color: '#6b7280', fontSize: '0.9375rem' }}>
+                No reviews yet. Be the first to review this product!
+              </div>
+            ) : (
+              reviews.map((review) => (
                 <motion.div key={review._id} style={styles.reviewCard} whileHover={{ y: -2 }}>
                   <div style={styles.reviewHeader}>
                     <div>
@@ -512,10 +712,10 @@ const ProductDetail = () => {
                   </div>
                   <p style={styles.reviewText}>{review.comment}</p>
                 </motion.div>
-              ))}
-            </AnimatedSection>
-          </div>
-        )}
+              ))
+            )}
+          </AnimatedSection>
+        </div>
 
         {/* Related Products */}
         {related.length > 0 && (
