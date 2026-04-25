@@ -1,15 +1,9 @@
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
 import HeroSection from '../components/HeroSection';
 import FeaturedProducts from '../components/FeaturedProducts';
 import SaleBanner from '../components/SaleBanner';
 import AnimatedSection from '../components/AnimatedSection';
-
-const categories = [
-  { label: 'Men', value: 'Men' },
-  { label: 'Women', value: 'Women' },
-  { label: 'Unisex', value: 'Unisex' },
-];
+import HomeProductsSection from '../components/HomeProductsSection';
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -19,59 +13,10 @@ const pageVariants = {
 
 const Home = () => {
   const styles = {
-    categories: {
-      padding: '6rem 0',
-      backgroundColor: 'var(--white)',
-      boxShadow: 'inset 0 1px 0 var(--gray-200)',
-    },
     container: {
       maxWidth: '1280px',
       margin: '0 auto',
       padding: '0 1.5rem',
-    },
-    sectionHeader: {
-      textAlign: 'center',
-      marginBottom: '3rem',
-    },
-    label: {
-      fontSize: '0.8rem',
-      fontWeight: 600,
-      letterSpacing: '4px',
-      textTransform: 'uppercase',
-      color: 'var(--gold)',
-      marginBottom: '0.75rem',
-    },
-    title: {
-      fontFamily: 'var(--font-heading)',
-      fontSize: 'clamp(1.75rem, 3vw, 2.5rem)',
-      fontWeight: 500,
-      color: 'var(--text)',
-    },
-    catStack: {
-      maxWidth: '420px',
-      margin: '0 auto',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '1rem',
-    },
-    catBtn: {
-      display: 'block',
-      width: '100%',
-      padding: '1.125rem 1.5rem',
-      fontFamily: 'var(--font-heading)',
-      fontSize: 'clamp(1.05rem, 2.5vw, 1.2rem)',
-      fontWeight: 500,
-      letterSpacing: '0.06em',
-      textTransform: 'uppercase',
-      textAlign: 'center',
-      textDecoration: 'none',
-      color: '#f2ebe3',
-      backgroundColor: '#014421',
-      border: '1px solid rgba(1, 68, 33, 0.5)',
-      borderRadius: '14px',
-      cursor: 'pointer',
-      boxShadow: '0 4px 20px rgba(1, 68, 33, 0.22)',
-      transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
     },
     features: {
       padding: '5rem 0',
@@ -111,32 +56,7 @@ const Home = () => {
       <FeaturedProducts />
       <SaleBanner />
 
-      {/* Categories Section */}
-      <section style={styles.categories}>
-        <div style={styles.container}>
-          <AnimatedSection>
-            <div style={styles.sectionHeader}>
-              <p style={styles.label}>Collections</p>
-              <h2 style={styles.title}>Shop by Category</h2>
-            </div>
-          </AnimatedSection>
-
-          <AnimatedSection delay={0.1}>
-            <div style={styles.catStack}>
-              {categories.map((cat) => (
-                <motion.div key={cat.value} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                  <Link
-                    to={`/shop?category=${encodeURIComponent(cat.value)}`}
-                    style={styles.catBtn}
-                  >
-                    {cat.label}
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
-          </AnimatedSection>
-        </div>
-      </section>
+      <HomeProductsSection />
 
       {/* Features Section */}
       <section style={styles.features}>
