@@ -13,6 +13,7 @@ import OrderDetail from './pages/OrderDetail';
 import Users from './pages/Users';
 import UserDetail from './pages/UserDetail';
 import Settings from './pages/Settings';
+import Reviews from './pages/Reviews';
 import SalesManager from './pages/SalesManager';
 
 const ProtectedRoute = ({ children }) => {
@@ -53,6 +54,7 @@ function App() {
             <Route path="/users" element={<ProtectedRoute><Users /></ProtectedRoute>} />
             <Route path="/users/:id" element={<ProtectedRoute><UserDetail /></ProtectedRoute>} />
             <Route path="/sales" element={<ProtectedRoute><SalesManager /></ProtectedRoute>} />
+            <Route path="/reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
