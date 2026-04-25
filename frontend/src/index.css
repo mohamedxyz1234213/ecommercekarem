@@ -270,9 +270,9 @@ section.hero-section {
 }
 
 .featured-mobile-carousel__card {
-  flex: 0 0 min(88vw, 340px);
-  width: min(88vw, 340px);
-  max-width: 340px;
+  flex: 0 0 min(74vw, 270px);
+  width: min(74vw, 270px);
+  max-width: 270px;
   scroll-snap-align: start;
   scroll-snap-stop: always;
 }
