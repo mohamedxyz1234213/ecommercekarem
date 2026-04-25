@@ -96,12 +96,7 @@ const Shop = () => {
       fontSize: '0.85rem', color: 'var(--text)', cursor: 'pointer',
       appearance: 'none', backgroundImage: 'none',
     },
-    grid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-      gap: '1.5rem',
-      paddingBottom: '4rem',
-    },
+    grid: {},
     filtersPanel: {
       backgroundColor: 'var(--white)',
       borderRadius: 'var(--radius-md)',
@@ -236,7 +231,7 @@ const Shop = () => {
         {loading ? (
           <LoadingSpinner />
         ) : (
-          <div style={styles.grid}>
+          <div style={styles.grid} className="shop-grid">
             {sortedProducts.length > 0 ? (
               sortedProducts.map((product, i) => (
                 <AnimatedSection key={product._id} delay={Math.min(i * 0.05, 0.3)}>
