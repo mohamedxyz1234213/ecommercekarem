@@ -17,6 +17,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import OrderDetail from './pages/OrderDetail';
 import NotFound from './pages/NotFound';
+import AboutUs from './pages/AboutUs';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -37,6 +38,7 @@ function App() {
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/about" element={<AboutUs />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route

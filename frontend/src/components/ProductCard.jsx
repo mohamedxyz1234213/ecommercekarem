@@ -69,8 +69,8 @@ const ProductCard = ({ product }) => {
     },
     addBtn: {
       position: 'absolute',
-      bottom: '14px',
-      right: '14px',
+      bottom: '12px',
+      right: '12px',
       width: '44px',
       height: '44px',
       borderRadius: '50%',
@@ -82,7 +82,7 @@ const ProductCard = ({ product }) => {
       justifyContent: 'center',
       cursor: isOutOfStock ? 'not-allowed' : 'pointer',
       fontSize: '1.05rem',
-      zIndex: 2,
+      zIndex: 4,
       boxShadow: isOutOfStock ? 'none' : '0 4px 14px rgba(1, 68, 33, 0.35)',
       opacity: isOutOfStock ? 0.6 : 1,
     },
@@ -230,6 +230,22 @@ const ProductCard = ({ product }) => {
             whileHover={{ scale: 1.06 }}
             transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
           />
+          {/* Cart button inside image wrapper — keeps it away from the sale/price text */}
+          <motion.button
+            type="button"
+            style={styles.addBtn}
+            whileHover={isOutOfStock ? {} : { scale: 1.08 }}
+            whileTap={isOutOfStock ? {} : { scale: 0.94 }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (!isOutOfStock) addToCart(product);
+            }}
+            aria-label={isOutOfStock ? 'Out of stock' : 'Add to cart'}
+            disabled={isOutOfStock}
+          >
+            <FiShoppingBag />
+          </motion.button>
         </div>
         <div style={styles.info}>
           {brand && <span style={styles.brand}>{brand}</span>}
@@ -252,20 +268,6 @@ const ProductCard = ({ product }) => {
           </div>
         </div>
       </Link>
-      <motion.button
-        style={styles.addBtn}
-        whileHover={isOutOfStock ? {} : { scale: 1.08 }}
-        whileTap={isOutOfStock ? {} : { scale: 0.94 }}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (!isOutOfStock) addToCart(product);
-        }}
-        aria-label={isOutOfStock ? 'Out of stock' : 'Add to cart'}
-        disabled={isOutOfStock}
-      >
-        <FiShoppingBag />
-      </motion.button>
     </motion.div>
   );
 };

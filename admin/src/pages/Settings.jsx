@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MdSave, MdImage, MdStore, MdCampaign, MdLink, MdAdd, MdDelete, MdLocalShipping } from 'react-icons/md';
+import { MdSave, MdImage, MdStore, MdCampaign, MdLink, MdAdd, MdDelete, MdLocalShipping, MdInfo } from 'react-icons/md';
 import ImageUpload from '../components/ImageUpload';
 import API from '../api/axios';
 import toast from 'react-hot-toast';
@@ -35,8 +35,30 @@ const Settings = () => {
     heroSecondaryButtonLink: '',
     socialLinks: [],
     shippingZones: [],
+    // About Us
+    aboutTitle: '',
+    aboutSubtitle: '',
+    aboutStory: '',
+    aboutMission: '',
+    aboutFoundedYear: '',
+    aboutImage: '',
+    aboutValue1Title: '',
+    aboutValue1Desc: '',
+    aboutValue2Title: '',
+    aboutValue2Desc: '',
+    aboutValue3Title: '',
+    aboutValue3Desc: '',
+    aboutStat1Value: '',
+    aboutStat1Label: '',
+    aboutStat2Value: '',
+    aboutStat2Label: '',
+    aboutStat3Value: '',
+    aboutStat3Label: '',
+    aboutStat4Value: '',
+    aboutStat4Label: '',
   });
   const [heroImages, setHeroImages] = useState([]);
+  const [aboutImages, setAboutImages] = useState([]);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [newLink, setNewLink] = useState({ platform: '', url: '', icon: 'FiInstagram', location: 'both', enabled: true });
@@ -65,9 +87,33 @@ const Settings = () => {
         heroSecondaryButtonLink: data.heroSecondaryButtonLink || '',
         socialLinks: data.socialLinks || [],
         shippingZones: data.shippingZones || [],
+        // About Us
+        aboutTitle: data.aboutTitle || '',
+        aboutSubtitle: data.aboutSubtitle || '',
+        aboutStory: data.aboutStory || '',
+        aboutMission: data.aboutMission || '',
+        aboutFoundedYear: data.aboutFoundedYear || '',
+        aboutImage: data.aboutImage || '',
+        aboutValue1Title: data.aboutValue1Title || '',
+        aboutValue1Desc: data.aboutValue1Desc || '',
+        aboutValue2Title: data.aboutValue2Title || '',
+        aboutValue2Desc: data.aboutValue2Desc || '',
+        aboutValue3Title: data.aboutValue3Title || '',
+        aboutValue3Desc: data.aboutValue3Desc || '',
+        aboutStat1Value: data.aboutStat1Value || '',
+        aboutStat1Label: data.aboutStat1Label || '',
+        aboutStat2Value: data.aboutStat2Value || '',
+        aboutStat2Label: data.aboutStat2Label || '',
+        aboutStat3Value: data.aboutStat3Value || '',
+        aboutStat3Label: data.aboutStat3Label || '',
+        aboutStat4Value: data.aboutStat4Value || '',
+        aboutStat4Label: data.aboutStat4Label || '',
       });
       if (data.heroImage) {
         setHeroImages([data.heroImage]);
+      }
+      if (data.aboutImage) {
+        setAboutImages([data.aboutImage]);
       }
     } catch {
       // Use defaults if no settings exist yet
@@ -90,6 +136,12 @@ const Settings = () => {
         payload.heroImage = heroImages[0];
       } else if (heroImages.length === 0) {
         payload.heroImage = '';
+      }
+      // If about image was uploaded
+      if (aboutImages.length > 0 && aboutImages[0] !== settings.aboutImage) {
+        payload.aboutImage = aboutImages[0];
+      } else if (aboutImages.length === 0) {
+        payload.aboutImage = '';
       }
       await API.put('/settings', payload);
       toast.success('Settings saved successfully!');
@@ -648,6 +700,108 @@ const Settings = () => {
             </div>
           )}
         </div>
+
+        {/* ── About Us Section ── */}
+        <div className="card" style={{ gridColumn: '1 / -1' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <MdInfo size={22} style={{ color: '#2D5016' }} />
+            <h3 style={{ fontSize: '1.1rem', color: '#142016' }}>About Us Page</h3>
+          </div>
+          <p style={{ fontSize: '0.85rem', color: '#4d564a', marginBottom: 20 }}>
+            Customize the About Us page — your brand story, mission, statistics, and core values.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="form-group">
+              <label>Page Title</label>
+              <input className="form-control" name="aboutTitle" value={settings.aboutTitle} onChange={handleChange} placeholder="e.g. Our Story" />
+            </div>
+            <div className="form-group">
+              <label>Page Subtitle</label>
+              <input className="form-control" name="aboutSubtitle" value={settings.aboutSubtitle} onChange={handleChange} placeholder="e.g. A Luxury Egyptian Perfume House" />
+            </div>
+            <div className="form-group">
+              <label>Founded Year</label>
+              <input className="form-control" name="aboutFoundedYear" value={settings.aboutFoundedYear} onChange={handleChange} placeholder="e.g. 2020" />
+            </div>
+          </div>
+
+          <div className="form-group" style={{ marginTop: 8 }}>
+            <label>Brand Story</label>
+            <textarea className="form-control" name="aboutStory" value={settings.aboutStory} onChange={handleChange} rows={4} placeholder="Write your brand story..." />
+          </div>
+          <div className="form-group">
+            <label>Mission Statement</label>
+            <textarea className="form-control" name="aboutMission" value={settings.aboutMission} onChange={handleChange} rows={3} placeholder="Your brand mission..." />
+          </div>
+
+          <div className="form-group">
+            <label>About Page Background Image (optional)</label>
+            <ImageUpload images={aboutImages} onChange={setAboutImages} maxImages={1} />
+          </div>
+
+          {/* Brand Values */}
+          <div style={{ marginTop: 20, marginBottom: 8, fontWeight: 600, color: '#142016', fontSize: '0.95rem' }}>Brand Values (3)</div>
+          <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 12 }}>These appear as cards on the About Us page.</p>
+          {[1, 2, 3].map((n) => (
+            <div key={n} style={{ background: '#FAF8F5', borderRadius: 8, padding: 16, marginBottom: 12 }}>
+              <div style={{ fontWeight: 600, fontSize: '0.82rem', color: '#4a6741', marginBottom: 10 }}>Value {n}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12 }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '0.8rem' }}>Title</label>
+                  <input
+                    className="form-control"
+                    name={`aboutValue${n}Title`}
+                    value={settings[`aboutValue${n}Title`]}
+                    onChange={handleChange}
+                    placeholder="e.g. Authenticity"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '0.8rem' }}>Description</label>
+                  <input
+                    className="form-control"
+                    name={`aboutValue${n}Desc`}
+                    value={settings[`aboutValue${n}Desc`]}
+                    onChange={handleChange}
+                    placeholder="Short description..."
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {/* Stats */}
+          <div style={{ marginTop: 20, marginBottom: 8, fontWeight: 600, color: '#142016', fontSize: '0.95rem' }}>Stats / Numbers (4)</div>
+          <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 12 }}>Bold statistics shown in the dark band on the About Us page.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {[1, 2, 3, 4].map((n) => (
+              <div key={n} style={{ background: '#FAF8F5', borderRadius: 8, padding: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '0.75rem' }}>Value</label>
+                  <input
+                    className="form-control"
+                    name={`aboutStat${n}Value`}
+                    value={settings[`aboutStat${n}Value`]}
+                    onChange={handleChange}
+                    placeholder="e.g. 5+"
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label style={{ fontSize: '0.75rem' }}>Label</label>
+                  <input
+                    className="form-control"
+                    name={`aboutStat${n}Label`}
+                    value={settings[`aboutStat${n}Label`]}
+                    onChange={handleChange}
+                    placeholder="e.g. Years of Excellence"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
 
       <div style={{ marginTop: 24 }}>

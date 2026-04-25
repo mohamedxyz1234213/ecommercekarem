@@ -175,13 +175,14 @@ const HeroSection = () => {
       zIndex: 1,
       pointerEvents: 'none',
     }),
-    scrollHint: {
+    scrollHintWrapper: {
       position: 'absolute',
       bottom: '2rem',
       left: '50%',
-      transform: 'translateX(-50%) translateZ(0)',
-      WebkitTransform: 'translateX(-50%) translateZ(0)',
+      transform: 'translateX(-50%)',
       zIndex: 3,
+    },
+    scrollHint: {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -267,14 +268,16 @@ const HeroSection = () => {
         </motion.div>
       </div>
 
-      <motion.div
-        style={styles.scrollHint}
-        animate={{ y: [0, 8, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      >
-        <span>SCROLL</span>
-        <div style={{ width: '1px', height: '30px', backgroundColor: 'rgba(255,255,255,0.3)' }} />
-      </motion.div>
+      <div style={styles.scrollHintWrapper}>
+        <motion.div
+          style={styles.scrollHint}
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          <span>SCROLL</span>
+          <div style={{ width: '1px', height: '30px', backgroundColor: 'rgba(255,255,255,0.3)' }} />
+        </motion.div>
+      </div>
     </section>
   );
 };
