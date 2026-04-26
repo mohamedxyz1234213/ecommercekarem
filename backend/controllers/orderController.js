@@ -14,7 +14,19 @@ const {
 const { uploadImageBuffer, hasCloudinaryConfig } = require('../utils/cloudinary');
 const { sanitize } = require('../utils/sanitize');
 
-const isValidEmail = (value) => /^\S+@\S+\.\S+$/.test(String(value || '').trim());
+// Safe email validation without ReDoS vulnerability
+const isValidEmail = (value) => {
+  const str = String(value || '').trim();
+  if (str.length > 254) return false;
+  const atIdx = str.lastIndexOf('@');
+  if (atIdx < 1) return false;
+  const local = str.slice(0, atIdx);
+  const domain = str.slice(atIdx + 1);
+  if (!local || !domain) return false;
+  const dotIdx = domain.lastIndexOf('.');
+  if (dotIdx < 1 || dotIdx >= domain.length - 1) return false;
+  return true;
+};
 
 const normalizeArea = (value) => String(value || '').trim().toLowerCase();
 
@@ -64,7 +76,7 @@ const createOrder = async (req, res) => {
 
     const normalizedEmail = String(email || req.user?.email || '').trim().toLowerCase();
     if (!isValidEmail(normalizedEmail)) {
-      return res.status(400).json({ message: 'A valid email is required for payment verification' });
+      return res.status(400).json({ message: 'A valid email is required for order confirmation' });
     }
 
     // For authenticated users, email must match account email
