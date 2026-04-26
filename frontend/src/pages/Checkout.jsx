@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { FiSmartphone, FiTruck } from 'react-icons/fi';
@@ -106,7 +106,7 @@ const Checkout = () => {
     }
     const normalizedEmail = String(form.email || user?.email || '').trim().toLowerCase();
     if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
-      toast.error('Please enter a valid email for payment verification');
+      toast.error('Please enter a valid email for order confirmation');
       return;
     }
     if (items.length === 0) {
@@ -134,14 +134,26 @@ const Checkout = () => {
         email: normalizedEmail,
       };
 
+      // Include guest info when not authenticated
+      if (!user) {
+        orderData.guestName = form.fullName;
+        orderData.guestPhone = form.phone;
+      }
+
       const { data } = await API.post('/orders', orderData);
 
       clearCart();
       if (paymentMethod === 'instapay') {
-        navigate('/instapay-payment', { state: { orderId: data._id || 'new', total } });
+        navigate('/instapay-payment', {
+          state: { orderId: data._id || 'new', total, guestEmail: user ? null : normalizedEmail },
+        });
       } else {
-        toast.success('Order placed successfully!');
-        navigate('/profile');
+        toast.success('Order placed successfully! Check your email for details.');
+        if (user) {
+          navigate('/profile');
+        } else {
+          navigate('/track-order', { state: { orderId: data._id, email: normalizedEmail } });
+        }
       }
     } catch (err) {
       const message = err?.response?.data?.message || 'Failed to place order. Please try again.';
@@ -154,7 +166,10 @@ const Checkout = () => {
   const styles = {
     page: { paddingTop: '100px', minHeight: '100vh', backgroundColor: 'transparent' },
     container: { maxWidth: '960px', margin: '0 auto', padding: '2rem 1.5rem 4rem' },
-    title: { fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 500, marginBottom: '2rem', color: 'var(--text)' },
+    title: { fontFamily: 'var(--font-heading)', fontSize: '2rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--text)' },
+    guestNotice: {
+      fontSize: '0.85rem', color: 'var(--gray-500)', marginBottom: '2rem',
+    },
     grid: { display: 'grid', gridTemplateColumns: '1fr 380px', gap: '3rem', alignItems: 'start' },
     formSection: { display: 'flex', flexDirection: 'column', gap: '1.5rem' },
     sectionTitle: { fontFamily: 'var(--font-heading)', fontSize: '1.2rem', fontWeight: 500, marginBottom: '0.25rem' },
@@ -205,6 +220,19 @@ const Checkout = () => {
       <div style={styles.container}>
         <AnimatedSection>
           <h1 style={styles.title}>Checkout</h1>
+          {!user && (
+            <p style={styles.guestNotice}>
+              Ordering as guest.{' '}
+              <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600 }}>
+                Sign in
+              </Link>{' '}
+              or{' '}
+              <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 600 }}>
+                create an account
+              </Link>{' '}
+              to save your orders.
+            </p>
+          )}
         </AnimatedSection>
 
         <form onSubmit={handleSubmit}>
@@ -219,8 +247,8 @@ const Checkout = () => {
                       <input style={styles.input} name="fullName" value={form.fullName} onChange={handleChange} required />
                     </div>
                     <div style={styles.field}>
-                      <label style={styles.label}>Email</label>
-                      <input style={styles.input} name="email" type="email" value={form.email} onChange={handleChange} />
+                      <label style={styles.label}>Email *</label>
+                      <input style={styles.input} name="email" type="email" value={form.email} onChange={handleChange} required />
                     </div>
                   </div>
                   <div style={styles.field}>
@@ -359,3 +387,4 @@ const Checkout = () => {
 };
 
 export default Checkout;
+

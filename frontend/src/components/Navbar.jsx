@@ -448,13 +448,22 @@ const Navbar = () => {
                 </button>
               </>
             ) : (
-              <button
-                style={styles.authBtn}
-                onClick={() => navigate('/login')}
-                className="nav-auth-btn"
-              >
-                Sign In
-              </button>
+              <>
+                <Link
+                  to="/track-order"
+                  style={{ ...styles.link, fontSize: '0.85rem' }}
+                  className="nav-track-link"
+                >
+                  Track Order
+                </Link>
+                <button
+                  style={styles.authBtn}
+                  onClick={() => navigate('/login')}
+                  className="nav-auth-btn"
+                >
+                  Sign In
+                </button>
+              </>
             )}
 
             <button
@@ -696,6 +705,15 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
+                  <Motion.div variants={menuItemVariants} style={{ width: '100%' }}>
+                    <Link
+                      to="/track-order"
+                      style={{ ...styles.mobileLink, ...styles.mobileLinkMuted }}
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      Track Order
+                    </Link>
+                  </Motion.div>
                   <Motion.div variants={menuItemVariants} style={{ width: '100%' }}>
                     <Link
                       to="/login"

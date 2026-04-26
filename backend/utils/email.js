@@ -119,6 +119,7 @@ const formatOrderItems = (items) => {
 
 const sendOrderConfirmation = async (order, user) => {
   const subject = `Order Confirmed — #${order._id.toString().slice(-8).toUpperCase()}`;
+  const isGuest = !order.user;
   const content = `
     <h2 style="margin:0 0 8px;color:#014421;font-size:22px;font-weight:700;">Thank you for your order!</h2>
     <p style="margin:0 0 24px;color:#6b7280;font-size:15px;">Hi <strong style="color:#142016;">${user.name}</strong>, your order has been placed successfully.</p>
@@ -148,6 +149,13 @@ const sendOrderConfirmation = async (order, user) => {
         <td style="text-align:right;font-size:20px;font-weight:800;color:#014421;">EGP ${order.totalPrice.toFixed(2)}</td>
       </tr>
     </table>
+
+    ${isGuest ? `
+    <div style="margin-top:24px;background-color:#e8f4fd;border:1px solid #90cdf4;border-radius:10px;padding:16px;">
+      <p style="margin:0 0 8px;color:#1e40af;font-size:14px;font-weight:700;">🔍 Track Your Order</p>
+      <p style="margin:0 0 6px;color:#1e40af;font-size:13px;">Use your Order ID below to track your order status at any time:</p>
+      <p style="margin:0;font-family:monospace;font-size:15px;font-weight:700;color:#142016;background:#fff;padding:8px 12px;border-radius:6px;display:inline-block;">${order._id}</p>
+    </div>` : ''}
 
     ${order.paymentMethod === 'instapay' ? `
     <div style="margin-top:24px;background-color:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:16px;">
@@ -242,9 +250,13 @@ const sendInstapayRejection = async (order, user) => {
   return sendEmail(order.email || user.email, subject, emailWrapper(content));
 };
 
-const sendAdminNotification = async (order) => {
+const sendAdminNotification = async (order, emailRecipient) => {
   const adminEmail = process.env.ADMIN_EMAIL;
   if (!adminEmail) return;
+
+  const customerName = emailRecipient?.name || order.guestInfo?.name || order.user?.name || 'Guest';
+  const customerEmail = emailRecipient?.email || order.email || '';
+  const customerPhone = order.guestInfo?.phone || order.shippingAddress?.phone || '';
 
   const subject = `New Order — #${order._id.toString().slice(-8).toUpperCase()}`;
   const content = `
@@ -258,9 +270,17 @@ const sendAdminNotification = async (order) => {
           <td style="text-align:right;font-weight:700;color:#142016;font-size:13px;padding-bottom:8px;">#${order._id.toString().slice(-8).toUpperCase()}</td>
         </tr>
         <tr>
-          <td style="color:#6b7280;font-size:13px;padding-bottom:8px;">Customer Email</td>
-          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:8px;">${order.email}</td>
+          <td style="color:#6b7280;font-size:13px;padding-bottom:8px;">Customer Name</td>
+          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:8px;">${customerName}${!order.user ? ' <span style="background:#fef3c7;color:#92400e;font-size:11px;padding:2px 6px;border-radius:4px;font-weight:700;">GUEST</span>' : ''}</td>
         </tr>
+        <tr>
+          <td style="color:#6b7280;font-size:13px;padding-bottom:8px;">Customer Email</td>
+          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:8px;">${customerEmail}</td>
+        </tr>
+        ${customerPhone ? `<tr>
+          <td style="color:#6b7280;font-size:13px;padding-bottom:8px;">Phone</td>
+          <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:8px;">${customerPhone}</td>
+        </tr>` : ''}
         <tr>
           <td style="color:#6b7280;font-size:13px;padding-bottom:8px;">Payment Method</td>
           <td style="text-align:right;font-weight:600;color:#142016;font-size:13px;padding-bottom:8px;">${paymentMethodLabel(order.paymentMethod)}</td>

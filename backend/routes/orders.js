@@ -1,7 +1,7 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const { body } = require('express-validator');
-const { auth, isAdmin } = require('../middleware/auth');
+const { auth, isAdmin, optionalAuth } = require('../middleware/auth');
 const { uploadInstapayProof } = require('../middleware/upload');
 
 const apiLimiter = rateLimit({
@@ -15,6 +15,7 @@ const apiLimiter = rateLimit({
 const {
   createOrder,
   submitInstapayProof,
+  trackOrder,
   getMyOrders,
   getAllOrders,
   getOrderById,
@@ -25,11 +26,11 @@ const {
 
 const router = express.Router();
 
-// @route   POST /api/orders
+// @route   POST /api/orders (supports both authenticated and guest users)
 router.post(
   '/',
   apiLimiter,
-  auth,
+  optionalAuth,
   [
     body('items').isArray({ min: 1 }).withMessage('At least one item is required'),
     body('items.*.product').notEmpty().withMessage('Product ID is required'),
@@ -44,8 +45,8 @@ router.post(
   createOrder
 );
 
-// @route   POST /api/orders/:id/instapay-proof
-router.post('/:id/instapay-proof', apiLimiter, auth, (req, res) => {
+// @route   POST /api/orders/:id/instapay-proof (optionalAuth — guests verify by email)
+router.post('/:id/instapay-proof', apiLimiter, optionalAuth, (req, res) => {
   uploadInstapayProof(req, res, (err) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
@@ -56,6 +57,9 @@ router.post('/:id/instapay-proof', apiLimiter, auth, (req, res) => {
     return submitInstapayProof(req, res);
   });
 });
+
+// @route   GET /api/orders/track/:id (public — verifies by email query param)
+router.get('/track/:id', apiLimiter, trackOrder);
 
 // @route   GET /api/orders/my
 router.get('/my', apiLimiter, auth, getMyOrders);

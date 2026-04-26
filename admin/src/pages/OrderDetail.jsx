@@ -153,11 +153,14 @@ const OrderDetail = () => {
             <div className="grid-2">
               <div>
                 <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 2 }}>Full Name</p>
-                <p style={{ fontWeight: 600 }}>{order.user?.name || '—'}</p>
+                <p style={{ fontWeight: 600 }}>
+                  {order.user?.name || order.guestInfo?.name || '—'}
+                  {!order.user && <span style={{ marginLeft: 8, fontSize: '0.75rem', background: '#fef3c7', color: '#92400e', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>GUEST</span>}
+                </p>
               </div>
               <div>
                 <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 2 }}>Phone</p>
-                <p style={{ fontWeight: 600 }}>{order.shippingAddress?.phone || '—'}</p>
+                <p style={{ fontWeight: 600 }}>{order.shippingAddress?.phone || order.guestInfo?.phone || '—'}</p>
               </div>
               <div style={{ gridColumn: '1 / -1' }}>
                 <p style={{ fontSize: '0.8rem', color: '#4d564a', marginBottom: 2 }}>Address</p>
@@ -295,12 +298,21 @@ const OrderDetail = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div>
                 <p style={{ fontSize: '0.8rem', color: '#4d564a' }}>Name</p>
-                <p style={{ fontWeight: 600 }}>{order.user?.name || '—'}</p>
+                <p style={{ fontWeight: 600 }}>
+                  {order.user?.name || order.guestInfo?.name || '—'}
+                  {!order.user && <span style={{ marginLeft: 8, fontSize: '0.75rem', background: '#fef3c7', color: '#92400e', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>GUEST</span>}
+                </p>
               </div>
               <div>
                 <p style={{ fontSize: '0.8rem', color: '#4d564a' }}>Email</p>
-                <p style={{ fontWeight: 600 }}>{order.user?.email || order.email || '—'}</p>
+                <p style={{ fontWeight: 600 }}>{order.user?.email || order.guestInfo?.email || order.email || '—'}</p>
               </div>
+              {(order.guestInfo?.phone || order.shippingAddress?.phone) && (
+                <div>
+                  <p style={{ fontSize: '0.8rem', color: '#4d564a' }}>Phone</p>
+                  <p style={{ fontWeight: 600 }}>{order.guestInfo?.phone || order.shippingAddress?.phone}</p>
+                </div>
+              )}
               <div>
                 <p style={{ fontSize: '0.8rem', color: '#4d564a' }}>Ordered</p>
                 <p style={{ fontWeight: 600 }}>{new Date(order.createdAt).toLocaleString()}</p>
