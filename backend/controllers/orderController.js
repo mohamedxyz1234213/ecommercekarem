@@ -14,7 +14,19 @@ const {
 const { uploadImageBuffer, hasCloudinaryConfig } = require('../utils/cloudinary');
 const { sanitize } = require('../utils/sanitize');
 
-const isValidEmail = (value) => /^\S+@\S+\.\S+$/.test(String(value || '').trim());
+// Safe email validation without ReDoS vulnerability
+const isValidEmail = (value) => {
+  const str = String(value || '').trim();
+  if (str.length > 254) return false;
+  const atIdx = str.lastIndexOf('@');
+  if (atIdx < 1) return false;
+  const local = str.slice(0, atIdx);
+  const domain = str.slice(atIdx + 1);
+  if (!local || !domain) return false;
+  const dotIdx = domain.lastIndexOf('.');
+  if (dotIdx < 1 || dotIdx >= domain.length - 1) return false;
+  return true;
+};
 
 const normalizeArea = (value) => String(value || '').trim().toLowerCase();
 
@@ -40,7 +52,7 @@ const resolveShippingFee = (zones, governorate, area) => {
   return null;
 };
 
-// @desc    Create new order
+// @desc    Create new order (supports both authenticated and guest users)
 // @route   POST /api/orders
 const createOrder = async (req, res) => {
   try {
@@ -56,14 +68,30 @@ const createOrder = async (req, res) => {
       instapayProof,
       instapayUsername,
       email,
+      guestName,
+      guestPhone,
     } = req.body;
 
-    const normalizedEmail = String(email || req.user.email || '').trim().toLowerCase();
+    const isGuest = !req.user;
+
+    const normalizedEmail = String(email || req.user?.email || '').trim().toLowerCase();
     if (!isValidEmail(normalizedEmail)) {
-      return res.status(400).json({ message: 'A valid email is required for payment verification' });
+      return res.status(400).json({ message: 'A valid email is required for order confirmation' });
     }
-    if (normalizedEmail !== String(req.user.email || '').trim().toLowerCase()) {
+
+    // For authenticated users, email must match account email
+    if (!isGuest && normalizedEmail !== String(req.user.email || '').trim().toLowerCase()) {
       return res.status(400).json({ message: 'Email verification failed. Please use your account email.' });
+    }
+
+    // Guest orders require name and phone
+    if (isGuest) {
+      if (!guestName || !String(guestName).trim()) {
+        return res.status(400).json({ message: 'Full name is required for guest orders' });
+      }
+      if (!guestPhone || !String(guestPhone).trim()) {
+        return res.status(400).json({ message: 'Phone number is required for guest orders' });
+      }
     }
 
     if (!items || items.length === 0) {
@@ -148,8 +176,8 @@ const createOrder = async (req, res) => {
       });
     }
 
-    const order = await Order.create({
-      user: req.user._id,
+    const orderData = {
+      user: isGuest ? null : req.user._id,
       items: orderItems,
       shippingAddress,
       paymentMethod,
@@ -159,13 +187,27 @@ const createOrder = async (req, res) => {
       shippingPrice: shippingFee,
       totalPrice: totalPrice + shippingFee,
       email: normalizedEmail,
-    });
+    };
+
+    if (isGuest) {
+      orderData.guestInfo = {
+        name: String(guestName).trim(),
+        email: normalizedEmail,
+        phone: String(guestPhone).trim(),
+      };
+    }
+
+    const order = await Order.create(orderData);
 
     const populatedOrder = await Order.findById(order._id).populate('user', 'name email');
 
-    // For InstaPay, send emails normally
-    sendOrderConfirmation(populatedOrder, req.user).catch(() => {});
-    sendAdminNotification(populatedOrder).catch(() => {});
+    // Build a user-like object for email purposes
+    const emailRecipient = isGuest
+      ? { name: String(guestName).trim(), email: normalizedEmail }
+      : req.user;
+
+    sendOrderConfirmation(populatedOrder, emailRecipient).catch(() => {});
+    sendAdminNotification(populatedOrder, emailRecipient).catch(() => {});
 
     res.status(201).json(populatedOrder);
   } catch (error) {
@@ -187,9 +229,11 @@ const submitInstapayProof = async (req, res) => {
       return res.status(404).json({ message: 'Order not found' });
     }
 
-    // Ensure only owner (or admin) can submit payment proof
-    if (order.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'Not authorized to update this order' });
+    // For authenticated users, ensure only owner (or admin) can submit payment proof
+    if (req.user) {
+      if (order.user && order.user.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Not authorized to update this order' });
+      }
     }
 
     if (order.paymentMethod !== 'instapay') {
@@ -201,10 +245,13 @@ const submitInstapayProof = async (req, res) => {
       return res.status(400).json({ message: 'A valid email is required' });
     }
 
-    // Verify submitted email matches order/user email for payment proof verification
-    const owner = await User.findById(order.user).select('email name');
-    const ownerEmail = String(owner?.email || '').trim().toLowerCase();
-    const orderEmail = String(order.email || '').trim().toLowerCase();
+    // Verify submitted email matches order email (works for both guest and authenticated)
+    const orderEmail = String(order.email || order.guestInfo?.email || '').trim().toLowerCase();
+    let ownerEmail = orderEmail;
+    if (order.user) {
+      const owner = await User.findById(order.user).select('email name');
+      ownerEmail = String(owner?.email || '').trim().toLowerCase();
+    }
     if (submittedEmail !== ownerEmail && submittedEmail !== orderEmail) {
       return res.status(400).json({ message: 'Email verification failed for this order' });
     }
@@ -229,7 +276,10 @@ const submitInstapayProof = async (req, res) => {
     await order.save();
 
     // Notify admin that payment proof is submitted and pending verification
-    sendAdminNotification(order).catch(() => {});
+    const emailRecipient = order.user
+      ? await User.findById(order.user).select('name email')
+      : { name: order.guestInfo?.name || 'Guest', email: order.email };
+    sendAdminNotification(order, emailRecipient).catch(() => {});
 
     return res.json({ message: 'Payment proof submitted successfully', order });
   } catch (error) {
@@ -306,6 +356,38 @@ const getAllOrders = async (req, res) => {
   }
 };
 
+// @desc    Track an order by ID — public endpoint, requires email verification
+// @route   GET /api/orders/track/:id
+const trackOrder = async (req, res) => {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const email = String(req.query.email || '').trim().toLowerCase();
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: 'A valid email is required to track your order' });
+    }
+
+    const order = await Order.findById(req.params.id).populate('user', 'name email');
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const orderEmail = String(order.email || order.guestInfo?.email || '').trim().toLowerCase();
+    const userEmail = String(order.user?.email || '').trim().toLowerCase();
+
+    if (email !== orderEmail && email !== userEmail) {
+      return res.status(403).json({ message: 'Email does not match this order. Please check your email and try again.' });
+    }
+
+    res.json(order);
+  } catch (error) {
+    console.error('trackOrder error:', error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 // @desc    Get single order by ID
 // @route   GET /api/orders/:id
 const getOrderById = async (req, res) => {
@@ -320,8 +402,12 @@ const getOrderById = async (req, res) => {
       return res.status(404).json({ message: 'Order not found' });
     }
 
-    // Allow access for admin or the order owner
-    if (order.user._id.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+    // Allow access for admin or the order owner; guest orders accessible only via trackOrder
+    if (order.user) {
+      if (order.user._id.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Not authorized to view this order' });
+      }
+    } else if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Not authorized to view this order' });
     }
 
@@ -382,9 +468,10 @@ const updateOrderStatus = async (req, res) => {
       await order.save();
     }
 
-    const user = await User.findById(order.user);
-    if (user) {
-      sendStatusUpdate(order, user).catch(() => {});
+    const user = order.user ? await User.findById(order.user) : null;
+    const emailRecipient = user || { name: order.guestInfo?.name || 'Customer', email: order.email };
+    if (emailRecipient.email) {
+      sendStatusUpdate(order, emailRecipient).catch(() => {});
     }
 
     res.json(order);
@@ -423,10 +510,11 @@ const approveInstapay = async (req, res) => {
     order.paidAt = new Date();
     await order.save();
 
-    const user = await User.findById(order.user);
-    if (user) {
-      sendInstapayApproval(order, user).catch(() => {});
-      sendStatusUpdate(order, user).catch(() => {});
+    const user = order.user ? await User.findById(order.user) : null;
+    const emailRecipient = user || { name: order.guestInfo?.name || 'Customer', email: order.email };
+    if (emailRecipient.email) {
+      sendInstapayApproval(order, emailRecipient).catch(() => {});
+      sendStatusUpdate(order, emailRecipient).catch(() => {});
     }
 
     res.json({ message: 'InstaPay payment approved', order });
@@ -484,10 +572,11 @@ const rejectInstapay = async (req, res) => {
     }
     await order.save();
 
-    const user = await User.findById(order.user);
-    if (user) {
-      sendInstapayRejection(order, user).catch(() => {});
-      sendStatusUpdate(order, user).catch(() => {});
+    const user = order.user ? await User.findById(order.user) : null;
+    const emailRecipient = user || { name: order.guestInfo?.name || 'Customer', email: order.email };
+    if (emailRecipient.email) {
+      sendInstapayRejection(order, emailRecipient).catch(() => {});
+      sendStatusUpdate(order, emailRecipient).catch(() => {});
     }
 
     res.json({ message: 'InstaPay payment rejected', order });
@@ -503,6 +592,7 @@ const rejectInstapay = async (req, res) => {
 module.exports = {
   createOrder,
   submitInstapayProof,
+  trackOrder,
   getMyOrders,
   getAllOrders,
   getOrderById,

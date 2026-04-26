@@ -16,6 +16,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import OrderDetail from './pages/OrderDetail';
+import TrackOrder from './pages/TrackOrder';
 import NotFound from './pages/NotFound';
 import AboutUs from './pages/AboutUs';
 
@@ -41,22 +42,9 @@ function App() {
             <Route path="/about" element={<AboutUs />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
-            <Route
-              path="/checkout"
-              element={
-                <ProtectedRoute>
-                  <Checkout />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/instapay-payment"
-              element={
-                <ProtectedRoute>
-                  <InstapayPayment />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/instapay-payment" element={<InstapayPayment />} />
+            <Route path="/track-order" element={<TrackOrder />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route

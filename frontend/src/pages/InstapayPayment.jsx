@@ -17,8 +17,8 @@ const InstapayPayment = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { orderId, total } = location.state || { orderId: 'N/A', total: 0 };
-  const [email, setEmail] = useState(user?.email || '');
+  const { orderId, total, guestEmail } = location.state || { orderId: 'N/A', total: 0, guestEmail: null };
+  const [email, setEmail] = useState(guestEmail || user?.email || '');
   const [instapayUsername, setInstapayUsername] = useState('');
   const [proofImage, setProofImage] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -164,9 +164,15 @@ const InstapayPayment = () => {
                 <motion.button
                   style={styles.backBtn}
                   whileHover={{ opacity: 0.9 }}
-                  onClick={() => navigate('/profile')}
+                  onClick={() => {
+                    if (user) {
+                      navigate('/profile');
+                    } else {
+                      navigate('/track-order', { state: { orderId, email } });
+                    }
+                  }}
                 >
-                  View My Orders
+                  Track My Order
                 </motion.button>
               </div>
             </div>

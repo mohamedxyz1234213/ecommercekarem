@@ -38,6 +38,9 @@ const Orders = () => {
       (o._id || '').toLowerCase().includes(search.toLowerCase()) ||
       (o.user?.name || '').toLowerCase().includes(search.toLowerCase()) ||
       (o.user?.email || '').toLowerCase().includes(search.toLowerCase()) ||
+      (o.guestInfo?.name || '').toLowerCase().includes(search.toLowerCase()) ||
+      (o.guestInfo?.email || '').toLowerCase().includes(search.toLowerCase()) ||
+      (o.guestInfo?.phone || '').toLowerCase().includes(search.toLowerCase()) ||
       (o.email || '').toLowerCase().includes(search.toLowerCase());
     const orderStatus = o.status || '';
     const matchStatus = !statusFilter || orderStatus.toLowerCase() === statusFilter.toLowerCase();
@@ -68,8 +71,15 @@ const Orders = () => {
       label: 'Customer',
       render: (row) => (
         <div>
-          <div style={{ fontWeight: 600 }}>{row.user?.name || 'Guest'}</div>
-          <div style={{ fontSize: '0.75rem', color: '#4d564a' }}>{row.user?.email || row.email || ''}</div>
+          <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+            {row.user?.name || row.guestInfo?.name || 'Guest'}
+            {!row.user && (
+              <span style={{ fontSize: '0.7rem', background: '#fef3c7', color: '#92400e', padding: '1px 5px', borderRadius: 4, fontWeight: 700 }}>
+                GUEST
+              </span>
+            )}
+          </div>
+          <div style={{ fontSize: '0.75rem', color: '#4d564a' }}>{row.user?.email || row.guestInfo?.email || row.email || ''}</div>
         </div>
       ),
     },
