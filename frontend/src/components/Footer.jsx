@@ -166,6 +166,22 @@ const Footer = () => {
       color: 'var(--text-muted)',
       opacity: 0.9,
     },
+    craftedBy: {
+      marginTop: '0.6rem',
+      fontSize: '0.82rem',
+      color: 'var(--text-muted)',
+    },
+    craftedLink: {
+      display: 'inline-block',
+      fontWeight: 600,
+      background: 'linear-gradient(90deg, #6b8f71, #3d6b44, #6b8f71)',
+      backgroundSize: '200% auto',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+      textDecoration: 'none',
+      animation: 'footerShimmer 2.5s linear infinite',
+    },
   };
 
   return (
@@ -247,6 +263,23 @@ const Footer = () => {
 
         <div style={styles.divider}>
           <p>&copy; {new Date().getFullYear()} {siteName}. All rights reserved.</p>
+          <p style={styles.craftedBy}>
+            Crafted by{' '}
+            <a
+              href="https://MOHAMEDelfouly.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.craftedLink}
+            >
+              Mohamed Elfouly
+            </a>
+          </p>
+          <style>{`
+            @keyframes footerShimmer {
+              0% { background-position: 0% center; }
+              100% { background-position: 200% center; }
+            }
+          `}</style>
         </div>
       </div>
     </footer>
