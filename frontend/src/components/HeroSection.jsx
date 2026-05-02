@@ -55,7 +55,7 @@ const HeroSection = () => {
   }, []);
 
   const hasImage = !!content.heroImage;
-  const heroVideoSrc = '/Video.mp4';
+  const heroVideoSrc = '/HeroVideo.mp4';
 
   // Ping-pong reverse playback
   const videoRef = useRef(null);
