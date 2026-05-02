@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
@@ -55,7 +55,49 @@ const HeroSection = () => {
   }, []);
 
   const hasImage = !!content.heroImage;
-  const heroVideoSrc = '/HeroVideo.mp4';
+  const heroVideoSrc = '/grok-imagine-video_a_Prompt__Extreme_clos.mov';
+
+  // Ping-pong reverse playback
+  const videoRef = useRef(null);
+  const reversingRef = useRef(false);
+  const rafRef = useRef(null);
+  const lastTimeRef = useRef(null);
+
+  const reverseStep = useCallback((timestamp) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (lastTimeRef.current === null) {
+      lastTimeRef.current = timestamp;
+    }
+    const delta = (timestamp - lastTimeRef.current) / 1000; // seconds elapsed
+    lastTimeRef.current = timestamp;
+
+    const next = video.currentTime - delta;
+    if (next <= 0) {
+      video.currentTime = 0;
+      reversingRef.current = false;
+      lastTimeRef.current = null;
+      video.play();
+      return;
+    }
+    video.currentTime = next;
+    rafRef.current = requestAnimationFrame(reverseStep);
+  }, []);
+
+  const handleEnded = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    reversingRef.current = true;
+    lastTimeRef.current = null;
+    rafRef.current = requestAnimationFrame(reverseStep);
+  }, [reverseStep]);
+
+  useEffect(() => {
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
 
   const styles = {
     hero: {
@@ -196,14 +238,16 @@ const HeroSection = () => {
   return (
     <section className="hero-section" style={styles.hero}>
       <video
+        ref={videoRef}
         autoPlay
-        loop
         muted
         playsInline
         preload="metadata"
+        onEnded={handleEnded}
         style={styles.video}
         poster={content.heroImage || undefined}
       >
+        <source src={heroVideoSrc} type="video/quicktime" />
         <source src={heroVideoSrc} type="video/mp4" />
       </video>
       <div style={styles.overlay} />
