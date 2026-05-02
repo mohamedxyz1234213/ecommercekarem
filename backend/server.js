@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const passport = require('passport');
@@ -25,10 +26,14 @@ app.disable('x-powered-by');
 
 const sessionSecret =
   process.env.SESSION_SECRET ||
-  (isProduction ? null : 'dev-only-insecure-session-secret-change-me');
+  (isProduction ? null : crypto.randomBytes(32).toString('hex'));
 
 if (!sessionSecret) {
   throw new Error('SESSION_SECRET must be set in production');
+}
+
+if (!process.env.SESSION_SECRET && !isProduction) {
+  console.warn('SESSION_SECRET is not set. Using ephemeral session secret for development only.');
 }
 
 if (isProduction) {
