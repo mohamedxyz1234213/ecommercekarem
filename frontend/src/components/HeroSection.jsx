@@ -128,7 +128,7 @@ const HeroSection = () => {
       position: 'absolute',
       inset: 0,
       background:
-        'linear-gradient(rgba(90, 109, 102, 0.55), rgba(1, 50, 32, 0.65)), ' +
+        'linear-gradient(rgba(90, 109, 102, 0.35), rgba(1, 50, 32, 0.45)), ' +
         'radial-gradient(ellipse at 30% 50%, rgba(131, 130, 116, 0.1) 0%, transparent 50%), ' +
         'radial-gradient(ellipse at 70% 30%, rgba(149, 170, 160, 0.25) 0%, transparent 50%)',
       zIndex: 2,
