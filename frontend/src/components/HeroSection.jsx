@@ -55,7 +55,7 @@ const HeroSection = () => {
   }, []);
 
   const hasImage = !!content.heroImage;
-  const heroVideoSrc = '/grok-imagine-video_a_Prompt__Extreme_clos.mov';
+  const heroVideoSrc = '/Video.mp4';
 
   // Ping-pong reverse playback
   const videoRef = useRef(null);
@@ -247,7 +247,6 @@ const HeroSection = () => {
         style={styles.video}
         poster={content.heroImage || undefined}
       >
-        <source src={heroVideoSrc} type="video/quicktime" />
         <source src={heroVideoSrc} type="video/mp4" />
       </video>
       <div style={styles.overlay} />
