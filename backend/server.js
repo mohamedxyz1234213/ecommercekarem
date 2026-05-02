@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const passport = require('passport');
@@ -19,6 +20,25 @@ const connectDB = require('./config/db');
 require('./config/passport')(passport);
 
 const app = express();
+const isProduction = process.env.NODE_ENV === 'production';
+
+app.disable('x-powered-by');
+
+const sessionSecret =
+  process.env.SESSION_SECRET ||
+  (isProduction ? null : crypto.randomBytes(32).toString('hex'));
+
+if (!sessionSecret) {
+  throw new Error('SESSION_SECRET must be set in production');
+}
+
+if (!process.env.SESSION_SECRET && !isProduction) {
+  console.warn('SESSION_SECRET is not set. Using ephemeral session secret for development only.');
+}
+
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
 
 // Security headers
 app.use(
@@ -30,7 +50,7 @@ app.use(
 
 // Logging
 if (process.env.NODE_ENV !== 'test') {
-  app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
+  app.use(morgan(isProduction ? 'combined' : 'dev'));
 }
 
 // CORS — in development, allow any origin so phone (LAN IP + Vite port) can reach the API.
@@ -56,7 +76,7 @@ const allowedOrigins = new Set(
 );
 
 const corsAllowAny =
-  process.env.NODE_ENV !== 'production' || process.env.CORS_ALLOW_ALL === 'true';
+  !isProduction || process.env.CORS_ALLOW_ALL === 'true';
 const allowVercelPreviews = process.env.CORS_ALLOW_VERCEL_PREVIEWS === 'true';
 
 app.use(
@@ -92,11 +112,14 @@ app.use(cookieParser());
 // Session
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'fallback-session-secret',
+    secret: sessionSecret,
+    proxy: isProduction,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: isProduction,
+      httpOnly: true,
+      sameSite: 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     },
   })
