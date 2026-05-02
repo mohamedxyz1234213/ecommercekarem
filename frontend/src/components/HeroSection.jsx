@@ -55,7 +55,7 @@ const HeroSection = () => {
   }, []);
 
   const hasImage = !!content.heroImage;
-  const heroVideoSrc = '/HeroVideo.mp4';
+  const heroVideoSrc = '/video.mov';
 
   // Ping-pong reverse playback
   const videoRef = useRef(null);
@@ -247,7 +247,7 @@ const HeroSection = () => {
         style={styles.video}
         poster={content.heroImage || undefined}
       >
-        <source src={heroVideoSrc} type="video/mp4" />
+        <source src={heroVideoSrc} type="video/quicktime" />
       </video>
       <div style={styles.overlay} />
 
