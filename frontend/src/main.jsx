@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
@@ -14,6 +15,7 @@ import './index.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
+    <HelmetProvider>
     <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'placeholder-client-id'}>
       <BrowserRouter>
         <AuthProvider>
@@ -47,5 +49,6 @@ createRoot(document.getElementById('root')).render(
         </AuthProvider>
       </BrowserRouter>
     </GoogleOAuthProvider>
+    </HelmetProvider>
   </StrictMode>
 );

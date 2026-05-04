@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import PageSEO from '../utils/useSEO';
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -56,10 +57,27 @@ const NotFound = () => {
       letterSpacing: '1px',
       textDecoration: 'none',
     },
+    linksGrid: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: '0.75rem',
+      marginTop: '1.5rem',
+    },
+    linkItem: {
+      padding: '0.55rem 1.25rem',
+      border: '1px solid var(--gray-200)',
+      borderRadius: 'var(--radius-sm)',
+      fontSize: '0.85rem',
+      color: 'var(--text)',
+      textDecoration: 'none',
+      backgroundColor: 'rgba(255,255,255,0.6)',
+    },
   };
 
   return (
     <motion.div style={styles.page} variants={pageVariants} initial="initial" animate="animate" exit="exit">
+      <PageSEO title="404 — Page Not Found" description="The page you are looking for could not be found. Return to vybe and explore our luxury perfume collection." url="/404" />
       <div style={styles.content}>
         <motion.div
           style={styles.number}
@@ -78,6 +96,12 @@ const NotFound = () => {
             Back to Home
           </Link>
         </motion.div>
+        <div style={styles.linksGrid}>
+          <Link to="/shop" style={styles.linkItem}>Shop All</Link>
+          <Link to="/about" style={styles.linkItem}>About Us</Link>
+          <Link to="/login" style={styles.linkItem}>Sign In</Link>
+          <Link to="/track-order" style={styles.linkItem}>Track Order</Link>
+        </div>
       </div>
     </motion.div>
   );

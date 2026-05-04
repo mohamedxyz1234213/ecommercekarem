@@ -6,6 +6,7 @@ import API from '../api/axios';
 import ProductCard from '../components/ProductCard';
 import AnimatedSection from '../components/AnimatedSection';
 import LoadingSpinner from '../components/LoadingSpinner';
+import PageSEO from '../utils/useSEO';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -159,6 +160,11 @@ const Shop = () => {
 
   return (
     <motion.div style={styles.page} variants={pageVariants} initial="initial" animate="animate" exit="exit">
+      <PageSEO
+        title="Shop All Fragrances"
+        description="Browse vybe's full collection of luxury perfumes and fine fragrances. Filter by brand, price, and category. Fast delivery across Egypt."
+        url="/shop"
+      />
       <div style={styles.container}>
         <AnimatedSection>
           <div style={styles.header}>

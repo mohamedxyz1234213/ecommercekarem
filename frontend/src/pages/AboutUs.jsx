@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import API from '../api/axios';
 import { getApiOrigin } from '../utils/apiBase';
+import PageSEO from '../utils/useSEO';
 
 const ABOUT_FALLBACKS = {
   aboutTitle: 'Our Story',
@@ -104,6 +105,11 @@ const AboutUs = () => {
       transition={{ duration: 0.4 }}
       style={{ overflowX: 'hidden' }}
     >
+      <PageSEO
+        title="Our Story — About vybe"
+        description="Learn about vybe, Egypt's premier perfume house. Discover our story, mission, and passion for authentic luxury fragrances crafted with care."
+        url="/about"
+      />
       {/* ── Hero Banner ── */}
       <section
         style={{
