@@ -4,6 +4,7 @@ import FeaturedProducts from '../components/FeaturedProducts';
 import SaleBanner from '../components/SaleBanner';
 import AnimatedSection from '../components/AnimatedSection';
 import HomeProductsSection from '../components/HomeProductsSection';
+import PageSEO from '../utils/useSEO';
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -52,6 +53,11 @@ const Home = () => {
 
   return (
     <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+      <PageSEO
+        title="Luxury Perfumes & Fine Fragrances"
+        description="Shop vybe — Egypt's premier destination for luxury perfumes, eau de parfum, and fine fragrances. Authentic scents, fast delivery, elegant gift wrapping."
+        url="/"
+      />
       <HeroSection />
       <FeaturedProducts />
       <SaleBanner />

@@ -227,6 +227,9 @@ const ProductCard = ({ product }) => {
             src={displayImage}
             alt={name}
             style={styles.image}
+            loading="lazy"
+            width={400}
+            height={500}
             whileHover={{ scale: 1.06 }}
             transition={{ duration: 0.55, ease: [0.25, 0.46, 0.45, 0.94] }}
           />

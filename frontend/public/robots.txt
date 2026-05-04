@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /profile
+Disallow: /order/
+Disallow: /checkout
+Disallow: /instapay-payment
+Disallow: /admin/
+
+Sitemap: https://vybe.store/sitemap.xml

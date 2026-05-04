@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FiPlus, FiMinus, FiTrash2, FiArrowLeft, FiArrowRight } from 'react-icons/fi';
 import { useCart, getItemMaxStock } from '../context/CartContext';
 import AnimatedSection from '../components/AnimatedSection';
+import PageSEO from '../utils/useSEO';
 
 const FALLBACK_CART_IMAGE =
   'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22120%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f5f0e8%22/%3E%3C/svg%3E';
@@ -73,6 +74,7 @@ const Cart = () => {
 
   return (
     <motion.div style={styles.page} variants={pageVariants} initial="initial" animate="animate" exit="exit">
+      <PageSEO title="Shopping Bag" description="Review your selected luxury perfumes and fragrances in your vybe shopping bag." url="/cart" />
       <div style={styles.container}>
         <AnimatedSection>
           <div style={styles.header}>
@@ -99,6 +101,9 @@ const Cart = () => {
                       src={item.images?.[0] || FALLBACK_CART_IMAGE}
                       alt={item.name}
                       style={styles.itemImg}
+                      loading="lazy"
+                      width={100}
+                      height={120}
                     />
                     <div style={styles.itemInfo}>
                       <div>

@@ -13,6 +13,7 @@ import ProductCard from '../components/ProductCard';
 import AnimatedSection from '../components/AnimatedSection';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { getApiOrigin } from '../utils/apiBase';
+import PageSEO from '../utils/useSEO';
 
 const FALLBACK_DETAIL_IMAGE =
   'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22700%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23f5f0e8%22/%3E%3C/svg%3E';
@@ -470,6 +471,36 @@ const ProductDetail = () => {
 
   return (
     <motion.div style={styles.page} variants={pageVariants} initial="initial" animate="animate" exit="exit">
+      <PageSEO
+        title={`${name}${brand ? ` by ${brand}` : ''} — Luxury Fragrance`}
+        description={description
+          ? description.slice(0, 155) + (description.length > 155 ? '…' : '')
+          : `Shop ${name}${brand ? ` by ${brand}` : ''} at vybe. Authentic luxury perfume with fast delivery across Egypt.`}
+        url={`/product/${product._id}`}
+        image={images?.[0] ? normalizeImageUrl(images[0]) : undefined}
+        type="product"
+      />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        name,
+        brand: brand ? { '@type': 'Brand', name: brand } : undefined,
+        description,
+        image: images?.map(normalizeImageUrl),
+        sku: product._id,
+        offers: {
+          '@type': 'Offer',
+          price: (onSale && salePrice ? salePrice : price)?.toFixed(2),
+          priceCurrency: 'EGP',
+          availability: (product.stock || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          url: `https://vybe.store/product/${product._id}`,
+        },
+        aggregateRating: rating > 0 ? {
+          '@type': 'AggregateRating',
+          ratingValue: rating.toFixed(1),
+          reviewCount: numReviews,
+        } : undefined,
+      }) }} />
       <div style={styles.container}>
         <Link to="/shop" style={styles.back}>
           <FiArrowLeft size={18} strokeWidth={2.5} /> Back to Shop

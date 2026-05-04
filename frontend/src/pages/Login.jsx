@@ -7,6 +7,7 @@ import { useGoogleLogin } from '@react-oauth/google';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import AnimatedSection from '../components/AnimatedSection';
+import PageSEO from '../utils/useSEO';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -184,6 +185,7 @@ const Login = () => {
 
   return (
     <motion.div style={styles.page} variants={pageVariants} initial="initial" animate="animate" exit="exit">
+      <PageSEO title="Sign In" description="Sign in to your vybe account to manage orders, wishlist, and profile." url="/login" />
       <div style={styles.container}>
         <AnimatedSection>
           <div style={styles.card}>
