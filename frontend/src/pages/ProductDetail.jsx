@@ -479,28 +479,28 @@ const ProductDetail = () => {
         url={`/product/${product._id}`}
         image={images?.[0] ? normalizeImageUrl(images[0]) : undefined}
         type="product"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name,
+          brand: brand ? { '@type': 'Brand', name: brand } : undefined,
+          description,
+          image: images?.map(normalizeImageUrl),
+          sku: product._id,
+          offers: {
+            '@type': 'Offer',
+            price: (onSale && salePrice ? salePrice : price)?.toFixed(2),
+            priceCurrency: 'EGP',
+            availability: (product.stock || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+            url: `https://vybe.store/product/${product._id}`,
+          },
+          aggregateRating: rating > 0 ? {
+            '@type': 'AggregateRating',
+            ratingValue: rating.toFixed(1),
+            reviewCount: numReviews,
+          } : undefined,
+        }}
       />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'Product',
-        name,
-        brand: brand ? { '@type': 'Brand', name: brand } : undefined,
-        description,
-        image: images?.map(normalizeImageUrl),
-        sku: product._id,
-        offers: {
-          '@type': 'Offer',
-          price: (onSale && salePrice ? salePrice : price)?.toFixed(2),
-          priceCurrency: 'EGP',
-          availability: (product.stock || 0) > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-          url: `https://vybe.store/product/${product._id}`,
-        },
-        aggregateRating: rating > 0 ? {
-          '@type': 'AggregateRating',
-          ratingValue: rating.toFixed(1),
-          reviewCount: numReviews,
-        } : undefined,
-      }) }} />
       <div style={styles.container}>
         <Link to="/shop" style={styles.back}>
           <FiArrowLeft size={18} strokeWidth={2.5} /> Back to Shop

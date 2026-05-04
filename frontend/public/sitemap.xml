@@ -16,21 +16,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://vybe.store/cart</loc>
-    <changefreq>never</changefreq>
-    <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://vybe.store/login</loc>
-    <changefreq>never</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://vybe.store/register</loc>
-    <changefreq>never</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
     <loc>https://vybe.store/track-order</loc>
     <changefreq>never</changefreq>
     <priority>0.4</priority>

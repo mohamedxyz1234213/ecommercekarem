@@ -4,6 +4,7 @@
  *
  * Usage:
  *   <PageSEO title="Page Title" description="Page description" url="/page" />
+ *   <PageSEO ... jsonLd={{ '@context': 'https://schema.org', ... }} />
  */
 import { Helmet } from 'react-helmet-async';
 
@@ -18,8 +19,9 @@ const DEFAULT_IMAGE = `${BASE_URL}/image.png`;
  * @param {string} [props.url]        – Relative or absolute URL for canonical / OG url
  * @param {string} [props.image]      – Absolute URL for OG image
  * @param {string} [props.type]       – OG type, default "website"
+ * @param {object} [props.jsonLd]     – Optional JSON-LD structured data object
  */
-const PageSEO = ({ title, description, url = '/', image = DEFAULT_IMAGE, type = 'website' }) => {
+const PageSEO = ({ title, description, url = '/', image = DEFAULT_IMAGE, type = 'website', jsonLd }) => {
   const fullTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} | Luxury Perfumes & Fine Fragrances`;
   const canonicalUrl = url.startsWith('http') ? url : `${BASE_URL}${url}`;
 
@@ -43,6 +45,13 @@ const PageSEO = ({ title, description, url = '/', image = DEFAULT_IMAGE, type = 
       <meta name="twitter:title" content={fullTitle} />
       {description && <meta name="twitter:description" content={description} />}
       <meta name="twitter:image" content={image} />
+
+      {/* Structured Data */}
+      {jsonLd && (
+        <script type="application/ld+json">
+          {JSON.stringify(jsonLd)}
+        </script>
+      )}
     </Helmet>
   );
 };
