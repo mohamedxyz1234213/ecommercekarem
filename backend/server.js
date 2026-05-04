@@ -65,6 +65,8 @@ const allowedOrigins = new Set(
   [
     process.env.CLIENT_URL || 'http://localhost:3000',
     process.env.ADMIN_URL || 'http://localhost:3001',
+    'https://vybe-scent.com',
+    'https://www.vybe-scent.com',
     'http://localhost:5173',
     'http://localhost:5174',
     'http://127.0.0.1:5173',
