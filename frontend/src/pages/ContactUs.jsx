@@ -13,7 +13,6 @@ const pageVariants = {
 
 const ContactUs = () => {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
-  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -25,12 +24,11 @@ const ContactUs = () => {
       toast.error('Please fill in all required fields.');
       return;
     }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast.success("Message sent! We'll get back to you within 24 hours.");
-      setForm({ name: '', email: '', subject: '', message: '' });
-    }, 1200);
+    const subject = encodeURIComponent(form.subject || `Message from ${form.name}`);
+    const body = encodeURIComponent(
+      `Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`
+    );
+    window.location.href = `mailto:support@vybe.store?subject=${subject}&body=${body}`;
   };
 
   const styles = {
@@ -233,10 +231,10 @@ const ContactUs = () => {
                   style={styles.btn}
                   whileHover={{ opacity: 0.9 }}
                   whileTap={{ scale: 0.98 }}
-                  disabled={loading}
+                  disabled={!form.name || !form.email || !form.message}
                 >
                   <FiSend />
-                  {loading ? 'Sending...' : 'Send Message'}
+                  Send Message
                 </motion.button>
               </form>
             </div>
