@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { MdMarkEmailRead, MdMarkEmailUnread, MdSearch } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../api/axios';
@@ -13,9 +13,11 @@ const ContactMessages = () => {
   const [pages, setPages] = useState(1);
   const [total, setTotal] = useState(0);
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     try {
-      const { data } = await API.get('/admin/contact-messages', { params: { page, limit: 20 } });
+      const { data } = await API.get('/admin/contact-messages', {
+        params: { page, limit: 20, search: search.trim() || undefined },
+      });
       setMessages(data.messages || []);
       setPages(data.pages || 1);
       setTotal(data.total || 0);
@@ -24,11 +26,11 @@ const ContactMessages = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, search]);
 
   useEffect(() => {
     fetchMessages();
-  }, [page]);
+  }, [fetchMessages]);
 
   const toggleReadStatus = async (row) => {
     try {
@@ -43,17 +45,6 @@ const ContactMessages = () => {
       toast.error('Failed to update message status');
     }
   };
-
-  const filtered = messages.filter((m) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      (m.name || '').toLowerCase().includes(q) ||
-      (m.email || '').toLowerCase().includes(q) ||
-      (m.subject || '').toLowerCase().includes(q) ||
-      (m.message || '').toLowerCase().includes(q)
-    );
-  });
 
   const columns = [
     {
@@ -149,13 +140,16 @@ const ContactMessages = () => {
           <input
             placeholder="Search by sender, email, subject, or message..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
       </div>
 
       <div className="card">
-        <DataTable columns={columns} data={filtered} pageSize={10} emptyMessage="No contact messages found" />
+        <DataTable columns={columns} data={messages} pageSize={20} emptyMessage="No contact messages found" />
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>

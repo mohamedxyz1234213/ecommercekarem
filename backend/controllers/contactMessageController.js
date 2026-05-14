@@ -2,6 +2,8 @@ const { validationResult } = require('express-validator');
 const ContactMessage = require('../models/ContactMessage');
 const { sendContactMessageNotification } = require('../utils/email');
 
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 const submitContactMessage = async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -37,10 +39,20 @@ const getContactMessages = async (req, res) => {
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
     const isReadFilter = req.query.isRead;
+    const search = String(req.query.search || '').trim();
 
     const filter = {};
     if (isReadFilter === 'true' || isReadFilter === 'false') {
       filter.isRead = isReadFilter === 'true';
+    }
+    if (search) {
+      const safeSearch = escapeRegex(search);
+      filter.$or = [
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { email: { $regex: safeSearch, $options: 'i' } },
+        { subject: { $regex: safeSearch, $options: 'i' } },
+        { message: { $regex: safeSearch, $options: 'i' } },
+      ];
     }
 
     const total = await ContactMessage.countDocuments(filter);
