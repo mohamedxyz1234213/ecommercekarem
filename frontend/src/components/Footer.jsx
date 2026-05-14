@@ -217,10 +217,15 @@ const Footer = () => {
             <div>
               <h4 style={styles.heading}>Quick Links</h4>
               <ul style={styles.linkList}>
-                {['Shop All', 'New Arrivals', 'Best Sellers', 'On Sale'].map((text) => (
-                  <li key={text}>
-                    <Link to="/shop" style={styles.link}>
-                      {text}
+                {[
+                  { label: 'Shop All', to: '/shop' },
+                  { label: 'New Arrivals', to: '/shop?sort=newest' },
+                  { label: 'Best Sellers', to: '/shop?sort=rating' },
+                  { label: 'On Sale', to: '/shop?sale=true' },
+                ].map(({ label, to }) => (
+                  <li key={label}>
+                    <Link to={to} style={styles.link}>
+                      {label}
                     </Link>
                   </li>
                 ))}
@@ -230,10 +235,15 @@ const Footer = () => {
             <div>
               <h4 style={styles.heading}>Help</h4>
               <ul style={styles.linkList}>
-                {['Contact Us', 'Shipping Info', 'Returns', 'FAQ'].map((text) => (
-                  <li key={text}>
-                    <Link to="/" style={styles.link}>
-                      {text}
+                {[
+                  { label: 'Contact Us', to: '/contact' },
+                  { label: 'Shipping Info', to: '/shipping' },
+                  { label: 'Returns', to: '/returns' },
+                  { label: 'FAQ', to: '/faq' },
+                ].map(({ label, to }) => (
+                  <li key={label}>
+                    <Link to={to} style={styles.link}>
+                      {label}
                     </Link>
                   </li>
                 ))}
