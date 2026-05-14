@@ -65,12 +65,16 @@ const getContactMessages = async (req, res) => {
 
 const updateContactMessageReadStatus = async (req, res) => {
   try {
+    if (typeof req.body?.isRead !== 'boolean') {
+      return res.status(400).json({ message: 'isRead must be a boolean value' });
+    }
+
     const message = await ContactMessage.findById(req.params.id);
     if (!message) {
       return res.status(404).json({ message: 'Message not found' });
     }
 
-    message.isRead = req.body?.isRead === true;
+    message.isRead = req.body.isRead;
     await message.save();
 
     return res.json({ message: 'Message status updated', contactMessage: message });

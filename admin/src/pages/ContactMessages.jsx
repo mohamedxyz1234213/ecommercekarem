@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 import { MdMarkEmailRead, MdMarkEmailUnread, MdSearch } from 'react-icons/md';
 import toast from 'react-hot-toast';
 import API from '../api/axios';
@@ -10,11 +9,16 @@ const ContactMessages = () => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const fetchMessages = async () => {
     try {
-      const { data } = await API.get('/admin/contact-messages', { params: { limit: 100 } });
+      const { data } = await API.get('/admin/contact-messages', { params: { page, limit: 20 } });
       setMessages(data.messages || []);
+      setPages(data.pages || 1);
+      setTotal(data.total || 0);
     } catch {
       toast.error('Failed to fetch contact messages');
     } finally {
@@ -24,7 +28,7 @@ const ContactMessages = () => {
 
   useEffect(() => {
     fetchMessages();
-  }, []);
+  }, [page]);
 
   const toggleReadStatus = async (row) => {
     try {
@@ -136,7 +140,7 @@ const ContactMessages = () => {
   if (loading) return <LoadingSpinner />;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <div>
       <h1 className="page-title">Contact Messages</h1>
 
       <div className="card" style={{ marginBottom: 24 }}>
@@ -153,7 +157,32 @@ const ContactMessages = () => {
       <div className="card">
         <DataTable columns={columns} data={filtered} pageSize={10} emptyMessage="No contact messages found" />
       </div>
-    </motion.div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16 }}>
+        <span style={{ fontSize: '0.85rem', color: '#4d564a' }}>Total messages: {total}</span>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button
+            className="btn btn-secondary btn-sm"
+            disabled={page <= 1}
+            onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+            style={{ opacity: page <= 1 ? 0.6 : 1 }}
+          >
+            Previous
+          </button>
+          <span style={{ fontSize: '0.85rem', minWidth: 84, textAlign: 'center' }}>
+            Page {page} / {pages}
+          </span>
+          <button
+            className="btn btn-secondary btn-sm"
+            disabled={page >= pages}
+            onClick={() => setPage((prev) => Math.min(prev + 1, pages))}
+            style={{ opacity: page >= pages ? 0.6 : 1 }}
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

@@ -31,10 +31,18 @@ const ICON_MAP = {
 };
 
 const isRenderableLink = (url) => {
-  const normalized = String(url || '').trim().toLowerCase();
+  const raw = String(url || '').trim();
+  const normalized = raw.toLowerCase();
   if (!normalized || normalized === '#') return false;
-  if (normalized.startsWith('javascript:')) return false;
-  return true;
+
+  if (raw.startsWith('/')) return true;
+
+  try {
+    const parsed = new URL(raw);
+    return ['http:', 'https:', 'mailto:', 'tel:'].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
 };
 
 const Footer = () => {
