@@ -10,6 +10,7 @@ import {
   MdChevronLeft,
   MdChevronRight,
   MdRateReview,
+  MdContactMail,
 } from 'react-icons/md';
 
 const navItems = [
@@ -18,6 +19,7 @@ const navItems = [
   { path: '/orders', label: 'Orders', icon: MdShoppingCart },
   { path: '/users', label: 'Users', icon: MdPeople },
   { path: '/reviews', label: 'Reviews', icon: MdRateReview },
+  { path: '/contact-messages', label: 'Contact Messages', icon: MdContactMail },
   { path: '/sales', label: 'Sales Manager', icon: MdLocalOffer },
   { path: '/settings', label: 'Settings', icon: MdSettings },
 ];

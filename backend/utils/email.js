@@ -30,6 +30,14 @@ const sendEmail = async (to, subject, html) => {
   }
 };
 
+const escapeHtml = (value) =>
+  String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+
 const emailWrapper = (content) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -340,6 +348,40 @@ const sendRegistrationWelcome = async (user) => {
   return sendEmail(user.email, subject, emailWrapper(content));
 };
 
+const sendContactMessageNotification = async (contactMessage) => {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  const subject = `New Website Message — ${escapeHtml(contactMessage.subject || 'No Subject')}`;
+  const content = `
+    <h2 style="margin:0 0 8px;color:#014421;font-size:22px;font-weight:700;">New Contact Message</h2>
+    <p style="margin:0 0 24px;color:#6b7280;font-size:15px;">A customer submitted a message from the website contact form.</p>
+
+    <div style="background-color:#f9f6f1;border-radius:12px;padding:20px;margin-bottom:24px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="color:#6b7280;font-size:13px;padding-bottom:8px;">Name</td>
+          <td style="text-align:right;font-weight:700;color:#142016;font-size:13px;padding-bottom:8px;">${escapeHtml(contactMessage.name)}</td>
+        </tr>
+        <tr>
+          <td style="color:#6b7280;font-size:13px;padding-bottom:8px;">Email</td>
+          <td style="text-align:right;font-weight:700;color:#142016;font-size:13px;padding-bottom:8px;">${escapeHtml(contactMessage.email)}</td>
+        </tr>
+        <tr>
+          <td style="color:#6b7280;font-size:13px;">Subject</td>
+          <td style="text-align:right;font-weight:700;color:#142016;font-size:13px;">${escapeHtml(contactMessage.subject || 'No Subject')}</td>
+        </tr>
+      </table>
+    </div>
+
+    <div style="border:1px solid #e8e3da;border-radius:12px;padding:16px;white-space:pre-wrap;color:#374151;font-size:14px;line-height:1.7;">
+      ${escapeHtml(contactMessage.message)}
+    </div>
+  `;
+
+  return sendEmail(adminEmail, subject, emailWrapper(content));
+};
+
 module.exports = {
   sendEmail,
   sendOrderConfirmation,
@@ -349,4 +391,5 @@ module.exports = {
   sendAdminNotification,
   sendLoginWelcome,
   sendRegistrationWelcome,
+  sendContactMessageNotification,
 };

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FiMail, FiPhone, FiMapPin, FiSend, FiClock } from 'react-icons/fi';
+import { FiSend } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import AnimatedSection from '../components/AnimatedSection';
 import PageSEO from '../utils/useSEO';
+import API from '../api/axios';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -18,17 +19,24 @@ const ContactUs = () => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
       toast.error('Please fill in all required fields.');
       return;
     }
-    const subject = encodeURIComponent(form.subject || `Message from ${form.name}`);
-    const body = encodeURIComponent(
-      `Name: ${form.name}\nEmail: ${form.email}\n\n${form.message}`
-    );
-    window.location.href = `mailto:support@vybe.store?subject=${subject}&body=${body}`;
+    try {
+      await API.post('/contact-messages', {
+        name: form.name,
+        email: form.email,
+        subject: form.subject,
+        message: form.message,
+      });
+      toast.success('Message sent successfully.');
+      setForm({ name: '', email: '', subject: '', message: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to send message.');
+    }
   };
 
   const styles = {
@@ -45,39 +53,13 @@ const ContactUs = () => {
       fontWeight: 500, color: 'var(--text)', marginBottom: '0.75rem',
     },
     subtitle: { color: 'var(--gray-500)', fontSize: '0.95rem', maxWidth: '500px', margin: '0 auto' },
-    grid: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1.6fr',
-      gap: '2.5rem',
-    },
-    infoCard: {
-      backgroundColor: 'var(--white)',
-      borderRadius: 'var(--radius-md)',
-      padding: '2.5rem',
-      boxShadow: 'var(--shadow-sm)',
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '2rem',
-    },
-    infoTitle: {
-      fontFamily: 'var(--font-heading)',
-      fontSize: '1.3rem', fontWeight: 500, color: 'var(--text)', marginBottom: '0.25rem',
-    },
-    infoDesc: { fontSize: '0.9rem', color: 'var(--gray-500)', lineHeight: 1.7 },
-    infoItem: { display: 'flex', alignItems: 'flex-start', gap: '1rem' },
-    infoIcon: {
-      width: '44px', height: '44px', borderRadius: '50%',
-      backgroundColor: 'var(--secondary)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: 'var(--primary)', fontSize: '1.1rem', flexShrink: 0,
-    },
-    infoLabel: { fontSize: '0.78rem', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--gray-400)', marginBottom: '0.2rem' },
-    infoValue: { fontSize: '0.95rem', color: 'var(--text)', fontWeight: 500 },
     formCard: {
       backgroundColor: 'var(--white)',
       borderRadius: 'var(--radius-md)',
       padding: '2.5rem',
       boxShadow: 'var(--shadow-sm)',
+      maxWidth: '720px',
+      margin: '0 auto',
     },
     formTitle: { fontFamily: 'var(--font-heading)', fontSize: '1.3rem', fontWeight: 500, marginBottom: '1.75rem', color: 'var(--text)' },
     field: { display: 'flex', flexDirection: 'column', gap: '0.35rem', marginBottom: '1.25rem' },
@@ -134,49 +116,7 @@ const ContactUs = () => {
         </AnimatedSection>
 
         <AnimatedSection>
-          <div style={styles.grid} className="contact-grid">
-            <div style={styles.infoCard}>
-              <div>
-                <p style={styles.infoTitle}>Let&apos;s talk</p>
-                <p style={styles.infoDesc}>
-                  Reach out to us and we&apos;ll respond as soon as possible. Our team is available
-                  Saturday through Thursday.
-                </p>
-              </div>
-
-              <div style={styles.infoItem}>
-                <div style={styles.infoIcon}><FiMail /></div>
-                <div>
-                  <p style={styles.infoLabel}>Email</p>
-                  <p style={styles.infoValue}>support@vybe.store</p>
-                </div>
-              </div>
-
-              <div style={styles.infoItem}>
-                <div style={styles.infoIcon}><FiPhone /></div>
-                <div>
-                  <p style={styles.infoLabel}>Phone / WhatsApp</p>
-                  <p style={styles.infoValue}>+20 100 000 0000</p>
-                </div>
-              </div>
-
-              <div style={styles.infoItem}>
-                <div style={styles.infoIcon}><FiMapPin /></div>
-                <div>
-                  <p style={styles.infoLabel}>Location</p>
-                  <p style={styles.infoValue}>Cairo, Egypt</p>
-                </div>
-              </div>
-
-              <div style={styles.infoItem}>
-                <div style={styles.infoIcon}><FiClock /></div>
-                <div>
-                  <p style={styles.infoLabel}>Working Hours</p>
-                  <p style={styles.infoValue}>Sat – Thu, 10 AM – 8 PM</p>
-                </div>
-              </div>
-            </div>
-
+          <div>
             <div style={styles.formCard}>
               <h2 style={styles.formTitle}>Send us a message</h2>
               <form onSubmit={handleSubmit}>
@@ -244,7 +184,6 @@ const ContactUs = () => {
 
       <style>{`
         @media (max-width: 768px) {
-          .contact-grid { grid-template-columns: 1fr !important; }
           .contact-row { grid-template-columns: 1fr !important; }
         }
       `}</style>

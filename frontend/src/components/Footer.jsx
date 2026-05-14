@@ -30,6 +30,21 @@ const ICON_MAP = {
   FiMessageCircle,
 };
 
+const isRenderableLink = (url) => {
+  const raw = String(url || '').trim();
+  const normalized = raw.toLowerCase();
+  if (!normalized || normalized === '#') return false;
+
+  if (raw.startsWith('/')) return true;
+
+  try {
+    const parsed = new URL(raw);
+    return ['http:', 'https:', 'mailto:', 'tel:'].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+};
+
 const Footer = () => {
   const [email, setEmail] = useState('');
   const [socialLinks, setSocialLinks] = useState([]);
@@ -43,7 +58,10 @@ const Footer = () => {
         setSiteName(data.siteName || 'vybe');
         setTagline(data.tagline || '');
         const links = (data.socialLinks || []).filter(
-          (link) => link.enabled && (link.location === 'footer' || link.location === 'both')
+          (link) =>
+            link.enabled &&
+            (link.location === 'footer' || link.location === 'both') &&
+            isRenderableLink(link.url)
         );
         setSocialLinks(links);
       } catch {
