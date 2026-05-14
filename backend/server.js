@@ -142,6 +142,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/contact-messages', require('./routes/contactMessages'));
 
 // Health check
 app.get('/api/health', (req, res) => {

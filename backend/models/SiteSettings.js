@@ -119,12 +119,7 @@ const siteSettingsSchema = new mongoose.Schema(
     // Social links
     socialLinks: {
       type: [socialLinkSchema],
-      default: [
-        { platform: 'Instagram', url: '#', icon: 'FiInstagram', location: 'both', enabled: true },
-        { platform: 'Facebook', url: '#', icon: 'FiFacebook', location: 'both', enabled: true },
-        { platform: 'Twitter', url: '#', icon: 'FiTwitter', location: 'footer', enabled: true },
-        { platform: 'Email', url: 'mailto:info@example.com', icon: 'FiMail', location: 'footer', enabled: true },
-      ],
+      default: [],
     },
 
     // Site branding (for completeness)
