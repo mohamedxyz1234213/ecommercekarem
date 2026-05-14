@@ -19,6 +19,10 @@ import OrderDetail from './pages/OrderDetail';
 import TrackOrder from './pages/TrackOrder';
 import NotFound from './pages/NotFound';
 import AboutUs from './pages/AboutUs';
+import ContactUs from './pages/ContactUs';
+import ShippingInfo from './pages/ShippingInfo';
+import Returns from './pages/Returns';
+import FAQ from './pages/FAQ';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -40,6 +44,10 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/about" element={<AboutUs />} />
+            <Route path="/contact" element={<ContactUs />} />
+            <Route path="/shipping" element={<ShippingInfo />} />
+            <Route path="/returns" element={<Returns />} />
+            <Route path="/faq" element={<FAQ />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
